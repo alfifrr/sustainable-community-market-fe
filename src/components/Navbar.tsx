@@ -26,7 +26,7 @@ const Navbar: FC = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search"
               className="input input-bordered w-24 md:w-auto"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
