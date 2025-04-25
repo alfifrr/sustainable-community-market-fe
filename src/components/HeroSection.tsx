@@ -5,10 +5,7 @@ import Navbar from "./Navbar";
 const HeroSection: FC = () => {
   return (
     <>
-      <SectionContainer>
-        <Navbar />
-        Hero Section
-      </SectionContainer>
+      <SectionContainer>Hero Section</SectionContainer>
     </>
   );
 };

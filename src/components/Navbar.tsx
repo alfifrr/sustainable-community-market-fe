@@ -1,6 +1,21 @@
-import React, { FC } from "react";
+"use client";
+import { API_ENDPOINTS } from "@/lib/endpoints";
+import { useDebounce } from "@/hooks/useDebounce";
+import React, { FC, useEffect, useState } from "react";
+import SearchResults from "./SearchResult";
+import { useRouter } from "next/navigation";
 
 const Navbar: FC = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    if (debouncedSearch.trim()) {
+      router.push(`/search?q=${encodeURIComponent(debouncedSearch.trim())}`);
+    }
+  }, [debouncedSearch, router]);
+
   return (
     <>
       <div className="navbar bg-base-100 shadow-sm">
@@ -8,11 +23,15 @@ const Navbar: FC = () => {
           <a className="btn btn-ghost text-xl">SC Market</a>
         </div>
         <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Search"
-            className="input input-bordered w-24 md:w-auto"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="input input-bordered w-24 md:w-auto"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
           <div className="dropdown dropdown-end">
             <div
               tabIndex={0}
