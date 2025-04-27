@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/formats";
 import { Product, User } from "@/lib/types";
 
 interface SearchResultsProps {

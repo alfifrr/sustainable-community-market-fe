@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/lib/endpoints";
+import { useAuth } from "@/hooks/useAuth";
 
 interface FormErrors {
   username: string;
@@ -21,6 +22,7 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const { login } = useAuth();
 
   // Check for saved username on component mount
   useEffect(() => {
@@ -98,14 +100,18 @@ export default function Login() {
         });
         const data = await response.json();
         if (response.ok && data.status === "success") {
-          // store tokens
-          localStorage.setItem("authToken", data.data.access_token);
-          localStorage.setItem("refreshToken", data.data.refresh_token);
+          // use auth hook to handle login
+          login({
+            access_token: data.data.access_token,
+            refresh_token: data.data.refresh_token,
+          });
+
           if (rememberMe) {
             localStorage.setItem("rememberedUsername", username);
           } else {
             localStorage.removeItem("rememberedUsername");
           }
+
           router.push("/");
         } else {
           setServerError(data.message || "Invalid username or password");

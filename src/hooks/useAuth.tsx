@@ -1,27 +1,21 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/authStore";
 
 export const useAuth = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoggedIn, setIsLoggedIn, user, setUser } = useAuthStore();
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("authToken");
-      setIsLoggedIn(!!token);
-      setIsLoading(false);
-    };
-    checkAuth();
-    window.addEventListener("storage", checkAuth);
+  const login = (tokens: { access_token: string; refresh_token: string }) => {
+    localStorage.setItem("authToken", tokens.access_token);
+    localStorage.setItem("refreshToken", tokens.refresh_token);
+    setIsLoggedIn(true);
+  };
 
-    return () => {
-      window.removeEventListener("storage", checkAuth);
-    };
-  }, []);
   const logout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
     setIsLoggedIn(false);
+    setUser(null);
   };
-  return { isLoggedIn, isLoading, logout };
+
+  return { isLoggedIn, login, user, logout };
 };
