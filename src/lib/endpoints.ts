@@ -14,5 +14,6 @@ export const API_ENDPOINTS = {
   USER_BY_ID: (id: string) => `/api/users/${id}`,
   PRODUCTS: "/api/products",
   PRODUCT_BY_ID: (id: string) => `/api/products/${id}`,
+  LOGIN: "/api/login",
   // Add other endpoints as needed
 };

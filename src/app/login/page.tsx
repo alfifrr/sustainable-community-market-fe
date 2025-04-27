@@ -1,104 +1,117 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useDebounce } from '@/hooks/useDebounce';
+"use client";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { API_ENDPOINTS } from "@/lib/endpoints";
 
 interface FormErrors {
-  email: string;
+  username: string;
   password: string;
 }
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [errors, setErrors] = useState<FormErrors>({ email: '', password: '' });
+  const [errors, setErrors] = useState<FormErrors>({
+    username: "",
+    password: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [serverError, setServerError] = useState<string>('');
+  const [serverError, setServerError] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
-  // Using your existing useDebounce hook for email validation
-  const debouncedEmail = useDebounce(email, 500);
-
-  // Check for saved email on component mount
+  // Check for saved username on component mount
   useEffect(() => {
-    const savedEmail = localStorage.getItem('rememberedEmail');
-    if (savedEmail) {
-      setEmail(savedEmail);
+    const savedUsername = localStorage.getItem("rememberedUsername");
+    if (savedUsername) {
+      setUsername(savedUsername);
       setRememberMe(true);
     }
   }, []);
 
-  // Debounced email validation
-  useEffect(() => {
-    if (debouncedEmail) {
-      validateEmail(debouncedEmail);
-    }
-  }, [debouncedEmail]);
-
-  const validateEmail = (email: string) => {
-    if (!email) {
-      setErrors(prev => ({ ...prev, email: 'Email is required' }));
+  // both validations in FE to reduce api call
+  const validateUsername = (username: string) => {
+    if (!username) {
+      setErrors((prev) => ({ ...prev, username: "Username is required" }));
       return false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setErrors(prev => ({ ...prev, email: 'Email is invalid' }));
-      return false;
-    } else {
-      setErrors(prev => ({ ...prev, email: '' }));
-      return true;
     }
+    if (username.length < 6) {
+      setErrors((prev) => ({
+        ...prev,
+        username: "Username must be at least 6 characters",
+      }));
+      return false;
+    }
+    // check for lowercases and numbers only
+    const usernameRegex = /^[a-z0-9]+$/;
+    if (!usernameRegex.test(username)) {
+      setErrors((prev) => ({
+        ...prev,
+        username: "Username can only contain lowercase letters and numbers",
+      }));
+      return false;
+    }
+    setErrors((prev) => ({ ...prev, username: "" }));
+    return true;
   };
-
   const validatePassword = (password: string) => {
     if (!password) {
-      setErrors(prev => ({ ...prev, password: 'Password is required' }));
+      setErrors((prev) => ({ ...prev, password: "Password is required" }));
       return false;
-    } else if (password.length < 6) {
-      setErrors(prev => ({ ...prev, password: 'Password must be at least 6 characters' }));
-      return false;
-    } else {
-      setErrors(prev => ({ ...prev, password: '' }));
-      return true;
     }
+    if (password.length < 6) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "Password must be at least 6 characters",
+      }));
+      return false;
+    }
+    setErrors((prev) => ({ ...prev, password: "" }));
+    return true;
   };
-
   const validateForm = () => {
-    const isEmailValid = validateEmail(email);
+    const isUsernameValid = validateUsername(username);
     const isPasswordValid = validatePassword(password);
-    return isEmailValid && isPasswordValid;
+    return isUsernameValid && isPasswordValid;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setServerError('');
-    
+    setServerError("");
+
     if (validateForm()) {
       setIsSubmitting(true);
-      
+
       try {
-        // Here you would integrate with your API endpoints
-        // Example: const response = await fetch(API_ENDPOINTS.LOGIN, {...})
-        
-        // Simulate API call with timeout
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Example successful login - store token
-        localStorage.setItem('authToken', 'example-token');
-        
-        // Handle remember me
-        if (rememberMe) {
-          localStorage.setItem('rememberedEmail', email);
+        // call the login api
+        const response = await fetch(API_ENDPOINTS.LOGIN, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password,
+          }),
+        });
+        const data = await response.json();
+        if (response.ok && data.status === "success") {
+          // store tokens
+          localStorage.setItem("authToken", data.data.access_token);
+          localStorage.setItem("refreshToken", data.data.refresh_token);
+          if (rememberMe) {
+            localStorage.setItem("rememberedUsername", username);
+          } else {
+            localStorage.removeItem("rememberedUsername");
+          }
+          router.push("/");
         } else {
-          localStorage.removeItem('rememberedEmail');
+          setServerError(data.message || "Invalid username or password");
         }
-        
-        // Success! Redirect to home page
-        router.push('/');
       } catch (error) {
-        // Handle errors from the API
-        setServerError('Invalid email or password. Please try again.');
+        setServerError("An error occurred, Please try again.");
       } finally {
         setIsSubmitting(false);
       }
@@ -109,32 +122,42 @@ export default function Login() {
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6">Login</h1>
-        
+
         {/* Server error message */}
         {serverError && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             {serverError}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1" htmlFor="email">
-              Email
+            <label
+              className="block text-sm font-medium mb-1"
+              htmlFor="username"
+            >
+              Username
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setUsername(e.target.value)
+              }
               className="input input-bordered w-full"
               disabled={isSubmitting}
             />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {errors.username && (
+              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+            )}
           </div>
-          
+
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1" htmlFor="password">
+            <label
+              className="block text-sm font-medium mb-1"
+              htmlFor="password"
+            >
               Password
             </label>
             <div className="relative">
@@ -142,11 +165,13 @@ export default function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPassword(e.target.value)
+                }
                 className="input input-bordered w-full"
                 disabled={isSubmitting}
               />
-              <button 
+              <button
                 type="button"
                 onMouseDown={() => setShowPassword(true)}
                 onMouseUp={() => setShowPassword(false)}
@@ -158,30 +183,32 @@ export default function Login() {
                 aria-label="Show password"
                 disabled={isSubmitting}
               >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  strokeWidth={1.5} 
-                  stroke="currentColor" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
                   className="w-5 h-5"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
                   />
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
               </button>
             </div>
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
           </div>
-          
+
           {/* Remember Me Checkbox */}
           <div className="mb-6 flex items-center">
             <input
@@ -192,16 +219,21 @@ export default function Login() {
               className="checkbox checkbox-sm"
               disabled={isSubmitting}
             />
-            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
+            <label
+              htmlFor="rememberMe"
+              className="ml-2 block text-sm text-gray-700"
+            >
               Remember me
             </label>
           </div>
-          
+
           <div className="flex flex-col gap-4">
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`btn ${isSubmitting ? 'btn-disabled' : 'btn-primary'} w-full`}
+              className={`btn ${
+                isSubmitting ? "btn-disabled" : "btn-primary"
+              } w-full`}
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center">
@@ -209,12 +241,12 @@ export default function Login() {
                   Logging in...
                 </span>
               ) : (
-                'Login'
+                "Login"
               )}
             </button>
-            
+
             <p className="text-center">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <Link href="/signup" className="text-primary hover:underline">
                 Sign up
               </Link>

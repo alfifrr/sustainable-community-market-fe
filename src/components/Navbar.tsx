@@ -5,12 +5,13 @@ import React, { FC, useEffect, useState } from "react";
 import SearchResults from "./SearchResult";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
   const router = useRouter();
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  const debouncedSearch = useDebounce(searchTerm, 500); // add wait time for 500ms after all typing activities
+  const { isLoggedIn, logout } = useAuth(); // handle auth w/ hook
 
   useEffect(() => {
     if (debouncedSearch.trim()) {
@@ -18,23 +19,9 @@ const Navbar: FC = () => {
     }
   }, [debouncedSearch, router]);
 
-  // Check if user is logged in (can be replaced with your actual auth logic)
-  useEffect(() => {
-    // This is a placeholder for your actual authentication check
-    const checkLoginStatus = () => {
-      // Example: Check localStorage, cookies, or context for auth token
-      const token = localStorage.getItem('authToken');
-      setIsLoggedIn(!!token);
-    };
-    
-    checkLoginStatus();
-  }, []);
-
   const handleLogout = () => {
-    // Example logout logic
-    localStorage.removeItem('authToken');
-    setIsLoggedIn(false);
-    router.push('/');
+    logout();
+    router.push("/login");
   };
 
   return (
@@ -53,7 +40,7 @@ const Navbar: FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           {isLoggedIn ? (
             // Show user dropdown when logged in
             <div className="dropdown dropdown-end">
