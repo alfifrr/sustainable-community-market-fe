@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from "@/lib/endpoints";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { User, Product } from "@/lib/types";
+import Link from "next/link";
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -82,20 +83,26 @@ export default function SearchPage() {
             </h2>
             <div className="space-y-4">
               {users.map((user) => (
-                <div key={user.id} className="card bg-base-200">
-                  <div className="card-body">
-                    <h3 className="card-title">
-                      {user.name}
-                      {user.is_verified && (
-                        <span className="badge badge-success">Verified</span>
-                      )}
-                    </h3>
-                    <p className="text-sm">
-                      Member since{" "}
-                      {new Date(user.date_joined).toLocaleDateString()}
-                    </p>
+                <Link
+                  href={`/users/${user.id}`}
+                  key={user.id}
+                  className="card bg-base-200"
+                >
+                  <div>
+                    <div className="card-body">
+                      <h3 className="card-title">
+                        {user.name}
+                        {user.is_verified && (
+                          <span className="badge badge-success">Verified</span>
+                        )}
+                      </h3>
+                      <p className="text-sm">
+                        Member since{" "}
+                        {new Date(user.date_joined).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -109,23 +116,29 @@ export default function SearchPage() {
             </h2>
             <div className="space-y-4">
               {products.map((product) => (
-                <div key={product.id} className="card bg-base-200">
-                  <div className="card-body">
-                    <h3 className="card-title">{product.name}</h3>
-                    <p>{product.description}</p>
-                    <p className="font-semibold">
-                      Rp. {product.price.toLocaleString()}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <span className="badge badge-outline">
-                        {product.category.name}
-                      </span>
-                      <span className="text-sm">
-                        seller: {product.user.name}
-                      </span>
+                <Link
+                  href={`/products/${product.id}`}
+                  key={product.id}
+                  className="card bg-base-200"
+                >
+                  <div key={product.id} className="card bg-base-200">
+                    <div className="card-body">
+                      <h3 className="card-title">{product.name}</h3>
+                      <p>{product.description}</p>
+                      <p className="font-semibold">
+                        Rp. {product.price.toLocaleString()}
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="badge badge-outline">
+                          {product.category.name}
+                        </span>
+                        <span className="text-sm">
+                          seller: {product.user.name}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
