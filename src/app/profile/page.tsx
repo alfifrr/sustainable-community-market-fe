@@ -76,7 +76,7 @@ export default function Profile() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Balance:</span>
-                  <span>${profile.balance.toFixed(2)}</span>
+                  <span>Rp. {profile.balance.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Verified:</span>
