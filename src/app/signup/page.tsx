@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDebounce } from "@/hooks/useDebounce";
-import { SignupError, SignupRequest } from "@/lib/types";
+import { SignupRequest } from "@/lib/types";
 import axios from "axios";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 

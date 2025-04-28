@@ -1,9 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axiosInstance from "@/lib/interceptor";
-import { API_ENDPOINTS } from "@/lib/endpoints";
-import type { Profile, ProfileResponse } from "@/lib/types";
+import type { Profile } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { ProfileSkeleton } from "@/components/skeletons/Profile";

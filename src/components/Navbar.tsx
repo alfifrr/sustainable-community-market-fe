@@ -1,8 +1,6 @@
 "use client";
-import { API_ENDPOINTS } from "@/lib/endpoints";
 import { useDebounce } from "@/hooks/useDebounce";
 import React, { FC, useEffect, useState } from "react";
-import SearchResults from "./SearchResult";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";

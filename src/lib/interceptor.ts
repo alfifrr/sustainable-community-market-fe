@@ -1,8 +1,12 @@
 import axios from "axios";
-import { isTokenExpired } from "@/utils/tokenUtils";
 import Cookies from "js-cookie";
 import { useAuthStore } from "@/store/authStore";
 import { API_ENDPOINTS } from "./endpoints";
+
+interface QueueItem {
+  resolve: (value: string | null) => void;
+  reject: (error: Error) => void;
+}
 
 const axiosInstance = axios.create({
   headers: {
@@ -11,12 +15,12 @@ const axiosInstance = axios.create({
   },
 });
 
-let refreshTokenPromise: Promise<string> | null = null;
+// let refreshTokenPromise: Promise<string> | null = null;
 
 let isRefreshing = false;
-let failedQueue: any[] = [];
+let failedQueue: QueueItem[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -54,6 +58,7 @@ const refreshAccessToken = async () => {
 
     return access_token;
   } catch (error) {
+    console.log(error);
     Cookies.remove("authToken");
     Cookies.remove("refreshToken");
 
@@ -127,7 +132,7 @@ axiosInstance.interceptors.response.use(
           return axiosInstance(originalRequest);
         }
       } catch (refreshError) {
-        processQueue(refreshError, null);
+        processQueue(refreshError as Error, null);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

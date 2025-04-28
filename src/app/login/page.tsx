@@ -117,7 +117,7 @@ export default function Login() {
           setServerError(data.message || "Invalid username or password");
         }
       } catch (error) {
-        setServerError("An error occurred, Please try again.");
+        setServerError(`An error occurred, Please try again. Error: ${error}`);
       } finally {
         setIsSubmitting(false);
       }
@@ -252,7 +252,7 @@ export default function Login() {
             </button>
 
             <p className="text-center">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/signup" className="text-primary hover:underline">
                 Sign up
               </Link>

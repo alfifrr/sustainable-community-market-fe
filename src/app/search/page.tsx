@@ -1,11 +1,11 @@
 "use client";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { User, Product } from "@/lib/types";
 import Link from "next/link";
 
-export default function SearchPage() {
+function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const [users, setUsers] = useState<User[]>([]);
@@ -54,7 +54,9 @@ export default function SearchPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Search Results for "{query}"</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        Search Results for &quot;{query}&quot;
+      </h1>
 
       {isLoading && (
         <div className="flex justify-center">
@@ -70,7 +72,7 @@ export default function SearchPage() {
 
       {!isLoading && !error && users.length === 0 && products.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-lg">No results found for "{query}"</p>
+          <p className="text-lg">No results found for &quot;{query}&quot;</p>
         </div>
       )}
 
@@ -145,5 +147,19 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      }
+    >
+      <SearchResults />
+    </Suspense>
   );
 }

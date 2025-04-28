@@ -1,11 +1,22 @@
 import { create } from "zustand";
 import Cookies from "js-cookie";
 
+interface UserData {
+  id: string;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_verified: boolean;
+  date_joined: string;
+  last_activity: string;
+}
+
 interface AuthState {
   isLoggedIn: boolean;
   setIsLoggedIn: (value: boolean) => void;
-  user: any | null;
-  setUser: (user: any) => void;
+  user: UserData | null;
+  setUser: (user: UserData | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
