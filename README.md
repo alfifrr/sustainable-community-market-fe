@@ -1,41 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sustainable Community Market - Frontend
+
+A modern web application built with Next.js and TypeScript, featuring user authentication, product search, and community marketplace features.
+
+## Features
+
+### Authentication System
+- **Login Form**: Complete user authentication with email and password
+- **Signup Form**: User registration with comprehensive profile information
+- **Password Visibility**: Eye icon to temporarily reveal password input
+- **Password Strength Indicator**: Visual feedback on password security with criteria checklist
+- **Remember Me Functionality**: Option to save login email for returning users
+
+### User Experience
+- **Form Validation**: Real-time and submission-time validation with clear error messages
+- **Loading States**: Visual feedback during form submission with disabled inputs
+- **Server Error Handling**: Clean display of backend error messages
+- **Mobile-Responsive Design**: Optimized layout for all screen sizes using Tailwind CSS and DaisyUI
+
+### Technical Features
+- **TypeScript**: Full type safety throughout the application
+- **Next.js App Router**: Modern routing system with file-based routes
+- **Client Components**: Interactive UI elements with React hooks
+- **Tailwind CSS & DaisyUI**: Utility-first styling framework for consistent design
+- **Unit Tests**: Basic test coverage for components
+- **Hooks**: Custom hooks like useDebounce for improved UX
+
+## Project Structure
+sustainable-community-market-fe/
+├── src/
+│   ├── app/
+│   │   ├── login/
+│   │   │   └── page.tsx            # Login page component
+│   │   ├── signup/
+│   │   │   └── page.tsx            # Signup page component
+│   │   ├── search/                 # Search functionality
+│   │   ├── users/                  # User management
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx              # Root layout
+│   │   └── page.tsx                # Home page
+│   ├── components/
+│   │   ├── HeroSection.tsx
+│   │   ├── Navbar.tsx              # Navigation bar
+│   │   ├── SearchResult.tsx
+│   │   ├── SectionContainer.tsx
+│   │   └── UserLayout.tsx
+│   ├── hooks/
+│   │   └── useDebounce.tsx         # Custom debounce hook
+│   └── lib/
+│       ├── endpoints.ts            # API endpoints
+│       ├── types.ts                # TypeScript type definitions
+│       └── utils.ts                # Utility functions
+├── tests/                          # Unit tests
+├── public/                         # Static assets
+├── next.config.ts
+├── package.json
+├── README.md
+└── tsconfig.json
 
 ## Getting Started
 
-First, install the dependencies and run the development server:
+### Prerequisites
+- Node.js 16.8 or later
+- npm or yarn
 
+### Installation
+
+1. Clone the repository
 ```bash
-npm i
+git clone https://github.com/yourusername/nextjs-auth-system.git
+cd nextjs-auth-system
+```
+2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+```
 
-# run the dev. server
+3. Run the development server
+```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open http://localhost:3000 in your browser to view the application
+Running Tests
+```bash
+npm test
+# or
+yarn test
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Future Enhancements
+Integration with backend authentication API
+Social login options (Google, Facebook, etc.)
+Two-factor authentication
+Password reset functionality
+User profile management
+Protected routes for authenticated users
+Session management and persistence
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-Copy .env.local.example to .env.local in the main folder.
+## Technologies Used
+Next.js 14+
+React 18+
+TypeScript
+Tailwind CSS
+Jest & React Testing Library
