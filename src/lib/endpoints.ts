@@ -15,5 +15,7 @@ export const API_ENDPOINTS = {
   PRODUCTS: "/api/products",
   PRODUCT_BY_ID: (id: string) => `/api/products/${id}`,
   LOGIN: "/api/login",
+  PROFILE: "/api/profile",
+  REFRESH_TOKEN: "/api/refresh-token",
   // Add other endpoints as needed
 };

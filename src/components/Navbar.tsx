@@ -6,12 +6,14 @@ import SearchResults from "./SearchResult";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthSync } from "@/hooks/useAuthSync";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const debouncedSearch = useDebounce(searchTerm, 500); // add wait time for 500ms after all typing activities
   const { isLoggedIn, logout } = useAuth(); // handle auth w/ hook
+  useAuthSync(); // hook to sync the navbar with cookie tokens
 
   useEffect(() => {
     if (debouncedSearch.trim()) {
@@ -28,7 +30,9 @@ const Navbar: FC = () => {
     <>
       <div className="navbar bg-base-100 shadow-sm">
         <div className="flex-1">
-          <a className="btn btn-ghost text-xl">SC Market</a>
+          <Link href="/" className="btn btn-ghost text-xl">
+            SC Market
+          </Link>
         </div>
         <div className="flex gap-2">
           <div className="relative">
@@ -61,10 +65,10 @@ const Navbar: FC = () => {
                 className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
               >
                 <li>
-                  <a className="justify-between">
+                  <Link className="justify-between" href="/profile">
                     Profile
                     <span className="badge">New</span>
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a>Settings</a>

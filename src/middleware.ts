@@ -5,16 +5,21 @@ const protectedRoutes = ["/profile", "/products/create"];
 const authRoutes = ["/login", "/signup"];
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("authToken");
+  const authToken = request.cookies.get("authToken");
+  const refreshToken = request.cookies.get("refreshToken");
   const path = request.nextUrl.pathname;
 
   // Redirect authenticated users away from auth routes
-  if (token && authRoutes.includes(path)) {
+  if ((authToken || refreshToken) && authRoutes.includes(path)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   // Protect routes that require authentication
-  if (!token && protectedRoutes.some((route) => path.startsWith(route))) {
+  if (
+    !authToken &&
+    !refreshToken &&
+    protectedRoutes.some((route) => path.startsWith(route))
+  ) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
