@@ -1,4 +1,5 @@
 import HeroSection from "@/components/HeroSection";
+import HeadlineSection from "@/components/HeadlineSection";
 import SustainabilitySection from "@/components/SustainabilitySection";
 
 export default function Home() {
@@ -6,6 +7,9 @@ export default function Home() {
     <main className="min-h-screen">
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Headline Section */}
+      <HeadlineSection />
 
       {/* Sustainability Impact Section */}
       <SustainabilitySection />

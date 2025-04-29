@@ -1,8 +1,16 @@
 @import "tailwindcss";
-@plugin "daisyui";
+
+/* @plugin "daisyui"; */
 /* @plugin "daisyui" {
   themes: customlight --default, night --prefersdark;
 } */
+@plugin "daisyui" {
+  themes: false;
+}
+
+;
+
+
 
 @plugin "daisyui/theme" {
   name: "light";
@@ -40,6 +48,8 @@
 }
 
 ;
+
+
 
 
 @plugin "daisyui/theme" {
@@ -82,8 +92,7 @@
 
 
 
-
-:root {
+/* :root {
   --radius-selector: 2rem;
   --radius-field: 1rem;
   --radius-box: 1rem;
@@ -92,4 +101,4 @@
   --border: 1.5px;
   --depth: 0;
   --noise: 1;
-}
+} */

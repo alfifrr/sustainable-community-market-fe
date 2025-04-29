@@ -33,6 +33,9 @@ const Navbar: FC = () => {
           <Link href="/" className="btn btn-ghost text-xl">
             SC Market
           </Link>
+          <Link href="/about" className="btn btn-ghost">
+            About Us
+          </Link>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
