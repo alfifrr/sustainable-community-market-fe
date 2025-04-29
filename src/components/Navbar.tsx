@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthSync } from "@/hooks/useAuthSync";
+import { useTheme } from "@/context/ThemeContext";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
-  const debouncedSearch = useDebounce(searchTerm, 500); // add wait time for 500ms after all typing activities
-  const { isLoggedIn, logout } = useAuth(); // handle auth w/ hook
-  useAuthSync(); // hook to sync the navbar with cookie tokens
+  const debouncedSearch = useDebounce(searchTerm, 500);
+  const { isLoggedIn, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  useAuthSync();
 
   useEffect(() => {
     if (debouncedSearch.trim()) {
@@ -90,8 +92,60 @@ const Navbar: FC = () => {
             />
           </div>
 
+          {/* Theme Switcher */}
+          <label className="toggle text-base-content cursor-pointer">
+            <input
+              type="checkbox"
+              checked={theme === "dark"}
+              onChange={toggleTheme}
+              className="theme-controller sr-only"
+            />
+            {theme === "light" ? (
+              <svg
+                aria-label="sun"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+              >
+                <g
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  strokeWidth="2"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2"></path>
+                  <path d="M12 20v2"></path>
+                  <path d="m4.93 4.93 1.41 1.41"></path>
+                  <path d="m17.66 17.66 1.41 1.41"></path>
+                  <path d="M2 12h2"></path>
+                  <path d="M20 12h2"></path>
+                  <path d="m6.34 17.66-1.41 1.41"></path>
+                  <path d="m19.07 4.93-1.41 1.41"></path>
+                </g>
+              </svg>
+            ) : (
+              <svg
+                aria-label="moon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+              >
+                <g
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  strokeWidth="2"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </g>
+              </svg>
+            )}
+          </label>
+
           {isLoggedIn ? (
-            // Show user dropdown when logged in
             <div className="dropdown dropdown-end">
               <div
                 tabIndex={0}
@@ -124,7 +178,6 @@ const Navbar: FC = () => {
               </ul>
             </div>
           ) : (
-            // Show login/signup button when not logged in
             <div>
               <Link href="/login" className="btn btn-primary btn-sm">
                 Login / Sign Up
