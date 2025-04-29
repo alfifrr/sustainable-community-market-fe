@@ -13,7 +13,7 @@ export const SectionContainer: FC<SectionContainerProps> = ({
 }) => {
   return (
     <>
-      <div className={`w-full h-screen ${className}`} {...props}>
+      <div className={`w-full min-h-fit ${className}`} {...props}>
         {children}
       </div>
     </>
