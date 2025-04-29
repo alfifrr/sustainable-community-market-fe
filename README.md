@@ -5,6 +5,7 @@ A modern web application built with Next.js and TypeScript, featuring user authe
 ## Features
 
 ### Authentication System
+
 - **Login Form**: Complete user authentication with email and password
 - **Signup Form**: User registration with comprehensive profile information
 - **Password Visibility**: Eye icon to temporarily reveal password input
@@ -12,12 +13,14 @@ A modern web application built with Next.js and TypeScript, featuring user authe
 - **Remember Me Functionality**: Option to save login email for returning users
 
 ### User Experience
+
 - **Form Validation**: Real-time and submission-time validation with clear error messages
 - **Loading States**: Visual feedback during form submission with disabled inputs
 - **Server Error Handling**: Clean display of backend error messages
 - **Mobile-Responsive Design**: Optimized layout for all screen sizes using Tailwind CSS and DaisyUI
 
 ### Technical Features
+
 - **TypeScript**: Full type safety throughout the application
 - **Next.js App Router**: Modern routing system with file-based routes
 - **Client Components**: Interactive UI elements with React hooks
@@ -26,6 +29,8 @@ A modern web application built with Next.js and TypeScript, featuring user authe
 - **Hooks**: Custom hooks like useDebounce for improved UX
 
 ## Project Structure
+
+```bash
 sustainable-community-market-fe/
 ├── src/
 │   ├── app/
@@ -57,21 +62,26 @@ sustainable-community-market-fe/
 ├── package.json
 ├── README.md
 └── tsconfig.json
+```
 
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 16.8 or later
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/nextjs-auth-system.git
 cd nextjs-auth-system
 ```
+
 2. Install dependencies
+
 ```bash
 npm install
 # or
@@ -79,6 +89,7 @@ yarn install
 ```
 
 3. Run the development server
+
 ```bash
 npm run dev
 # or
@@ -86,7 +97,8 @@ yarn dev
 ```
 
 4. Open http://localhost:3000 in your browser to view the application
-Running Tests
+   Running Tests
+
 ```bash
 npm test
 # or
@@ -94,6 +106,7 @@ yarn test
 ```
 
 ## Future Enhancements
+
 Integration with backend authentication API
 Social login options (Google, Facebook, etc.)
 Two-factor authentication
@@ -103,6 +116,7 @@ Protected routes for authenticated users
 Session management and persistence
 
 ## Technologies Used
+
 Next.js 14+
 React 18+
 TypeScript
