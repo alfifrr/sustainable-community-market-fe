@@ -37,9 +37,9 @@ export default function WhyItMattersSection() {
           {/* Testimonial */}
           <blockquote className="mt-12 p-6 bg-black/30 backdrop-blur rounded-lg">
             <p className="italic text-lg">
-              "Working with this community has given me hope for the future.
-              It&apos;s amazing to see how small actions by many can create such
-              meaningful change."
+              &quot;Working with this community has given me hope for the
+              future. It&apos;s amazing to see how small actions by many can
+              create such meaningful change.&quot;
             </p>
             <footer className="mt-4">
               <cite className="not-italic">
