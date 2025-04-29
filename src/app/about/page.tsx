@@ -40,7 +40,8 @@ export default function About() {
                   In 2023, we witnessed the disconnect between abundant local
                   production and urban food waste. This inspired us to create a
                   platform that brings together farmers and conscious consumers,
-                  transforming how our community thinks about food sustainability.
+                  transforming how our community thinks about food
+                  sustainability.
                 </p>
               </div>
 
@@ -65,10 +66,10 @@ export default function About() {
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold">Our Vision</h3>
                 <p className="text-lg text-base-content/80">
-                  We envision a future where every community has direct access to
-                  fresh, local produce, where farmers receive fair compensation
-                  for their work, and where food waste becomes a thing of the
-                  past.
+                  We envision a future where every community has direct access
+                  to fresh, local produce, where farmers receive fair
+                  compensation for their work, and where food waste becomes a
+                  thing of the past.
                 </p>
                 <div className="pt-4">
                   <Link href="/products" className="btn btn-primary btn-lg">
