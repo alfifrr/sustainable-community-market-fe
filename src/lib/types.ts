@@ -1,14 +1,13 @@
 export interface User {
   id: string;
   name: string;
+  email: string;
+  is_verified: boolean;
   date_joined: string;
-  date_updated: string;
-  is_verified: false;
-  last_activity: string;
 }
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -27,17 +26,15 @@ export interface ProductUser {
 }
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number;
-  stock: number;
-  expiration_date: string;
-  product_posted: string;
-  product_updated: string | null;
+  image_url: string;
   category: Category;
-  pickup_address: PickupAddress;
-  user: ProductUser;
+  user: User;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ContactInfo {
