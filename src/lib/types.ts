@@ -4,6 +4,7 @@ export interface User {
   email: string;
   is_verified: boolean;
   date_joined: string;
+  last_activity: string;
 }
 
 export interface Category {
@@ -30,9 +31,13 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  stock: number;
   image_url: string;
   category: Category;
-  user: User;
+  user: ProductUser;
+  product_posted: string;
+  expiration_date: string;
+  pickup_address: PickupAddress;
   created_at: string;
   updated_at: string;
 }
