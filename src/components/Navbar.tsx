@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthSync } from "@/hooks/useAuthSync";
 import { useTheme } from "@/context/ThemeContext";
+import Cookies from "js-cookie";
+import axiosInstance, { refreshAccessToken } from "@/lib/interceptor";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,6 +25,22 @@ const Navbar: FC = () => {
 
   const handleLogout = () => {
     logout();
+    router.push("/login");
+  };
+
+  const handleLoginClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const authToken = Cookies.get("authToken");
+    const refreshToken = Cookies.get("refreshToken");
+
+    if (!authToken && refreshToken) {
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        // Token refresh successful, user is now logged in
+        return;
+      }
+    }
+    // Either no tokens exist or refresh failed
     router.push("/login");
   };
 
@@ -170,6 +188,9 @@ const Navbar: FC = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/products/create">List Product</Link>
+                </li>
+                <li>
                   <a>Settings</a>
                 </li>
                 <li>
@@ -179,7 +200,11 @@ const Navbar: FC = () => {
             </div>
           ) : (
             <div>
-              <Link href="/login" className="btn btn-primary btn-sm">
+              <Link
+                href="#"
+                onClick={handleLoginClick}
+                className="btn btn-primary btn-sm"
+              >
                 Login / Sign Up
               </Link>
             </div>
