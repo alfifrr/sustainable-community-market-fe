@@ -50,14 +50,15 @@ export interface ContactInfo {
 }
 
 export interface Profile {
-  balance: number;
+  id: number;
+  username: string;
+  role: "seller" | "buyer";
   contact_info: ContactInfo;
+  balance: number;
+  is_verified: boolean;
   date_joined: string;
   date_updated: string;
-  id: number;
-  is_verified: boolean;
-  last_activity: string;
-  username: string;
+  last_activity: string | null;
 }
 
 export interface ProfileResponse {
