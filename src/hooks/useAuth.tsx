@@ -1,6 +1,8 @@
 "use client";
 import { useAuthStore } from "@/store/authStore";
 import Cookies from "js-cookie";
+import axios from "axios";
+import { API_ENDPOINTS } from "@/lib/endpoints";
 
 export const useAuth = () => {
   const { isLoggedIn, setIsLoggedIn, user, setUser } = useAuthStore();
@@ -31,5 +33,23 @@ export const useAuth = () => {
     setUser(null);
   };
 
-  return { isLoggedIn, login, user, logout };
+  const register = async (userData: any) => {
+    try {
+      const response = await axios.post(API_ENDPOINTS.USERS, userData);
+      if (response.data) {
+        // After successful registration, log the user in
+        login({
+          access_token: response.data.access_token,
+          refresh_token: response.data.refresh_token,
+        });
+        setUser(response.data.user);
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    }
+  };
+
+  return { isLoggedIn, login, user, logout, register };
 };
