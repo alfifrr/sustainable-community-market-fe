@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { API_ENDPOINTS } from "@/lib/endpoints";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "@/store/authStore";
 
 interface FormErrors {
   username: string;
@@ -22,7 +21,6 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
-  const { login } = useAuth();
 
   // Check for saved username on component mount
   useEffect(() => {
@@ -58,6 +56,7 @@ export default function Login() {
     setErrors((prev) => ({ ...prev, username: "" }));
     return true;
   };
+
   const validatePassword = (password: string) => {
     if (!password) {
       setErrors((prev) => ({ ...prev, password: "Password is required" }));
@@ -73,6 +72,7 @@ export default function Login() {
     setErrors((prev) => ({ ...prev, password: "" }));
     return true;
   };
+
   const validateForm = () => {
     const isUsernameValid = validateUsername(username);
     const isPasswordValid = validatePassword(password);
@@ -87,34 +87,17 @@ export default function Login() {
       setIsSubmitting(true);
 
       try {
-        // call the login api
-        const response = await fetch(API_ENDPOINTS.LOGIN, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username,
-            password,
-          }),
-        });
-        const data = await response.json();
-        if (response.ok && data.status === "success") {
-          // use auth hook to handle login
-          login({
-            access_token: data.data.access_token,
-            refresh_token: data.data.refresh_token,
-          });
-
+        const success = await useAuthStore.getState().mockLogin(username, password);
+        
+        if (success) {
           if (rememberMe) {
             localStorage.setItem("rememberedUsername", username);
           } else {
             localStorage.removeItem("rememberedUsername");
           }
-
-          router.push("/");
+          router.push("/dashboard");
         } else {
-          setServerError(data.message || "Invalid username or password");
+          setServerError("Invalid username or password");
         }
       } catch (error) {
         setServerError(`An error occurred, Please try again. Error: ${error}`);

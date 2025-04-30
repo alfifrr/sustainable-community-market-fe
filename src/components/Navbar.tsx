@@ -9,6 +9,7 @@ import { useTheme } from "@/context/ThemeContext";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const router = useRouter();
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { isLoggedIn, logout } = useAuth();
@@ -35,6 +36,7 @@ const Navbar: FC = () => {
               tabIndex={0}
               role="button"
               className="btn btn-ghost btn-circle"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -151,17 +153,18 @@ const Navbar: FC = () => {
                 tabIndex={0}
                 role="button"
                 className="btn btn-ghost btn-circle avatar"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 <div className="w-10 rounded-full">
                   <img
-                    alt="Tailwind CSS Navbar component"
+                    alt="User avatar"
                     src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
                   />
                 </div>
               </div>
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+                className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
               >
                 <li>
                   <Link className="justify-between" href="/profile">

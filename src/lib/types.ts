@@ -1,88 +1,50 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  is_verified: boolean;
-  date_joined: string;
-  last_activity: string;
+export enum UserRole {
+  ADMIN = "ADMIN",
+  SELLER = "SELLER",
+  BUYER = "BUYER"
 }
 
-export interface Category {
-  id: string;
-  name: string;
+export enum Permission {
+  // Admin permissions
+  MANAGE_USERS = "MANAGE_USERS",
+  MANAGE_ROLES = "MANAGE_ROLES",
+  MANAGE_PRODUCTS = "MANAGE_PRODUCTS",
+  MANAGE_ORDERS = "MANAGE_ORDERS",
+  MANAGE_SETTINGS = "MANAGE_SETTINGS",
+  
+  // Seller permissions
+  CREATE_PRODUCT = "CREATE_PRODUCT",
+  EDIT_PRODUCT = "EDIT_PRODUCT",
+  DELETE_PRODUCT = "DELETE_PRODUCT",
+  VIEW_ORDERS = "VIEW_ORDERS",
+  MANAGE_INVENTORY = "MANAGE_INVENTORY",
+  
+  // Buyer permissions
+  PLACE_ORDER = "PLACE_ORDER",
+  VIEW_PRODUCTS = "VIEW_PRODUCTS",
+  RATE_PRODUCTS = "RATE_PRODUCTS",
+  MANAGE_PROFILE = "MANAGE_PROFILE"
 }
 
-export interface PickupAddress {
-  id: number;
-  label: string;
-  address: string;
-  contact_person: string;
-  details: string;
-}
-
-export interface ProductUser {
-  id: number;
-  name: string;
-  is_verified: boolean;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  image_url: string;
-  category: Category;
-  user: ProductUser;
-  product_posted: string;
-  expiration_date: string;
-  pickup_address: PickupAddress;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ContactInfo {
-  email: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-}
-
-export interface Profile {
-  balance: number;
-  contact_info: ContactInfo;
-  date_joined: string;
-  date_updated: string;
-  id: number;
-  is_verified: boolean;
-  last_activity: string;
-  username: string;
-}
-
-export interface ProfileResponse {
-  data: Profile;
-  message: string;
-  status: string;
-}
-
-export interface ApiError {
-  status: string;
-  message: string;
-  errors?: Record<string, string[]>;
-}
-
-export interface SignupRequest {
-  username: string;
-  password: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-}
-
-export interface SignupError {
-  error: string;
-  message: Record<string, string[]>;
-  status: string;
-}
+export const RolePermissions: Record<UserRole, Permission[]> = {
+  [UserRole.ADMIN]: [
+    Permission.MANAGE_USERS,
+    Permission.MANAGE_ROLES,
+    Permission.MANAGE_PRODUCTS,
+    Permission.MANAGE_ORDERS,
+    Permission.MANAGE_SETTINGS
+  ],
+  [UserRole.SELLER]: [
+    Permission.CREATE_PRODUCT,
+    Permission.EDIT_PRODUCT,
+    Permission.DELETE_PRODUCT,
+    Permission.VIEW_ORDERS,
+    Permission.MANAGE_INVENTORY
+  ],
+  [UserRole.BUYER]: [
+    Permission.PLACE_ORDER,
+    Permission.VIEW_PRODUCTS,
+    Permission.RATE_PRODUCTS,
+    Permission.MANAGE_PROFILE
+  ]
+}; 
