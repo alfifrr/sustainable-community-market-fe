@@ -1,34 +1,35 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axiosInstance from "@/lib/interceptor";
+import { API_ENDPOINTS } from "@/lib/endpoints";
 
 interface Category {
   id: number;
   name: string;
+  description: string;
 }
 
 interface Address {
   id: number;
   label: string;
   address: string;
+  contact_person: string;
+  details: string;
+  date_created: string;
+  date_updated: string | null;
+  user_id: number;
 }
-
-// Temporary mock data - will be replaced with API calls
-const mockCategories: Category[] = [
-  { id: 1, name: "Vegetables & Fruits" },
-  { id: 2, name: "Grains & Staples" },
-  { id: 3, name: "Protein & Dairy" },
-  { id: 4, name: "Meals & Snacks" },
-];
-
-const mockAddresses: Address[] = [
-  { id: 1, label: "Main Store", address: "123 Market St" },
-  { id: 2, label: "Warehouse", address: "456 Storage Ave" },
-];
 
 export default function CreateProduct() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
+  const [isAddressesLoading, setIsAddressesLoading] = useState(false);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const [addressesError, setAddressesError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -38,6 +39,51 @@ export default function CreateProduct() {
     address_id: "",
     expiration_date: "",
   });
+
+  const fetchCategories = async () => {
+    if (categories.length > 0) return;
+    setIsCategoriesLoading(true);
+    setCategoriesError(null);
+
+    try {
+      const { data } = await axiosInstance.get(API_ENDPOINTS.CATEGORY);
+      if (data.status === "success") {
+        setCategories(data.data);
+      } else {
+        setCategoriesError("Failed to load categories. Please try again.");
+      }
+    } catch (error) {
+      setCategoriesError("Failed to load categories. Please try again.");
+      console.error("Failed to fetch categories:", error);
+    } finally {
+      setIsCategoriesLoading(false);
+    }
+  };
+
+  const fetchAddresses = async () => {
+    if (addresses.length > 0) return;
+    setIsAddressesLoading(true);
+    setAddressesError(null);
+
+    try {
+      const { data } = await axiosInstance.get(API_ENDPOINTS.ADDRESSES);
+      if (data.status === "success") {
+        setAddresses(data.data);
+        if (data.data.length === 0) {
+          setAddressesError(
+            "No pickup addresses found. Please add an address in your profile first."
+          );
+        }
+      } else {
+        setAddressesError("Failed to load addresses. Please try again.");
+      }
+    } catch (error) {
+      setAddressesError("Failed to load addresses. Please try again.");
+      console.error("Failed to fetch addresses:", error);
+    } finally {
+      setIsAddressesLoading(false);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -156,21 +202,33 @@ export default function CreateProduct() {
                   >
                     Category <span className="text-error">*</span>
                   </label>
-                  <select
-                    id="category_id"
-                    name="category_id"
-                    value={formData.category_id}
-                    onChange={handleChange}
-                    className="select select-bordered w-full"
-                    required
-                  >
-                    <option value="">Select a category</option>
-                    {mockCategories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      id="category_id"
+                      name="category_id"
+                      value={formData.category_id}
+                      onChange={handleChange}
+                      onClick={fetchCategories}
+                      className="select select-bordered w-full"
+                      required
+                      disabled={isCategoriesLoading}
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    {isCategoriesLoading && (
+                      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                        <span className="loading loading-spinner loading-sm"></span>
+                      </div>
+                    )}
+                  </div>
+                  {categoriesError && (
+                    <p className="text-error text-sm mt-1">{categoriesError}</p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -179,21 +237,34 @@ export default function CreateProduct() {
                   >
                     Pickup Location <span className="text-error">*</span>
                   </label>
-                  <select
-                    id="address_id"
-                    name="address_id"
-                    value={formData.address_id}
-                    onChange={handleChange}
-                    className="select select-bordered w-full"
-                    required
-                  >
-                    <option value="">Select a pickup location</option>
-                    {mockAddresses.map((address) => (
-                      <option key={address.id} value={address.id}>
-                        {address.label} - {address.address}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      id="address_id"
+                      name="address_id"
+                      value={formData.address_id}
+                      onChange={handleChange}
+                      onClick={fetchAddresses}
+                      className="select select-bordered w-full"
+                      required
+                      disabled={isAddressesLoading}
+                    >
+                      <option value="">Select a pickup location</option>
+                      {addresses.map((address) => (
+                        <option key={address.id} value={address.id}>
+                          {address.label} - {address.address}
+                          {address.details && ` (${address.details})`}
+                        </option>
+                      ))}
+                    </select>
+                    {isAddressesLoading && (
+                      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                        <span className="loading loading-spinner loading-sm"></span>
+                      </div>
+                    )}
+                  </div>
+                  {addressesError && (
+                    <p className="text-error text-sm mt-1">{addressesError}</p>
+                  )}
                 </div>
               </div>
 
