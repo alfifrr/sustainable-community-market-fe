@@ -99,8 +99,43 @@ export default function CreateProduct() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Will implement API call later
-    console.log("Form submitted:", formData);
+    setIsSubmitting(true);
+
+    try {
+      // Convert the expiration date to end of day (23:59:59.999)
+      const expirationDate = new Date(formData.expiration_date);
+      expirationDate.setUTCHours(23, 59, 59, 999);
+
+      const productData = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        price: parseInt(formData.price),
+        stock: parseInt(formData.stock),
+        category_id: parseInt(formData.category_id),
+        address_id: parseInt(formData.address_id),
+        expiration_date: expirationDate.toISOString(),
+      };
+
+      const { data } = await axiosInstance.post(
+        API_ENDPOINTS.PRODUCTS,
+        productData
+      );
+
+      if (data.status === "success") {
+        router.push("/products/" + data.data.id);
+      } else {
+        throw new Error(data.message || "Failed to create product");
+      }
+    } catch (error: any) {
+      console.error("Failed to create product:", error);
+      alert(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create product"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -168,7 +203,7 @@ export default function CreateProduct() {
                     className="input input-bordered w-full"
                     placeholder="0"
                     min="0"
-                    step="1000"
+                    step="100"
                     required
                   />
                 </div>

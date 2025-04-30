@@ -135,7 +135,9 @@ export default function BenefitsSection() {
           <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start">
             {/* Dynamic Pricing Section */}
             <div className="flex-1 w-full">
-              <h3 className="text-2xl font-bold mb-6">Dynamic Pricing</h3>
+              <h3 className="text-2xl font-bold mb-6">
+                Dynamic Pricing System
+              </h3>
               <div className="space-y-4">
                 <PriceExample days={4} discount={0.2} originalPrice={100000} />
                 <PriceExample days={2} discount={0.6} originalPrice={100000} />
