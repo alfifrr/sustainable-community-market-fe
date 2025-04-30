@@ -30,7 +30,7 @@ export default function AboutPage() {
       <SectionContainer className="!h-auto">
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="animate-fadeIn">
-            <h1 className="text-5xl font-bold mb-12 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary animate-scaleUp">
+            <h1 className="text-5xl font-bold mb-12 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent animate-scaleUp">
               About Sustainable Community Market
             </h1>
 
@@ -122,7 +122,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="mb-10 text-center bg-gradient-to-r from-primary/10 to-secondary/10 p-10 rounded-xl scroll-animate opacity-0">
+            <div className="mb-10 text-center bg-gradient-to-r from-primary/10 to-info/10 p-10 rounded-xl scroll-animate opacity-0">
               <h2 className="text-3xl font-semibold mb-6 text-primary">
                 Join Us
               </h2>

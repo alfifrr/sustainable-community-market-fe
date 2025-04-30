@@ -43,7 +43,7 @@ export default function WhyItMattersSection() {
             </p>
             <footer className="mt-4">
               <cite className="not-italic">
-                - Maria Chen, Local Organic Farmer
+                - Sarah Azkia, Local Organic Farmer
               </cite>
             </footer>
           </blockquote>

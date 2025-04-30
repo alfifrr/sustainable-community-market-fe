@@ -122,3 +122,39 @@ React 18+
 TypeScript
 Tailwind CSS
 Jest & React Testing Library
+Flask
+Supabase
+Mailtrap
+
+## Swagger API Documentation
+
+For complete API documentation, visit [Swagger Documentation](https://sustainable-community-market.onrender.com/api/docs).
+
+## Endpoint Note
+
+- Purchasing a product (`/api/buy`) costs additional fixed delivery and service fee of `Rp. 15,000`
+- Delivery and service fee will be fully returned upon order cancellation (`/api/cancel`)
+
+## Dynamic Pricing System
+
+Products are automatically discounted based on their remaining days until expiration:
+
+| Days Until Expiration | Discount | Final Price            |
+| --------------------- | -------- | ---------------------- |
+| > 4 days              | 0%       | 100% of original price |
+| 4 days                | 20%      | 80% of original price  |
+| 3 days                | 40%      | 60% of original price  |
+| 2 days                | 60%      | 40% of original price  |
+| 1 day                 | 80%      | 20% of original price  |
+| 0 days (today)        | 90%      | 10% of original price  |
+| Expired               | -        | Not available for sale |
+
+Example:
+
+- Original price: Rp 100,000
+- 3 days until expiration: Rp 60,000 (40% discount)
+- 1 day until expiration: Rp 20,000 (80% discount)
+
+## Bulk Discount System
+
+Purchasing 5 or more items will get a discount of 5%, stackable with the dynamic pricing system.
