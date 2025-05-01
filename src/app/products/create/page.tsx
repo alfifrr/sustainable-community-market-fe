@@ -225,6 +225,17 @@ export default function CreateProduct() {
                     name="price"
                     value={formData.price}
                     onChange={handleChange}
+                    onFocus={(e) => {
+                      const handleWheel = (e: WheelEvent) => {
+                        e.preventDefault();
+                      };
+                      e.target.addEventListener("wheel", handleWheel, {
+                        passive: false,
+                      });
+                      e.target.onblur = () => {
+                        e.target.removeEventListener("wheel", handleWheel);
+                      };
+                    }}
                     className="input input-bordered w-full"
                     placeholder="0"
                     min="0"
@@ -245,6 +256,17 @@ export default function CreateProduct() {
                     name="stock"
                     value={formData.stock}
                     onChange={handleChange}
+                    onFocus={(e) => {
+                      const handleWheel = (e: WheelEvent) => {
+                        e.preventDefault();
+                      };
+                      e.target.addEventListener("wheel", handleWheel, {
+                        passive: false,
+                      });
+                      e.target.onblur = () => {
+                        e.target.removeEventListener("wheel", handleWheel);
+                      };
+                    }}
                     className="input input-bordered w-full"
                     placeholder="0"
                     min="0"
