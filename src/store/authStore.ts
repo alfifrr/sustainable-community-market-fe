@@ -29,5 +29,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
   role: null,
-  setRole: (role) => set({ role }),
+  setRole: (role) => {
+    if (role) {
+      Cookies.set("userRole", role);
+    } else {
+      Cookies.remove("userRole");
+    }
+    set({ role });
+  },
 }));

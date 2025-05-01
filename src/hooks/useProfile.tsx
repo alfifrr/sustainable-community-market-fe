@@ -11,6 +11,7 @@ export const useProfile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const setRole = useAuthStore((state: AuthState) => state.setRole);
+  const setUser = useAuthStore((state: AuthState) => state.setUser);
 
   const fetchProfile = async () => {
     try {
@@ -19,9 +20,21 @@ export const useProfile = () => {
         API_ENDPOINTS.PROFILE
       );
       if (response.data.status === "success") {
-        setProfile(response.data.data);
-        // Sync role with auth store
-        setRole(response.data.data.role);
+        const profileData = response.data.data;
+        setProfile(profileData);
+        // Sync role and user data with auth store
+        setRole(profileData.role);
+        setUser({
+          id: profileData.id.toString(),
+          username: profileData.username,
+          email: profileData.contact_info.email,
+          first_name: profileData.contact_info.first_name,
+          last_name: profileData.contact_info.last_name,
+          is_verified: profileData.is_verified,
+          date_joined: profileData.date_joined,
+          last_activity: profileData.last_activity || "",
+          role: profileData.role,
+        });
       }
     } catch (err) {
       setError("Failed to load profile data");

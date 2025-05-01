@@ -22,13 +22,26 @@ export const useAuth = () => {
     });
     setIsLoggedIn(true);
 
-    // Fetch profile immediately after login to sync role
+    // Fetch profile immediately after login to sync role and user data
     try {
       const response = await axiosInstance.get<ProfileResponse>(
         API_ENDPOINTS.PROFILE
       );
       if (response.data.status === "success") {
-        setRole(response.data.data.role);
+        const profileData = response.data.data;
+        // Set both role and user data
+        setRole(profileData.role);
+        setUser({
+          id: profileData.id.toString(),
+          username: profileData.username,
+          email: profileData.contact_info.email,
+          first_name: profileData.contact_info.first_name,
+          last_name: profileData.contact_info.last_name,
+          is_verified: profileData.is_verified,
+          date_joined: profileData.date_joined,
+          last_activity: profileData.last_activity || "",
+          role: profileData.role,
+        });
       }
     } catch (err) {
       console.error("Error fetching profile after login:", err);
