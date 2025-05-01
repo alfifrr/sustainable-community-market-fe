@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
+import { AxiosError } from "axios";
 
 interface Category {
   id: number;
@@ -57,7 +58,7 @@ export default function CreateProduct() {
       } else {
         setCategoriesError("Failed to load categories. Please try again.");
       }
-    } catch (error) {
+    } catch {
       setCategoriesError("Failed to load categories. Please try again.");
     } finally {
       setIsCategoriesLoading(false);
@@ -81,7 +82,7 @@ export default function CreateProduct() {
       } else {
         setAddressesError("Failed to load addresses. Please try again.");
       }
-    } catch (error) {
+    } catch {
       setAddressesError("Failed to load addresses. Please try again.");
     } finally {
       setIsAddressesLoading(false);
@@ -134,12 +135,20 @@ export default function CreateProduct() {
           status: "error",
         });
       }
-    } catch (error: any) {
-      setServerError({
-        error: error.response?.data?.error || "Create product error",
-        message: error.response?.data?.message || "Failed to create product",
-        status: "error",
-      });
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        setServerError({
+          error: error.response?.data?.error || "Create product error",
+          message: error.response?.data?.message || "Failed to create product",
+          status: "error",
+        });
+      } else {
+        setServerError({
+          error: "Create product error",
+          message: "An unexpected error occurred",
+          status: "error",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

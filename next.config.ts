@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   async rewrites() {
-    // main api endpoint (relative urls in lib/endpoints)
+    // main api endpoint (relative sub urls in lib/endpoints)
     return [
       {
         source: "/api/:path*",

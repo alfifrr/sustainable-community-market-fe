@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import type { Profile, ProfileResponse } from "@/lib/types";
@@ -10,10 +10,9 @@ export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const setRole = useAuthStore((state: AuthState) => state.setRole);
-  const setUser = useAuthStore((state: AuthState) => state.setUser);
+  const { setRole, setUser } = useAuthStore((state: AuthState) => state);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await axiosInstance.get<ProfileResponse>(
@@ -42,15 +41,15 @@ export const useProfile = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setRole, setUser]);
 
-  const refreshProfile = () => {
+  const refreshProfile = useCallback(() => {
     fetchProfile();
-  };
+  }, [fetchProfile]);
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [fetchProfile]);
 
   return { profile, isLoading, error, refreshProfile };
 };

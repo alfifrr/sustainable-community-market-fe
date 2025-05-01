@@ -13,8 +13,8 @@ function NoResults({ query }: { query: string }) {
       <div className="max-w-md mx-auto space-y-4">
         <h2 className="text-xl font-semibold">No results found</h2>
         <p className="text-base-content/70">
-          We couldn't find any matches for "{query}". Try adjusting your search
-          terms.
+          We couldn&apos;t find any matches for &quot;{query}&quot;. Try
+          adjusting your search terms.
         </p>
         <div className="flex flex-col gap-2">
           <p className="text-sm font-medium">Suggestions:</p>
@@ -158,7 +158,7 @@ function SearchResults() {
     <div className="container mx-auto px-4 py-8">
       <header className="mb-8">
         <h1 className="text-2xl font-bold mb-4">
-          Search Results for "{query}"
+          Search Results for &quot;{query}&quot;
         </h1>
 
         {/* Tabs for filtering results */}
@@ -166,21 +166,18 @@ function SearchResults() {
           <button
             className={`tab ${activeTab === "all" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("all")}
-            aria-selected={activeTab === "all"}
           >
             All ({products.length + users.length})
           </button>
           <button
             className={`tab ${activeTab === "products" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("products")}
-            aria-selected={activeTab === "products"}
           >
             Products ({products.length})
           </button>
           <button
             className={`tab ${activeTab === "users" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("users")}
-            aria-selected={activeTab === "users"}
           >
             Users ({users.length})
           </button>

@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthSync } from "@/hooks/useAuthSync";
 import { useTheme } from "@/context/ThemeContext";
 import Cookies from "js-cookie";
-import axiosInstance, { refreshAccessToken } from "@/lib/interceptor";
+import { refreshAccessToken } from "@/lib/interceptor";
 import { useAuthStore } from "@/store/authStore";
 
 const Navbar: FC = () => {
@@ -15,8 +15,7 @@ const Navbar: FC = () => {
   const router = useRouter();
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { isLoggedIn, logout } = useAuth();
-  const user = useAuthStore((state) => state.user);
-  const role = useAuthStore((state) => state.role);
+  const { user, role } = useAuthStore((state) => state);
   const { theme, toggleTheme } = useTheme();
   useAuthSync();
 

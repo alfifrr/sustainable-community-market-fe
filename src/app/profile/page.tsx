@@ -5,6 +5,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { AlertCircle, RefreshCw, Pencil, Eye, EyeOff } from "lucide-react";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
+import { AxiosError } from "axios";
 
 interface FormData {
   username: string;
@@ -23,6 +24,15 @@ interface FormErrors {
   last_name: string;
   phone_number: string;
   server?: string;
+}
+
+interface UpdateProfileData {
+  username: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  old_password?: string;
+  password?: string;
 }
 
 export default function Profile() {
@@ -155,8 +165,7 @@ export default function Profile() {
     setErrors((prev) => ({ ...prev, server: "" }));
 
     try {
-      // Only include password fields if new password is provided
-      const updateData: any = {
+      const updateData: UpdateProfileData = {
         username: formData.username,
         first_name: formData.first_name,
         last_name: formData.last_name,
@@ -173,22 +182,29 @@ export default function Profile() {
       // Refresh profile data after successful update
       await refreshProfile();
       setIsEditing(false);
-    } catch (error: any) {
-      if (error.response?.data?.message) {
-        if (typeof error.response.data.message === "object") {
-          const newErrors = { ...errors };
-          Object.entries(error.response.data.message).forEach(
-            ([field, messages]) => {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        const message = error.response?.data?.message;
+        if (message) {
+          if (typeof message === "object") {
+            const newErrors = { ...errors };
+            Object.entries(message).forEach(([field, messages]) => {
               if (Array.isArray(messages)) {
                 newErrors[field as keyof FormErrors] = messages[0];
               }
-            }
-          );
-          setErrors(newErrors);
+            });
+            setErrors(newErrors);
+          } else {
+            setErrors((prev) => ({
+              ...prev,
+              server: message,
+            }));
+          }
         } else {
           setErrors((prev) => ({
             ...prev,
-            server: error.response.data.message,
+            server:
+              "An error occurred while updating your profile. Please try again.",
           }));
         }
       } else {

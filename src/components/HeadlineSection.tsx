@@ -91,7 +91,7 @@ export default function HeadlineSection() {
         {/* Call to Action */}
         <div className="text-center max-w-3xl mx-auto">
           <p className="text-xl md:text-2xl font-medium mb-8">
-            Sustainability isn't just a dream — it's a decision.{" "}
+            Sustainability isn&apos;t just a dream — it&apos;s a decision.{" "}
             <span className="text-primary">
               Shop local, save resources, and shape a future our children will
               thank us for.

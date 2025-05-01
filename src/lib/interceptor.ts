@@ -45,7 +45,7 @@ export const refreshAccessToken = async () => {
 
     useAuthStore.getState().setIsLoggedIn(true);
     return access_token;
-  } catch (error) {
+  } catch {
     Cookies.remove("authToken");
     Cookies.remove("refreshToken");
     useAuthStore.getState().setIsLoggedIn(false);

@@ -1,9 +1,4 @@
-"use client";
-import { useRouter } from "next/navigation";
-
 export default function HowItWorksSection() {
-  const router = useRouter();
-
   return (
     <section className="py-16 md:py-24 bg-base-100">
       <div className="container mx-auto px-4">

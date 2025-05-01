@@ -1,13 +1,5 @@
 "use client";
-import { useState } from "react";
-import {
-  Package2,
-  Clock,
-  ShoppingCart,
-  TrendingDown,
-  Leaf,
-  Tag,
-} from "lucide-react";
+import { Package2, Clock, ShoppingCart, Leaf, Tag } from "lucide-react";
 import Image from "next/image";
 
 const PriceExample = ({
@@ -66,10 +58,6 @@ const PriceExample = ({
 };
 
 export default function BenefitsSection() {
-  // Using useId for stable IDs across server/client renders
-  const defaultTab = "pricing";
-  const [activeTab, setActiveTab] = useState(defaultTab);
-
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-base-200 to-base-300">
       <div className="container mx-auto px-4">

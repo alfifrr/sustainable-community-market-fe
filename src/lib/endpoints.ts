@@ -1,4 +1,4 @@
-// Use relative URLs since we're using rewrites
+// Use relative URLs since we're using rewrites in next.config.ts
 export const API_ENDPOINTS = {
   USERS: "/api/users",
   USER_BY_ID: (id: string) => `/api/users/${id}`,
