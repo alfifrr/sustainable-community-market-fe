@@ -40,6 +40,13 @@ export default function Profile() {
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6">Profile</h1>
 
+        {/* Profile Navigation */}
+        <div className="tabs tabs-boxed mb-6">
+          <button className="tab tab-active">Profile</button>
+          <button className="tab" onClick={() => router.push('/profile/transactions')}>Transactions</button>
+          <button className="tab" onClick={() => router.push('/profile/purchases')}>Purchases</button>
+        </div>
+
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <div className="space-y-4">
@@ -95,6 +102,22 @@ export default function Profile() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Quick Access Buttons */}
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          <button
+            className="btn btn-outline btn-primary"
+            onClick={() => router.push('/profile/transactions')}
+          >
+            View Transactions
+          </button>
+          <button
+            className="btn btn-outline btn-primary"
+            onClick={() => router.push('/profile/purchases')}
+          >
+            View Purchases
+          </button>
         </div>
       </div>
     </div>
