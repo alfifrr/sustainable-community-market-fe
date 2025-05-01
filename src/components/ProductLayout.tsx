@@ -1,13 +1,23 @@
+"use client";
+
 import { Product } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarDays, MapPin, Package2, User2 } from "lucide-react";
+import { CalendarDays, MapPin, Package2, User2, ShoppingCart, CreditCard, X } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useCartStore } from "@/store/cartStore";
 
 interface ProductLayoutProps {
   product: Product;
 }
 
 const ProductLayout = ({ product }: ProductLayoutProps) => {
+  const [quantity, setQuantity] = useState(1);
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -31,13 +41,77 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
     return diffDays;
   };
 
+  const addToCart = useCartStore((state) => state.addItem);
+
+  const handleAddToCart = () => {
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+
+    // Add to cart using cartStore
+    addToCart({
+      id: `cart-${product.id}`,
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      imageUrl: product.image_url || '',
+      sellerId: String(product.user.id),
+      sellerName: product.user.name
+    });
+
+    // Show toast notification
+    document.getElementById('cart-toast')?.classList.remove('hidden');
+
+    // Hide toast after 3 seconds
+    setTimeout(() => {
+      document.getElementById('cart-toast')?.classList.add('hidden');
+    }, 3000);
+  };
+
+  const handleBuyNow = () => {
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+
+    // Add to cart using cartStore
+    addToCart({
+      id: `cart-${product.id}`,
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      imageUrl: product.image_url || '',
+      sellerId: String(product.user.id),
+      sellerName: product.user.name
+    });
+
+    // Redirect to checkout
+    router.push('/checkout');
+  };
+
   const daysUntilExpiration = getDaysUntilExpiration();
 
   return (
     <main
-      className="container mx-auto px-4 py-6 md:py-8 max-w-4xl"
+      className="container mx-auto px-4 py-6 md:py-8 max-w-4xl relative"
       aria-label="Product Details"
     >
+      {/* Toast notification */}
+      <div id="cart-toast" className="toast toast-top toast-end z-50 hidden">
+        <div className="alert alert-success">
+          <span>Product added to cart!</span>
+        </div>
+      </div>
+      <button
+        onClick={() => router.back()}
+        className="btn btn-circle btn-sm absolute right-6 top-6 z-10 bg-base-100 shadow-md hover:bg-base-200"
+        aria-label="Back"
+      >
+        <X size={18} />
+      </button>
       <div className="bg-base-300 rounded-xl shadow-lg overflow-hidden">
         {/* Product Header with Image */}
         <div className="relative h-64 md:h-96 w-full bg-base-200">
@@ -67,9 +141,8 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 </span>
                 {daysUntilExpiration <= 7 && (
                   <span
-                    className={`badge ${
-                      daysUntilExpiration <= 3 ? "badge-error" : "badge-warning"
-                    }`}
+                    className={`badge ${daysUntilExpiration <= 3 ? "badge-error" : "badge-warning"
+                      }`}
                     role="alert"
                   >
                     Expires in {daysUntilExpiration} days
@@ -84,16 +157,62 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
               </p>
             </div>
 
-            <div
-              className="flex items-center gap-2 bg-base-200 px-4 py-2 rounded-lg"
-              role="status"
-            >
-              <Package2 className="w-5 h-5" />
-              <span className="font-medium">
-                {product.stock} {product.stock === 1 ? "unit" : "units"}{" "}
-                available
-              </span>
+            <div className="flex flex-col gap-2">
+              <div
+                className="flex items-center gap-2 bg-base-200 px-4 py-2 rounded-lg"
+                role="status"
+              >
+                <Package2 className="w-5 h-5" />
+                <span className="font-medium">
+                  {product.stock} {product.stock === 1 ? "unit" : "units"}{" "}
+                  available
+                </span>
+              </div>
+
+              {/* Quantity Selector */}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm font-medium">Quantity:</span>
+                <div className="join">
+                  <button
+                    className="join-item btn btn-sm btn-outline"
+                    onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                    disabled={quantity <= 1}
+                  >
+                    -
+                  </button>
+                  <span className="join-item px-4 py-1 flex items-center justify-center bg-base-200">
+                    {quantity}
+                  </span>
+                  <button
+                    className="join-item btn btn-sm btn-outline"
+                    onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
+                    disabled={quantity >= product.stock}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleAddToCart}
+              className="btn btn-outline btn-primary flex-1 gap-2"
+              disabled={product.stock <= 0}
+            >
+              <ShoppingCart size={18} />
+              Add to Cart
+            </button>
+            <button
+              onClick={handleBuyNow}
+              className="btn btn-primary flex-1 gap-2"
+              disabled={product.stock <= 0}
+            >
+              <CreditCard size={18} />
+              Buy Now
+            </button>
           </div>
 
           {/* Product Description */}
@@ -181,10 +300,9 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 <div className="flex items-center gap-2 mt-1">
                   <span
                     className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium
-                      ${
-                        product.user.is_verified
-                          ? "bg-info/10 text-info"
-                          : "bg-warning/10 text-warning"
+                      ${product.user.is_verified
+                        ? "bg-info/10 text-info"
+                        : "bg-warning/10 text-warning"
                       }`}
                   >
                     <span
