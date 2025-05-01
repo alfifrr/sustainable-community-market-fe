@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/profile", "/products/create"];
+const protectedRoutes = ["/profile"];
+const sellerRoutes = ["/products/create"];
 const authRoutes = ["/login", "/signup"];
 
 export function middleware(request: NextRequest) {
@@ -14,11 +15,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Protect routes that require authentication
+  // Check authentication for protected routes
   if (
     !authToken &&
     !refreshToken &&
-    protectedRoutes.some((route) => path.startsWith(route))
+    [...protectedRoutes, ...sellerRoutes].some((route) =>
+      path.startsWith(route)
+    )
   ) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

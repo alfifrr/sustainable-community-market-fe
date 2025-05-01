@@ -8,12 +8,15 @@ import { useAuthSync } from "@/hooks/useAuthSync";
 import { useTheme } from "@/context/ThemeContext";
 import Cookies from "js-cookie";
 import axiosInstance, { refreshAccessToken } from "@/lib/interceptor";
+import { useAuthStore } from "@/store/authStore";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { isLoggedIn, logout } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  const role = useAuthStore((state) => state.role);
   const { theme, toggleTheme } = useTheme();
   useAuthSync();
 
@@ -173,7 +176,9 @@ const Navbar: FC = () => {
                 <div className="w-10 rounded-full">
                   <img
                     alt="Tailwind CSS Navbar component"
-                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user?.username || ""
+                    )}`}
                   />
                 </div>
               </div>
@@ -187,9 +192,11 @@ const Navbar: FC = () => {
                     <span className="badge">New</span>
                   </Link>
                 </li>
-                <li>
-                  <Link href="/products/create">List Product</Link>
-                </li>
+                {role === "seller" && (
+                  <li>
+                    <Link href="/products/create">List Product</Link>
+                  </li>
+                )}
                 <li>
                   <a>Settings</a>
                 </li>

@@ -24,6 +24,11 @@ interface Address {
 export default function CreateProduct() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<{
+    error: string;
+    message: string;
+    status: string;
+  } | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
@@ -54,7 +59,6 @@ export default function CreateProduct() {
       }
     } catch (error) {
       setCategoriesError("Failed to load categories. Please try again.");
-      console.error("Failed to fetch categories:", error);
     } finally {
       setIsCategoriesLoading(false);
     }
@@ -79,7 +83,6 @@ export default function CreateProduct() {
       }
     } catch (error) {
       setAddressesError("Failed to load addresses. Please try again.");
-      console.error("Failed to fetch addresses:", error);
     } finally {
       setIsAddressesLoading(false);
     }
@@ -100,6 +103,7 @@ export default function CreateProduct() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setServerError(null);
 
     try {
       // Convert the expiration date to end of day (23:59:59.999)
@@ -124,15 +128,18 @@ export default function CreateProduct() {
       if (data.status === "success") {
         router.push("/products/" + data.data.id);
       } else {
-        throw new Error(data.message || "Failed to create product");
+        setServerError({
+          error: "Create product error",
+          message: data.message || "Failed to create product",
+          status: "error",
+        });
       }
     } catch (error: any) {
-      console.error("Failed to create product:", error);
-      alert(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to create product"
-      );
+      setServerError({
+        error: error.response?.data?.error || "Create product error",
+        message: error.response?.data?.message || "Failed to create product",
+        status: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -144,6 +151,15 @@ export default function CreateProduct() {
         <div className="max-w-3xl mx-auto">
           <div className="bg-base-100 rounded-xl shadow-lg p-6 md:p-8">
             <h1 className="text-2xl font-bold mb-6">List a New Product</h1>
+
+            {serverError && (
+              <div className="alert alert-error mb-6">
+                <div>
+                  <h3 className="font-bold">{serverError.error}</h3>
+                  <p className="text-sm">{serverError.message}</p>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Product Name */}

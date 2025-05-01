@@ -1,16 +1,17 @@
 "use client";
 import { useAuthStore } from "@/store/authStore";
 import Cookies from "js-cookie";
+import { API_ENDPOINTS } from "@/lib/endpoints";
+import axiosInstance from "@/lib/interceptor";
+import type { ProfileResponse } from "@/lib/types";
 
 export const useAuth = () => {
-  const { isLoggedIn, setIsLoggedIn, user, setUser } = useAuthStore();
+  const { isLoggedIn, setIsLoggedIn, user, setUser, setRole } = useAuthStore();
 
-  const login = (tokens: { access_token: string; refresh_token: string }) => {
-    // localStorage.removeItem("authToken");
-    // localStorage.removeItem("refreshToken");
-
-    // localStorage.setItem("authToken", tokens.access_token);
-    // localStorage.setItem("refreshToken", tokens.refresh_token);
+  const login = async (tokens: {
+    access_token: string;
+    refresh_token: string;
+  }) => {
     Cookies.set("authToken", tokens.access_token, {
       expires: 1 / 96, // 15 minutes
       path: "/",
@@ -20,15 +21,26 @@ export const useAuth = () => {
       path: "/",
     });
     setIsLoggedIn(true);
+
+    // Fetch profile immediately after login to sync role
+    try {
+      const response = await axiosInstance.get<ProfileResponse>(
+        API_ENDPOINTS.PROFILE
+      );
+      if (response.data.status === "success") {
+        setRole(response.data.data.role);
+      }
+    } catch (err) {
+      console.error("Error fetching profile after login:", err);
+    }
   };
 
   const logout = () => {
-    // localStorage.removeItem("authToken");
-    // localStorage.removeItem("refreshToken");
     Cookies.remove("authToken");
     Cookies.remove("refreshToken");
     setIsLoggedIn(false);
     setUser(null);
+    setRole(null);
   };
 
   return { isLoggedIn, login, user, logout };
