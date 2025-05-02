@@ -509,7 +509,7 @@ export default function CheckoutPage() {
                       Insufficient balance
                     </div>
                     <Link
-                      href="/profile/transactions"
+                      href="/topup?returnTo=/checkout"
                       className="btn btn-error btn-xs"
                     >
                       Top Up
