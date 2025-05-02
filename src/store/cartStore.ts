@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import Cookies from "js-cookie";
 import { useAuthStore } from "./authStore";
 
 export interface CartItem {
@@ -102,6 +103,17 @@ export const useCartStore = create<CartState>()(
 
       migrateGuestCart: (userId) =>
         set((state) => {
+          // Check if user is a seller using js-cookie
+          const userRole = Cookies.get("userRole");
+
+          // If user is a seller, don't migrate cart
+          if (userRole === "seller") {
+            return {
+              ...state,
+              currentCartId: userId,
+            };
+          }
+
           const guestCart = state.carts["guest"] || [];
           const userCart = state.carts[userId] || [];
 
