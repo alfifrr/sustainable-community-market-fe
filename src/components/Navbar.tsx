@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthSync } from "@/hooks/useAuthSync";
 import { useTheme } from "@/context/ThemeContext";
 import { useCartStore } from "@/store/cartStore";
-// Tambahkan di bagian imports
 import Image from "next/image";
 import Cookies from "js-cookie";
 import { refreshAccessToken } from "@/lib/interceptor";
@@ -49,6 +48,8 @@ const Navbar: FC = () => {
     // Either no tokens exist or refresh failed
     router.push("/login");
   };
+
+  const isSeller = user?.role === "seller";
 
   return (
     <>
@@ -122,15 +123,17 @@ const Navbar: FC = () => {
             />
           </div>
 
-          {/* Cart Icon */}
-          <Link href="/cart" className="btn btn-ghost btn-circle">
-            <div className="indicator">
-              <img src="/logo/cart.svg" alt="Cart" className="w-6 h-6" />
-              <span className="badge badge-sm indicator-item">
-                {cartItemsCount}
-              </span>
-            </div>
-          </Link>
+          {/* Cart Icon - Hide for sellers */}
+          {!isSeller && (
+            <Link href="/cart" className="btn btn-ghost btn-circle">
+              <div className="indicator">
+                <img src="/logo/cart.svg" alt="Cart" className="w-6 h-6" />
+                <span className="badge badge-sm indicator-item">
+                  {cartItemsCount}
+                </span>
+              </div>
+            </Link>
+          )}
 
           {/* Theme Switcher */}
           <label className="toggle text-base-content cursor-pointer">

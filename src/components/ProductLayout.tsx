@@ -3,11 +3,20 @@
 import { Product } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarDays, MapPin, Package2, User2, ShoppingCart, CreditCard, X } from "lucide-react";
+import {
+  CalendarDays,
+  MapPin,
+  Package2,
+  User2,
+  ShoppingCart,
+  CreditCard,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 
 interface ProductLayoutProps {
   product: Product;
@@ -17,6 +26,8 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   const [quantity, setQuantity] = useState(1);
   const router = useRouter();
   const { isLoggedIn } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  const isSeller = user?.role === "seller";
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -45,7 +56,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
 
   const handleAddToCart = () => {
     if (!isLoggedIn) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
@@ -56,23 +67,23 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
       name: product.name,
       price: product.price,
       quantity: quantity,
-      imageUrl: product.image_url || '',
+      imageUrl: product.image_url || "",
       sellerId: String(product.user.id),
-      sellerName: product.user.name
+      sellerName: product.user.name,
     });
 
     // Show toast notification
-    document.getElementById('cart-toast')?.classList.remove('hidden');
+    document.getElementById("cart-toast")?.classList.remove("hidden");
 
     // Hide toast after 3 seconds
     setTimeout(() => {
-      document.getElementById('cart-toast')?.classList.add('hidden');
+      document.getElementById("cart-toast")?.classList.add("hidden");
     }, 3000);
   };
 
   const handleBuyNow = () => {
     if (!isLoggedIn) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
@@ -83,13 +94,13 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
       name: product.name,
       price: product.price,
       quantity: quantity,
-      imageUrl: product.image_url || '',
+      imageUrl: product.image_url || "",
       sellerId: String(product.user.id),
-      sellerName: product.user.name
+      sellerName: product.user.name,
     });
 
     // Redirect to checkout
-    router.push('/checkout');
+    router.push("/checkout");
   };
 
   const daysUntilExpiration = getDaysUntilExpiration();
@@ -141,8 +152,9 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 </span>
                 {daysUntilExpiration <= 7 && (
                   <span
-                    className={`badge ${daysUntilExpiration <= 3 ? "badge-error" : "badge-warning"
-                      }`}
+                    className={`badge ${
+                      daysUntilExpiration <= 3 ? "badge-error" : "badge-warning"
+                    }`}
                     role="alert"
                   >
                     Expires in {daysUntilExpiration} days
@@ -169,51 +181,59 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 </span>
               </div>
 
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-sm font-medium">Quantity:</span>
-                <div className="join">
-                  <button
-                    className="join-item btn btn-sm btn-outline"
-                    onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                    disabled={quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <span className="join-item px-4 py-1 flex items-center justify-center bg-base-200">
-                    {quantity}
-                  </span>
-                  <button
-                    className="join-item btn btn-sm btn-outline"
-                    onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
-                    disabled={quantity >= product.stock}
-                  >
-                    +
-                  </button>
+              {/* Quantity Selector - Hide for sellers */}
+              {!isSeller && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm font-medium">Quantity:</span>
+                  <div className="join">
+                    <button
+                      className="join-item btn btn-sm btn-outline"
+                      onClick={() =>
+                        setQuantity((prev) => Math.max(1, prev - 1))
+                      }
+                      disabled={quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <span className="join-item px-4 py-1 flex items-center justify-center bg-base-200">
+                      {quantity}
+                    </span>
+                    <button
+                      className="join-item btn btn-sm btn-outline"
+                      onClick={() =>
+                        setQuantity((prev) => Math.min(product.stock, prev + 1))
+                      }
+                      disabled={quantity >= product.stock}
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleAddToCart}
-              className="btn btn-outline btn-primary flex-1 gap-2"
-              disabled={product.stock <= 0}
-            >
-              <ShoppingCart size={18} />
-              Add to Cart
-            </button>
-            <button
-              onClick={handleBuyNow}
-              className="btn btn-primary flex-1 gap-2"
-              disabled={product.stock <= 0}
-            >
-              <CreditCard size={18} />
-              Buy Now
-            </button>
-          </div>
+          {/* Action Buttons - Hide for sellers */}
+          {!isSeller && (
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleAddToCart}
+                className="btn btn-outline btn-primary flex-1 gap-2"
+                disabled={product.stock <= 0}
+              >
+                <ShoppingCart size={18} />
+                Add to Cart
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="btn btn-primary flex-1 gap-2"
+                disabled={product.stock <= 0}
+              >
+                <CreditCard size={18} />
+                Buy Now
+              </button>
+            </div>
+          )}
 
           {/* Product Description */}
           <div className="mt-8">
@@ -300,9 +320,10 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 <div className="flex items-center gap-2 mt-1">
                   <span
                     className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium
-                      ${product.user.is_verified
-                        ? "bg-info/10 text-info"
-                        : "bg-warning/10 text-warning"
+                      ${
+                        product.user.is_verified
+                          ? "bg-info/10 text-info"
+                          : "bg-warning/10 text-warning"
                       }`}
                   >
                     <span

@@ -7,6 +7,7 @@ import { ShoppingCart, CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 
 interface ProductCardProps {
   product: Product;
@@ -21,6 +22,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const router = useRouter();
   const { isLoggedIn } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  const isSeller = user?.role === "seller";
 
   const addToCart = useCartStore((state) => state.addItem);
 
@@ -28,7 +31,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault(); // Prevent navigation to product detail
 
     if (!isLoggedIn) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
@@ -41,12 +44,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       quantity: 1,
       imageUrl: product.image_url || getCategoryImage(categoryId),
       sellerId: product.user.id.toString(),
-      sellerName: product.user.name
+      sellerName: product.user.name,
     });
 
     // Show toast notification
-    const toast = document.createElement('div');
-    toast.className = 'toast toast-top toast-end z-50';
+    const toast = document.createElement("div");
+    toast.className = "toast toast-top toast-end z-50";
     toast.innerHTML = `
       <div class="alert alert-success">
         <span>Product added to cart!</span>
@@ -64,7 +67,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault(); // Prevent navigation to product detail
 
     if (!isLoggedIn) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
@@ -77,11 +80,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       quantity: 1,
       imageUrl: product.image_url || getCategoryImage(categoryId),
       sellerId: product.user.id.toString(),
-      sellerName: product.user.name
+      sellerName: product.user.name,
     });
 
     // Redirect to checkout
-    router.push('/checkout');
+    router.push("/checkout");
   };
 
   return (
@@ -140,25 +143,27 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </Link>
 
-      {/* Action Buttons */}
-      <div className="card-actions justify-end p-4 pt-0 gap-2">
-        <button
-          onClick={handleAddToCart}
-          className="btn btn-sm btn-outline btn-primary flex-1"
-          aria-label="Add to cart"
-        >
-          <ShoppingCart size={16} />
-          Add to Cart
-        </button>
-        <button
-          onClick={handleBuyNow}
-          className="btn btn-sm btn-primary flex-1"
-          aria-label="Buy now"
-        >
-          <CreditCard size={16} />
-          Buy
-        </button>
-      </div>
+      {/* Action Buttons - Hide for sellers */}
+      {!isSeller && (
+        <div className="card-actions justify-end p-4 pt-0 gap-2">
+          <button
+            onClick={handleAddToCart}
+            className="btn btn-sm btn-outline btn-primary flex-1"
+            aria-label="Add to cart"
+          >
+            <ShoppingCart size={16} />
+            Add to Cart
+          </button>
+          <button
+            onClick={handleBuyNow}
+            className="btn btn-sm btn-primary flex-1"
+            aria-label="Buy now"
+          >
+            <CreditCard size={16} />
+            Buy
+          </button>
+        </div>
+      )}
     </article>
   );
 }
