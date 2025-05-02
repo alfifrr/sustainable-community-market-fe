@@ -55,12 +55,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   const addToCart = useCartStore((state) => state.addItem);
 
   const handleAddToCart = () => {
-    if (!isLoggedIn) {
-      router.push("/login");
-      return;
-    }
-
-    // Add to cart using cartStore
+    // Add to cart using cartStore without login check
     addToCart({
       id: `cart-${product.id}`,
       productId: product.id,
@@ -83,6 +78,8 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
 
   const handleBuyNow = () => {
     if (!isLoggedIn) {
+      // Store the intended destination
+      localStorage.setItem("redirectAfterLogin", "/checkout");
       router.push("/login");
       return;
     }

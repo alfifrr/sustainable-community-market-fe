@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 
 interface ShippingAddress {
@@ -20,8 +21,11 @@ interface PaymentMethod {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const cartItems = useCartStore((state) => state.items);
+  const user = useAuthStore((state) => state.user);
+  const currentCartId = useCartStore((state) => state.currentCartId);
+  const carts = useCartStore((state) => state.carts);
   const clearCart = useCartStore((state) => state.clearCart);
+  const cartItems = carts[currentCartId] || [];
   const [loading, setLoading] = useState(false);
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -187,6 +191,7 @@ export default function CheckoutPage() {
       const purchaseDate = new Date().toISOString();
       const newOrder = {
         id: randomOrderId,
+        userId: user?.id || "guest",
         items: cartItems.map((item) => ({
           productId: item.productId,
           name: item.name,

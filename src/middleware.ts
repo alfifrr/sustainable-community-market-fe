@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/profile", "/cart"];
+const protectedRoutes = ["/profile", "/checkout"]; // Removed /cart from protected routes
 const sellerRoutes = ["/products/create"];
-const buyerRoutes = ["/cart", "/checkout"];
+const buyerRoutes = ["/checkout"]; // Moved /cart out of buyer routes to allow guest access
 const authRoutes = ["/login", "/signup"];
 
 export function middleware(request: NextRequest) {

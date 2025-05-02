@@ -3,7 +3,9 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 // Tipe data untuk item keranjang
 interface CartItem {
@@ -19,10 +21,16 @@ interface CartItem {
 
 export default function CartPage() {
   const router = useRouter();
-  const cartItems = useCartStore((state) => state.items);
+  const user = useAuthStore((state) => state.user);
+  const currentCartId = useCartStore((state) => state.currentCartId);
+  const carts = useCartStore((state) => state.carts);
   const removeItem = useCartStore((state) => state.removeItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const [loading, setLoading] = useState(false);
+  const { isLoggedIn } = useAuth();
+
+  // Get current cart items
+  const cartItems = carts[currentCartId] || [];
 
   // Fungsi untuk memformat harga
   const formatPrice = (price: number) => {
@@ -48,13 +56,20 @@ export default function CartPage() {
 
   // Fungsi untuk checkout
   const handleCheckout = () => {
+    if (!isLoggedIn) {
+      localStorage.setItem("redirectAfterLogin", "/checkout");
+      router.push("/login");
+    }
+
     router.push("/checkout");
   };
 
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
+        <h1 className="text-2xl font-bold mb-6">
+          {user ? "Your Cart" : "Guest Cart"}
+        </h1>
         <div className="animate-pulse">
           <div className="bg-base-300 h-24 rounded-lg mb-4"></div>
           <div className="bg-base-300 h-24 rounded-lg mb-4"></div>
@@ -66,7 +81,9 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        {user ? "Your Cart" : "Guest Cart"}
+      </h1>
 
       {cartItems.length === 0 ? (
         <div className="text-center py-10">

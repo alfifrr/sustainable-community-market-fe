@@ -30,12 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation to product detail
 
-    if (!isLoggedIn) {
-      router.push("/login");
-      return;
-    }
-
-    // Add to cart using cartStore
+    // Add to cart using cartStore without login check
     addToCart({
       id: `cart-${product.id}`,
       productId: product.id,
@@ -67,6 +62,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault(); // Prevent navigation to product detail
 
     if (!isLoggedIn) {
+      // Store the intended destination
+      localStorage.setItem("redirectAfterLogin", "/checkout");
       router.push("/login");
       return;
     }
