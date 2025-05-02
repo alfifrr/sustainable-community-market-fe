@@ -9,11 +9,10 @@ import { API_ENDPOINTS } from "@/lib/endpoints";
 import axiosInstance from "@/lib/interceptor";
 
 interface ShippingAddress {
-  fullName: string;
+  label: string;
   address: string;
-  city: string;
-  postalCode: string;
-  phone: string;
+  details: string;
+  contact_person: string;
 }
 
 interface PaymentMethod {
@@ -48,11 +47,10 @@ export default function CheckoutPage() {
 
   // Form state
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
-    fullName: "",
+    label: "",
     address: "",
-    city: "",
-    postalCode: "",
-    phone: "",
+    details: "",
+    contact_person: "",
   });
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>({
@@ -61,11 +59,10 @@ export default function CheckoutPage() {
   });
 
   const [formErrors, setFormErrors] = useState({
-    fullName: "",
+    label: "",
     address: "",
-    city: "",
-    postalCode: "",
-    phone: "",
+    details: "",
+    contact_person: "",
     payment: "",
   });
 
@@ -165,46 +162,57 @@ export default function CheckoutPage() {
   // Form validation
   const validateForm = () => {
     const errors = {
-      fullName: "",
+      label: "",
       address: "",
-      city: "",
-      postalCode: "",
-      phone: "",
+      details: "",
+      contact_person: "",
       payment: "",
     };
     let isValid = true;
 
-    if (!shippingAddress.fullName.trim()) {
-      errors.fullName = "Full name is required";
+    // Label validation (3-50 characters and required)
+    if (!shippingAddress.label.trim()) {
+      errors.label = "Label is required";
+      isValid = false;
+    } else if (shippingAddress.label.trim().length < 3) {
+      errors.label = "Label must be at least 3 characters";
+      isValid = false;
+    } else if (shippingAddress.label.trim().length > 50) {
+      errors.label = "Label must not exceed 50 characters";
       isValid = false;
     }
 
+    // Address validation (5-255 characters and required)
     if (!shippingAddress.address.trim()) {
       errors.address = "Address is required";
       isValid = false;
-    }
-
-    if (!shippingAddress.city.trim()) {
-      errors.city = "City is required";
+    } else if (shippingAddress.address.trim().length < 5) {
+      errors.address = "Address must be at least 5 characters";
+      isValid = false;
+    } else if (shippingAddress.address.trim().length > 255) {
+      errors.address = "Address must not exceed 255 characters";
       isValid = false;
     }
 
-    if (!shippingAddress.postalCode.trim()) {
-      errors.postalCode = "Postal code is required";
-      isValid = false;
-    } else if (!/^\d{5}$/.test(shippingAddress.postalCode)) {
-      errors.postalCode = "Postal code must be 5 digits";
+    // Details validation (optional, max 255 characters)
+    if (shippingAddress.details.trim().length > 255) {
+      errors.details = "Details must not exceed 255 characters";
       isValid = false;
     }
 
-    if (!shippingAddress.phone.trim()) {
-      errors.phone = "Phone number is required";
+    // Contact person validation (3-255 characters and required)
+    if (!shippingAddress.contact_person.trim()) {
+      errors.contact_person = "Contact person is required";
       isValid = false;
-    } else if (!/^\d{10,13}$/.test(shippingAddress.phone)) {
-      errors.phone = "Phone number must be 10-13 digits";
+    } else if (shippingAddress.contact_person.trim().length < 3) {
+      errors.contact_person = "Contact person must be at least 3 characters";
+      isValid = false;
+    } else if (shippingAddress.contact_person.trim().length > 255) {
+      errors.contact_person = "Contact person must not exceed 255 characters";
       isValid = false;
     }
 
+    // Payment validation
     if (paymentMethod.type === "bank_transfer" && !paymentMethod.details) {
       errors.payment = "Please select a bank for transfer";
       isValid = false;
@@ -364,11 +372,10 @@ export default function CheckoutPage() {
                       );
                       if (selectedAddress) {
                         setShippingAddress({
-                          fullName: selectedAddress.contact_person,
+                          label: selectedAddress.label,
                           address: selectedAddress.address,
-                          city: "", // You might want to parse this from the address
-                          postalCode: "", // You might want to parse this from the address
-                          phone: "", // You might need to add phone to your Address interface
+                          details: selectedAddress.details || "",
+                          contact_person: selectedAddress.contact_person,
                         });
                       }
                     }}
@@ -394,34 +401,65 @@ export default function CheckoutPage() {
                 )}
               </div>
 
+              {/* Enter New Address Form */}
               <div className="divider text-xs text-base-content/50">
                 OR ENTER NEW ADDRESS
               </div>
 
+              {/* Label Field */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Full Name</span>
+                  <span className="label-text">
+                    Label <span className="text-error">*</span>
+                  </span>
                 </label>
                 <input
                   type="text"
-                  name="fullName"
-                  value={shippingAddress.fullName}
+                  name="label"
+                  value={shippingAddress.label}
                   onChange={handleAddressChange}
                   className={`input input-bordered w-full ${
-                    formErrors.fullName ? "input-error" : ""
+                    formErrors.label ? "input-error" : ""
                   }`}
-                  placeholder="Recipient's full name"
+                  placeholder="E.g., Home, Office, etc."
                 />
-                {formErrors.fullName && (
+                {formErrors.label && (
                   <span className="text-error text-sm mt-1">
-                    {formErrors.fullName}
+                    {formErrors.label}
                   </span>
                 )}
               </div>
 
+              {/* Contact Person Field */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Address</span>
+                  <span className="label-text">
+                    Contact Person <span className="text-error">*</span>
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  name="contact_person"
+                  value={shippingAddress.contact_person}
+                  onChange={handleAddressChange}
+                  className={`input input-bordered w-full ${
+                    formErrors.contact_person ? "input-error" : ""
+                  }`}
+                  placeholder="Full name of the recipient"
+                />
+                {formErrors.contact_person && (
+                  <span className="text-error text-sm mt-1">
+                    {formErrors.contact_person}
+                  </span>
+                )}
+              </div>
+
+              {/* Address Field */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">
+                    Complete Address <span className="text-error">*</span>
+                  </span>
                 </label>
                 <textarea
                   name="address"
@@ -430,7 +468,7 @@ export default function CheckoutPage() {
                   className={`textarea textarea-bordered w-full ${
                     formErrors.address ? "textarea-error" : ""
                   }`}
-                  placeholder="Complete shipping address"
+                  placeholder="Street name, building/house number, RT/RW, district, city, region/province, postal code"
                   rows={3}
                 ></textarea>
                 {formErrors.address && (
@@ -440,67 +478,27 @@ export default function CheckoutPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">City</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={shippingAddress.city}
-                    onChange={handleAddressChange}
-                    className={`input input-bordered w-full ${
-                      formErrors.city ? "input-error" : ""
-                    }`}
-                    placeholder="City"
-                  />
-                  {formErrors.city && (
-                    <span className="text-error text-sm mt-1">
-                      {formErrors.city}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Postal Code</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="postalCode"
-                    value={shippingAddress.postalCode}
-                    onChange={handleAddressChange}
-                    className={`input input-bordered w-full ${
-                      formErrors.postalCode ? "input-error" : ""
-                    }`}
-                    placeholder="Postal code"
-                  />
-                  {formErrors.postalCode && (
-                    <span className="text-error text-sm mt-1">
-                      {formErrors.postalCode}
-                    </span>
-                  )}
-                </div>
-              </div>
-
+              {/* Details Field */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Phone Number</span>
+                  <span className="label-text">Additional Details</span>
+                  <span className="label-text-alt text-base-content/50">
+                    Optional
+                  </span>
                 </label>
                 <input
                   type="text"
-                  name="phone"
-                  value={shippingAddress.phone}
+                  name="details"
+                  value={shippingAddress.details}
                   onChange={handleAddressChange}
                   className={`input input-bordered w-full ${
-                    formErrors.phone ? "input-error" : ""
+                    formErrors.details ? "input-error" : ""
                   }`}
-                  placeholder="Active phone number"
+                  placeholder="Delivery notes, landmarks, building color, gate number, specific instructions for courier"
                 />
-                {formErrors.phone && (
+                {formErrors.details && (
                   <span className="text-error text-sm mt-1">
-                    {formErrors.phone}
+                    {formErrors.details}
                   </span>
                 )}
               </div>
