@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
+import { API_ENDPOINTS } from "@/lib/endpoints";
+import axiosInstance from "@/lib/interceptor";
 
 interface ShippingAddress {
   fullName: string;
@@ -19,6 +21,14 @@ interface PaymentMethod {
   details: string;
 }
 
+interface Address {
+  id: string;
+  label: string;
+  address: string;
+  details?: string;
+  contact_person: string;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -30,6 +40,11 @@ export default function CheckoutPage() {
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
+
+  // Add address state
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [isAddressesLoading, setIsAddressesLoading] = useState(false);
+  const [addressesError, setAddressesError] = useState<string | null>(null);
 
   // Form state
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
@@ -69,6 +84,38 @@ export default function CheckoutPage() {
       return;
     }
   }, [cartItems.length, router, orderComplete]);
+
+  // Add fetchAddresses function
+  const fetchAddresses = async () => {
+    if (addresses.length > 0) return;
+    setIsAddressesLoading(true);
+    setAddressesError(null);
+
+    try {
+      const { data } = await axiosInstance.get(API_ENDPOINTS.ADDRESSES);
+      if (data.status === "success") {
+        setAddresses(data.data);
+        if (data.data.length === 0) {
+          setAddressesError(
+            "No saved addresses found. Please add an address in your profile first."
+          );
+        }
+      } else {
+        setAddressesError("Failed to load addresses. Please try again.");
+      }
+    } catch {
+      setAddressesError("Failed to load addresses. Please try again.");
+    } finally {
+      setIsAddressesLoading(false);
+    }
+  };
+
+  // Add effect to fetch addresses on mount
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      fetchAddresses();
+    }
+  }, [cartItems]);
 
   // Function to calculate total price
   const calculateSubtotal = () => {
@@ -303,6 +350,54 @@ export default function CheckoutPage() {
             <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
 
             <div className="space-y-4">
+              {/* Saved Addresses Dropdown */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Select a Saved Address</span>
+                </label>
+                <div className="relative">
+                  <select
+                    onClick={fetchAddresses}
+                    onChange={(e) => {
+                      const selectedAddress = addresses.find(
+                        (addr) => addr.id === e.target.value
+                      );
+                      if (selectedAddress) {
+                        setShippingAddress({
+                          fullName: selectedAddress.contact_person,
+                          address: selectedAddress.address,
+                          city: "", // You might want to parse this from the address
+                          postalCode: "", // You might want to parse this from the address
+                          phone: "", // You might need to add phone to your Address interface
+                        });
+                      }
+                    }}
+                    className="select select-bordered w-full"
+                    disabled={isAddressesLoading}
+                  >
+                    <option value="">Choose an address or enter new one</option>
+                    {addresses.map((address) => (
+                      <option key={address.id} value={address.id}>
+                        {address.label} - {address.address}
+                        {address.details && ` (${address.details})`}
+                      </option>
+                    ))}
+                  </select>
+                  {isAddressesLoading && (
+                    <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                      <span className="loading loading-spinner loading-sm"></span>
+                    </div>
+                  )}
+                </div>
+                {addressesError && (
+                  <p className="text-error text-sm mt-1">{addressesError}</p>
+                )}
+              </div>
+
+              <div className="divider text-xs text-base-content/50">
+                OR ENTER NEW ADDRESS
+              </div>
+
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Full Name</span>
