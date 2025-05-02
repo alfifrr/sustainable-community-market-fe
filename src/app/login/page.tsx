@@ -101,7 +101,7 @@ export default function Login() {
         const data = await response.json();
         if (response.ok && data.status === "success") {
           // use auth hook to handle login
-          login({
+          await login({
             access_token: data.data.access_token,
             refresh_token: data.data.refresh_token,
           });

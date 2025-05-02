@@ -68,7 +68,7 @@ export default function CommunitySection() {
                 <div className="badge badge-primary">{profile.role}</div>
                 <p className="text-base-content/80">{profile.description}</p>
                 <blockquote className="mt-4 p-4 bg-base-300 rounded-lg italic">
-                  "{profile.testimonial}"
+                  &quot;{profile.testimonial}&quot;
                 </blockquote>
               </div>
             </div>

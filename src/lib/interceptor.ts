@@ -8,15 +8,6 @@ interface QueueItem {
   reject: (error: Error) => void;
 }
 
-const axiosInstance = axios.create({
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
-});
-
-// let refreshTokenPromise: Promise<string> | null = null;
-
 let isRefreshing = false;
 let failedQueue: QueueItem[] = [];
 
@@ -31,15 +22,13 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = [];
 };
 
-const refreshAccessToken = async () => {
+export const refreshAccessToken = async () => {
   try {
-    // fetch refresh token from cookie
     const refreshToken = Cookies.get("refreshToken");
     if (!refreshToken) {
       throw new Error("No refresh token available");
     }
 
-    // fetch new access using the refresh token
     const response = await axios.post(API_ENDPOINTS.REFRESH_TOKEN, null, {
       headers: {
         Authorization: `Bearer ${refreshToken}`,
@@ -47,35 +36,35 @@ const refreshAccessToken = async () => {
         Accept: "application/json",
       },
     });
+
     const { access_token } = response.data.data;
     Cookies.set("authToken", access_token, {
       expires: 1 / 96, // 15 minutes
       path: "/",
     });
 
-    // update authStore
     useAuthStore.getState().setIsLoggedIn(true);
-
     return access_token;
-  } catch (error) {
-    console.log(error);
+  } catch {
     Cookies.remove("authToken");
     Cookies.remove("refreshToken");
-
-    // Update auth store
     useAuthStore.getState().setIsLoggedIn(false);
     useAuthStore.getState().setUser(null);
-
-    window.location.href = "/login";
     return null;
   }
 };
+
+const axiosInstance = axios.create({
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+});
 
 axiosInstance.interceptors.request.use(
   async (config) => {
     let token = Cookies.get("authToken");
 
-    // if only refresh token exists, try to get new access token
     if (!token && Cookies.get("refreshToken")) {
       token = await refreshAccessToken();
     }
@@ -83,21 +72,6 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    config.headers.Accept = "application/json";
-
-    // if (token) {
-    //   if (isTokenExpired(token)) {
-    //     try {
-    //       refreshTokenPromise = refreshTokenPromise || refreshAccessToken();
-    //       const newToken = await refreshTokenPromise;
-    //       config.headers.Authorization = `Bearer ${newToken}`;
-    //     } finally {
-    //       refreshTokenPromise = null;
-    //     }
-    //   } else {
-    //     config.headers.Authorization = `Bearer ${token}`;
-    //   }
-    // }
     return config;
   },
   (error) => Promise.reject(error)
@@ -108,10 +82,8 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If error is 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // add req to to queue
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -121,6 +93,7 @@ axiosInstance.interceptors.response.use(
           })
           .catch((err) => Promise.reject(err));
       }
+
       originalRequest._retry = true;
       isRefreshing = true;
 
@@ -131,8 +104,10 @@ axiosInstance.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return axiosInstance(originalRequest);
         }
+        throw new Error("Failed to refresh token");
       } catch (refreshError) {
         processQueue(refreshError as Error, null);
+        window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

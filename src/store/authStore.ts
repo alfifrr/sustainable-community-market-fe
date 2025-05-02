@@ -10,13 +10,16 @@ interface UserData {
   is_verified: boolean;
   date_joined: string;
   last_activity: string;
+  role: "buyer" | "seller";
 }
 
-interface AuthState {
+export interface AuthState {
   isLoggedIn: boolean;
   setIsLoggedIn: (value: boolean) => void;
   user: UserData | null;
   setUser: (user: UserData | null) => void;
+  role: "seller" | "buyer" | null;
+  setRole: (role: "seller" | "buyer" | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -25,4 +28,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   setIsLoggedIn: (value) => set({ isLoggedIn: value }),
   user: null,
   setUser: (user) => set({ user }),
+  role: null,
+  setRole: (role) => {
+    if (role) {
+      Cookies.set("userRole", role);
+    } else {
+      Cookies.remove("userRole");
+    }
+    set({ role });
+  },
 }));
