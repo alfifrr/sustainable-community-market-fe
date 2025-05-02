@@ -61,13 +61,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation to product detail
 
-    if (!isLoggedIn) {
-      // Store the intended destination
-      localStorage.setItem("redirectAfterLogin", "/checkout");
-      router.push("/login");
-      return;
-    }
-
     // Add to cart using cartStore
     addToCart({
       id: `cart-${product.id}`,
@@ -79,6 +72,13 @@ export default function ProductCard({ product }: ProductCardProps) {
       sellerId: product.user.id.toString(),
       sellerName: product.user.name,
     });
+
+    if (!isLoggedIn) {
+      // Store the intended destination
+      localStorage.setItem("redirectAfterLogin", "/checkout");
+      router.push("/login");
+      return;
+    }
 
     // Redirect to checkout
     router.push("/checkout");

@@ -77,13 +77,6 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   };
 
   const handleBuyNow = () => {
-    if (!isLoggedIn) {
-      // Store the intended destination
-      localStorage.setItem("redirectAfterLogin", "/checkout");
-      router.push("/login");
-      return;
-    }
-
     // Add to cart using cartStore
     addToCart({
       id: `cart-${product.id}`,
@@ -95,6 +88,12 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
       sellerId: String(product.user.id),
       sellerName: product.user.name,
     });
+    if (!isLoggedIn) {
+      // Store the intended destination
+      localStorage.setItem("redirectAfterLogin", "/checkout");
+      router.push("/login");
+      return;
+    }
 
     // Redirect to checkout
     router.push("/checkout");
