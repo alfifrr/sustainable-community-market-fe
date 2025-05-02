@@ -10,5 +10,6 @@ export const API_ENDPOINTS = {
   PROFILE: "/api/profile",
   REFRESH_TOKEN: "/api/refresh-token",
   DEPOSIT: "/api/deposit",
+  BUY: "/api/buy",
   // Add other endpoints as needed
 };

@@ -36,7 +36,9 @@ export default function CheckoutPage() {
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
-  const [addressInputMode, setAddressInputMode] = useState<'saved' | 'new'>('saved');
+  const [addressInputMode, setAddressInputMode] = useState<"saved" | "new">(
+    "saved"
+  );
 
   // Add address state
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -135,10 +137,10 @@ export default function CheckoutPage() {
   };
 
   // Add handler for address mode change
-  const handleAddressModeChange = (mode: 'saved' | 'new') => {
+  const handleAddressModeChange = (mode: "saved" | "new") => {
     setAddressInputMode(mode);
     // Clear form when switching to new address mode
-    if (mode === 'new') {
+    if (mode === "new") {
       setShippingAddress({
         label: "",
         address: "",
@@ -159,49 +161,61 @@ export default function CheckoutPage() {
     };
     let isValid = true;
 
-    // Label validation (3-50 characters and required)
-    if (!shippingAddress.label.trim()) {
-      errors.label = "Label is required";
-      isValid = false;
-    } else if (shippingAddress.label.trim().length < 3) {
-      errors.label = "Label must be at least 3 characters";
-      isValid = false;
-    } else if (shippingAddress.label.trim().length > 50) {
-      errors.label = "Label must not exceed 50 characters";
-      isValid = false;
+    // Only validate address fields if we're entering a new address
+    if (addressInputMode === "new") {
+      // Label validation (3-50 characters and required)
+      if (!shippingAddress.label.trim()) {
+        errors.label = "Label is required";
+        isValid = false;
+      } else if (shippingAddress.label.trim().length < 3) {
+        errors.label = "Label must be at least 3 characters";
+        isValid = false;
+      } else if (shippingAddress.label.trim().length > 50) {
+        errors.label = "Label must not exceed 50 characters";
+        isValid = false;
+      }
+
+      // Address validation (5-255 characters and required)
+      if (!shippingAddress.address.trim()) {
+        errors.address = "Address is required";
+        isValid = false;
+      } else if (shippingAddress.address.trim().length < 5) {
+        errors.address = "Address must be at least 5 characters";
+        isValid = false;
+      } else if (shippingAddress.address.trim().length > 255) {
+        errors.address = "Address must not exceed 255 characters";
+        isValid = false;
+      }
+
+      // Details validation (optional, max 255 characters)
+      if (shippingAddress.details.trim().length > 255) {
+        errors.details = "Details must not exceed 255 characters";
+        isValid = false;
+      }
+
+      // Contact person validation (3-255 characters and required)
+      if (!shippingAddress.contact_person.trim()) {
+        errors.contact_person = "Contact person is required";
+        isValid = false;
+      } else if (shippingAddress.contact_person.trim().length < 3) {
+        errors.contact_person = "Contact person must be at least 3 characters";
+        isValid = false;
+      } else if (shippingAddress.contact_person.trim().length > 255) {
+        errors.contact_person = "Contact person must not exceed 255 characters";
+        isValid = false;
+      }
+    } else {
+      // When using saved address, validate that an address is selected
+      const selectElement = document.querySelector(
+        "select"
+      ) as HTMLSelectElement;
+      if (!selectElement.value) {
+        errors.address = "Please select an address";
+        isValid = false;
+      }
     }
 
-    // Address validation (5-255 characters and required)
-    if (!shippingAddress.address.trim()) {
-      errors.address = "Address is required";
-      isValid = false;
-    } else if (shippingAddress.address.trim().length < 5) {
-      errors.address = "Address must be at least 5 characters";
-      isValid = false;
-    } else if (shippingAddress.address.trim().length > 255) {
-      errors.address = "Address must not exceed 255 characters";
-      isValid = false;
-    }
-
-    // Details validation (optional, max 255 characters)
-    if (shippingAddress.details.trim().length > 255) {
-      errors.details = "Details must not exceed 255 characters";
-      isValid = false;
-    }
-
-    // Contact person validation (3-255 characters and required)
-    if (!shippingAddress.contact_person.trim()) {
-      errors.contact_person = "Contact person is required";
-      isValid = false;
-    } else if (shippingAddress.contact_person.trim().length < 3) {
-      errors.contact_person = "Contact person must be at least 3 characters";
-      isValid = false;
-    } else if (shippingAddress.contact_person.trim().length > 255) {
-      errors.contact_person = "Contact person must not exceed 255 characters";
-      isValid = false;
-    }
-
-    // Balance validation
+    // Balance validation (always required regardless of address mode)
     const total = calculateTotal();
     if (!profile?.balance || profile.balance < total) {
       errors.balance = `Insufficient balance. You need ${formatPrice(
@@ -214,6 +228,45 @@ export default function CheckoutPage() {
     return isValid;
   };
 
+  // Function to create a new address
+  const createNewAddress = async (): Promise<string | null> => {
+    try {
+      const { data } = await axiosInstance.post(API_ENDPOINTS.ADDRESSES, {
+        label: shippingAddress.label,
+        address: shippingAddress.address,
+        details: shippingAddress.details || "",
+        contact_person: shippingAddress.contact_person,
+      });
+
+      if (data.status === "success") {
+        return data.data.id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error creating address:", error);
+      throw new Error("Failed to create address");
+    }
+  };
+
+  // Function to place a single order
+  const placeSingleOrder = async (
+    addressId: string,
+    productId: string,
+    quantity: number
+  ) => {
+    try {
+      const { data } = await axiosInstance.post(API_ENDPOINTS.BUY, {
+        address_id: addressId,
+        product_id: productId,
+        quantity: quantity,
+      });
+      return data;
+    } catch (error) {
+      console.error(`Error placing order for product ${productId}:`, error);
+      throw error;
+    }
+  };
+
   // Handler for order submission
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
@@ -222,12 +275,42 @@ export default function CheckoutPage() {
 
     setProcessingOrder(true);
 
-    // Simulate order processing
     try {
-      // Here would be an API call to create the order
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Get or create address ID
+      let addressId;
+      if (addressInputMode === "new") {
+        addressId = await createNewAddress();
+        if (!addressId) {
+          throw new Error("Failed to create new address");
+        }
+      } else {
+        // Get selected address ID from the select element
+        const selectElement = document.querySelector(
+          "select"
+        ) as HTMLSelectElement;
+        addressId = selectElement.value;
+        if (!addressId) {
+          throw new Error("No address selected");
+        }
+      }
 
-      // Generate random order ID
+      // Place orders for each cart item
+      const orderPromises = cartItems.map((item) =>
+        placeSingleOrder(addressId, item.productId, item.quantity)
+      );
+
+      // Wait for all orders to complete
+      const results = await Promise.allSettled(orderPromises);
+
+      // Check for any failed orders
+      const failedOrders = results.filter(
+        (result) => result.status === "rejected"
+      );
+      if (failedOrders.length > 0) {
+        throw new Error(`Failed to place ${failedOrders.length} orders`);
+      }
+
+      // Generate order ID for display
       const randomOrderId = `ORD-${Math.floor(Math.random() * 1000000)}`;
       setOrderId(randomOrderId);
 
@@ -251,18 +334,16 @@ export default function CheckoutPage() {
         status: "completed",
       };
 
-      // Get existing purchases from localStorage or initialize empty array
+      // Get existing purchases from localStorage
       const existingPurchases = JSON.parse(
         localStorage.getItem("purchases") || "[]"
       );
 
       // Add new order to purchases
       existingPurchases.push(newOrder);
-
-      // Save updated purchases back to localStorage
       localStorage.setItem("purchases", JSON.stringify(existingPurchases));
 
-      // Clear cart after successful order
+      // Clear cart and complete order
       clearCart();
       setOrderComplete(true);
     } catch (error) {
@@ -348,14 +429,18 @@ export default function CheckoutPage() {
             {/* Address Input Mode Toggle */}
             <div className="tabs tabs-boxed mb-6">
               <button
-                className={`tab ${addressInputMode === 'saved' ? 'tab-active' : ''}`}
-                onClick={() => handleAddressModeChange('saved')}
+                className={`tab ${
+                  addressInputMode === "saved" ? "tab-active" : ""
+                }`}
+                onClick={() => handleAddressModeChange("saved")}
               >
                 Use Saved Address
               </button>
               <button
-                className={`tab ${addressInputMode === 'new' ? 'tab-active' : ''}`}
-                onClick={() => handleAddressModeChange('new')}
+                className={`tab ${
+                  addressInputMode === "new" ? "tab-active" : ""
+                }`}
+                onClick={() => handleAddressModeChange("new")}
               >
                 Enter New Address
               </button>
@@ -363,7 +448,7 @@ export default function CheckoutPage() {
 
             <div className="space-y-4">
               {/* Saved Addresses Dropdown */}
-              {addressInputMode === 'saved' && (
+              {addressInputMode === "saved" && (
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text">Select a Saved Address</span>
@@ -387,7 +472,9 @@ export default function CheckoutPage() {
                       className="select select-bordered w-full"
                       disabled={isAddressesLoading}
                     >
-                      <option value="">Choose an address or enter new one</option>
+                      <option value="">
+                        Choose an address or enter new one
+                      </option>
                       {addresses.map((address) => (
                         <option key={address.id} value={address.id}>
                           {address.label} - {address.address}
@@ -408,7 +495,7 @@ export default function CheckoutPage() {
               )}
 
               {/* Enter New Address Form */}
-              {addressInputMode === 'new' && (
+              {addressInputMode === "new" && (
                 <div className="space-y-4">
                   {/* Label Field */}
                   <div className="form-control">
