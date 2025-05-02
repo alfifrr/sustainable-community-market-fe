@@ -36,6 +36,7 @@ export default function CheckoutPage() {
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [addressInputMode, setAddressInputMode] = useState<'saved' | 'new'>('saved');
 
   // Add address state
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -131,6 +132,20 @@ export default function CheckoutPage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  // Add handler for address mode change
+  const handleAddressModeChange = (mode: 'saved' | 'new') => {
+    setAddressInputMode(mode);
+    // Clear form when switching to new address mode
+    if (mode === 'new') {
+      setShippingAddress({
+        label: "",
+        address: "",
+        details: "",
+        contact_person: "",
+      });
+    }
   };
 
   // Form validation
@@ -330,151 +345,169 @@ export default function CheckoutPage() {
           <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
 
+            {/* Address Input Mode Toggle */}
+            <div className="tabs tabs-boxed mb-6">
+              <button
+                className={`tab ${addressInputMode === 'saved' ? 'tab-active' : ''}`}
+                onClick={() => handleAddressModeChange('saved')}
+              >
+                Use Saved Address
+              </button>
+              <button
+                className={`tab ${addressInputMode === 'new' ? 'tab-active' : ''}`}
+                onClick={() => handleAddressModeChange('new')}
+              >
+                Enter New Address
+              </button>
+            </div>
+
             <div className="space-y-4">
               {/* Saved Addresses Dropdown */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Select a Saved Address</span>
-                </label>
-                <div className="relative">
-                  <select
-                    onClick={fetchAddresses}
-                    onChange={(e) => {
-                      const selectedAddress = addresses.find(
-                        (addr) => addr.id === e.target.value
-                      );
-                      if (selectedAddress) {
-                        setShippingAddress({
-                          label: selectedAddress.label,
-                          address: selectedAddress.address,
-                          details: selectedAddress.details || "",
-                          contact_person: selectedAddress.contact_person,
-                        });
-                      }
-                    }}
-                    className="select select-bordered w-full"
-                    disabled={isAddressesLoading}
-                  >
-                    <option value="">Choose an address or enter new one</option>
-                    {addresses.map((address) => (
-                      <option key={address.id} value={address.id}>
-                        {address.label} - {address.address}
-                        {address.details && ` (${address.details})`}
-                      </option>
-                    ))}
-                  </select>
-                  {isAddressesLoading && (
-                    <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                      <span className="loading loading-spinner loading-sm"></span>
-                    </div>
+              {addressInputMode === 'saved' && (
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Select a Saved Address</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      onClick={fetchAddresses}
+                      onChange={(e) => {
+                        const selectedAddress = addresses.find(
+                          (addr) => addr.id === e.target.value
+                        );
+                        if (selectedAddress) {
+                          setShippingAddress({
+                            label: selectedAddress.label,
+                            address: selectedAddress.address,
+                            details: selectedAddress.details || "",
+                            contact_person: selectedAddress.contact_person,
+                          });
+                        }
+                      }}
+                      className="select select-bordered w-full"
+                      disabled={isAddressesLoading}
+                    >
+                      <option value="">Choose an address or enter new one</option>
+                      {addresses.map((address) => (
+                        <option key={address.id} value={address.id}>
+                          {address.label} - {address.address}
+                          {address.details && ` (${address.details})`}
+                        </option>
+                      ))}
+                    </select>
+                    {isAddressesLoading && (
+                      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                        <span className="loading loading-spinner loading-sm"></span>
+                      </div>
+                    )}
+                  </div>
+                  {addressesError && (
+                    <p className="text-error text-sm mt-1">{addressesError}</p>
                   )}
                 </div>
-                {addressesError && (
-                  <p className="text-error text-sm mt-1">{addressesError}</p>
-                )}
-              </div>
+              )}
 
               {/* Enter New Address Form */}
-              <div className="divider text-xs text-base-content/50">
-                OR ENTER NEW ADDRESS
-              </div>
+              {addressInputMode === 'new' && (
+                <div className="space-y-4">
+                  {/* Label Field */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">
+                        Label <span className="text-error">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      name="label"
+                      value={shippingAddress.label}
+                      onChange={handleAddressChange}
+                      className={`input input-bordered w-full ${
+                        formErrors.label ? "input-error" : ""
+                      }`}
+                      placeholder="E.g., Home, Office, etc."
+                    />
+                    {formErrors.label && (
+                      <span className="text-error text-sm mt-1">
+                        {formErrors.label}
+                      </span>
+                    )}
+                  </div>
 
-              {/* Label Field */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">
-                    Label <span className="text-error">*</span>
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  name="label"
-                  value={shippingAddress.label}
-                  onChange={handleAddressChange}
-                  className={`input input-bordered w-full ${
-                    formErrors.label ? "input-error" : ""
-                  }`}
-                  placeholder="E.g., Home, Office, etc."
-                />
-                {formErrors.label && (
-                  <span className="text-error text-sm mt-1">
-                    {formErrors.label}
-                  </span>
-                )}
-              </div>
+                  {/* Contact Person Field */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">
+                        Contact Person <span className="text-error">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      name="contact_person"
+                      value={shippingAddress.contact_person}
+                      onChange={handleAddressChange}
+                      className={`input input-bordered w-full ${
+                        formErrors.contact_person ? "input-error" : ""
+                      }`}
+                      placeholder="Full name of the recipient"
+                    />
+                    {formErrors.contact_person && (
+                      <span className="text-error text-sm mt-1">
+                        {formErrors.contact_person}
+                      </span>
+                    )}
+                  </div>
 
-              {/* Contact Person Field */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">
-                    Contact Person <span className="text-error">*</span>
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  name="contact_person"
-                  value={shippingAddress.contact_person}
-                  onChange={handleAddressChange}
-                  className={`input input-bordered w-full ${
-                    formErrors.contact_person ? "input-error" : ""
-                  }`}
-                  placeholder="Full name of the recipient"
-                />
-                {formErrors.contact_person && (
-                  <span className="text-error text-sm mt-1">
-                    {formErrors.contact_person}
-                  </span>
-                )}
-              </div>
+                  {/* Address Field */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">
+                        Complete Address <span className="text-error">*</span>
+                      </span>
+                    </label>
+                    <textarea
+                      name="address"
+                      value={shippingAddress.address}
+                      onChange={handleAddressChange}
+                      className={`textarea textarea-bordered w-full ${
+                        formErrors.address ? "textarea-error" : ""
+                      }`}
+                      placeholder="Street name, building/house number, RT/RW, district, city, region/province, postal code"
+                      rows={3}
+                    ></textarea>
+                    {formErrors.address && (
+                      <span className="text-error text-sm mt-1">
+                        {formErrors.address}
+                      </span>
+                    )}
+                  </div>
 
-              {/* Address Field */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">
-                    Complete Address <span className="text-error">*</span>
-                  </span>
-                </label>
-                <textarea
-                  name="address"
-                  value={shippingAddress.address}
-                  onChange={handleAddressChange}
-                  className={`textarea textarea-bordered w-full ${
-                    formErrors.address ? "textarea-error" : ""
-                  }`}
-                  placeholder="Street name, building/house number, RT/RW, district, city, region/province, postal code"
-                  rows={3}
-                ></textarea>
-                {formErrors.address && (
-                  <span className="text-error text-sm mt-1">
-                    {formErrors.address}
-                  </span>
-                )}
-              </div>
-
-              {/* Details Field */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Additional Details</span>
-                  <span className="label-text-alt text-base-content/50">
-                    Optional
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  name="details"
-                  value={shippingAddress.details}
-                  onChange={handleAddressChange}
-                  className={`input input-bordered w-full ${
-                    formErrors.details ? "input-error" : ""
-                  }`}
-                  placeholder="Delivery notes, landmarks, building color, gate number, specific instructions for courier"
-                />
-                {formErrors.details && (
-                  <span className="text-error text-sm mt-1">
-                    {formErrors.details}
-                  </span>
-                )}
-              </div>
+                  {/* Details Field */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Additional Details</span>
+                      <span className="label-text-alt text-base-content/50">
+                        Optional
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      name="details"
+                      value={shippingAddress.details}
+                      onChange={handleAddressChange}
+                      className={`input input-bordered w-full ${
+                        formErrors.details ? "input-error" : ""
+                      }`}
+                      placeholder="Delivery notes, landmarks, building color, gate number, specific instructions for courier"
+                    />
+                    {formErrors.details && (
+                      <span className="text-error text-sm mt-1">
+                        {formErrors.details}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Balance Error */}
               {formErrors.balance && (
