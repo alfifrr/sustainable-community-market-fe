@@ -7,17 +7,13 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import axiosInstance from "@/lib/interceptor";
+import { useProfile } from "@/hooks/useProfile";
 
 interface ShippingAddress {
   label: string;
   address: string;
   details: string;
   contact_person: string;
-}
-
-interface PaymentMethod {
-  type: "bank_transfer" | "e_wallet";
-  details: string;
 }
 
 interface Address {
@@ -35,6 +31,7 @@ export default function CheckoutPage() {
   const carts = useCartStore((state) => state.carts);
   const clearCart = useCartStore((state) => state.clearCart);
   const cartItems = carts[currentCartId] || [];
+  const { profile, isLoading: isProfileLoading } = useProfile();
   const [loading, setLoading] = useState(false);
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -53,17 +50,12 @@ export default function CheckoutPage() {
     contact_person: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>({
-    type: "bank_transfer",
-    details: "",
-  });
-
   const [formErrors, setFormErrors] = useState({
     label: "",
     address: "",
     details: "",
     contact_person: "",
-    payment: "",
+    balance: "",
   });
 
   // Function to format price
@@ -141,24 +133,6 @@ export default function CheckoutPage() {
     }));
   };
 
-  // Handler for payment method changes
-  const handlePaymentChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    if (name === "type") {
-      setPaymentMethod((prev) => ({
-        ...prev,
-        type: value as "bank_transfer" | "e_wallet",
-      }));
-    } else {
-      setPaymentMethod((prev) => ({
-        ...prev,
-        details: value,
-      }));
-    }
-  };
-
   // Form validation
   const validateForm = () => {
     const errors = {
@@ -166,7 +140,7 @@ export default function CheckoutPage() {
       address: "",
       details: "",
       contact_person: "",
-      payment: "",
+      balance: "",
     };
     let isValid = true;
 
@@ -212,12 +186,12 @@ export default function CheckoutPage() {
       isValid = false;
     }
 
-    // Payment validation
-    if (paymentMethod.type === "bank_transfer" && !paymentMethod.details) {
-      errors.payment = "Please select a bank for transfer";
-      isValid = false;
-    } else if (paymentMethod.type === "e_wallet" && !paymentMethod.details) {
-      errors.payment = "Please select an e-wallet";
+    // Balance validation
+    const total = calculateTotal();
+    if (!profile?.balance || profile.balance < total) {
+      errors.balance = `Insufficient balance. You need ${formatPrice(
+        total
+      )} but only have ${formatPrice(profile?.balance || 0)}`;
       isValid = false;
     }
 
@@ -257,7 +231,6 @@ export default function CheckoutPage() {
           sellerName: item.sellerName,
         })),
         shippingAddress,
-        paymentMethod,
         totalAmount: calculateTotal(),
         purchaseDate,
         status: "completed",
@@ -502,85 +475,45 @@ export default function CheckoutPage() {
                   </span>
                 )}
               </div>
+
+              {/* Balance Error */}
+              {formErrors.balance && (
+                <div className="text-error text-sm mt-4">
+                  {formErrors.balance}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="bg-base-100 rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-
+            <h2 className="text-xl font-semibold mb-4">Payment</h2>
             <div className="space-y-4">
-              <div className="form-control">
-                <label className="label cursor-pointer justify-start gap-3">
-                  <input
-                    type="radio"
-                    name="type"
-                    value="bank_transfer"
-                    checked={paymentMethod.type === "bank_transfer"}
-                    onChange={handlePaymentChange}
-                    className="radio radio-primary"
-                  />
-                  <span className="label-text">Bank Transfer</span>
-                </label>
-
-                {paymentMethod.type === "bank_transfer" && (
-                  <div className="mt-2 pl-7">
-                    <select
-                      name="details"
-                      value={paymentMethod.details}
-                      onChange={handlePaymentChange}
-                      className={`select select-bordered w-full ${
-                        formErrors.payment ? "select-error" : ""
-                      }`}
-                    >
-                      <option value="">Select bank</option>
-                      <option value="bca">BCA</option>
-                      <option value="mandiri">Mandiri</option>
-                      <option value="bni">BNI</option>
-                      <option value="bri">BRI</option>
-                    </select>
-                    {formErrors.payment && (
-                      <span className="text-error text-sm mt-1">
-                        {formErrors.payment}
-                      </span>
-                    )}
+              <div className="p-4 bg-base-200 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Current Balance</span>
+                  <span className="text-xl font-bold">
+                    {formatPrice(profile?.balance || 0)}
+                  </span>
+                </div>
+                <div className="text-sm text-base-content/70 mt-1">
+                  Order total: {formatPrice(calculateTotal())}
+                </div>
+                {profile?.balance && profile.balance >= calculateTotal() ? (
+                  <div className="text-sm text-success mt-1">
+                    Balance after purchase:{" "}
+                    {formatPrice(profile.balance - calculateTotal())}
                   </div>
-                )}
-              </div>
-
-              <div className="form-control">
-                <label className="label cursor-pointer justify-start gap-3">
-                  <input
-                    type="radio"
-                    name="type"
-                    value="e_wallet"
-                    checked={paymentMethod.type === "e_wallet"}
-                    onChange={handlePaymentChange}
-                    className="radio radio-primary"
-                  />
-                  <span className="label-text">E-Wallet</span>
-                </label>
-
-                {paymentMethod.type === "e_wallet" && (
-                  <div className="mt-2 pl-7">
-                    <select
-                      name="details"
-                      value={paymentMethod.details}
-                      onChange={handlePaymentChange}
-                      className={`select select-bordered w-full ${
-                        formErrors.payment ? "select-error" : ""
-                      }`}
+                ) : (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="text-sm text-error">
+                      Insufficient balance
+                    </div>
+                    <Link
+                      href="/profile/transactions"
+                      className="btn btn-error btn-xs"
                     >
-                      <option value="">Select e-wallet</option>
-                      <option value="gopay">GoPay</option>
-                      <option value="ovo">OVO</option>
-                      <option value="dana">DANA</option>
-                      <option value="shopeepay">ShopeePay</option>
-                    </select>
-                    {formErrors.payment && (
-                      <span className="text-error text-sm mt-1">
-                        {formErrors.payment}
-                      </span>
-                    )}
+                      Top Up
+                    </Link>
                   </div>
                 )}
               </div>
