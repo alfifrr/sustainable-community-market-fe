@@ -40,11 +40,19 @@ export default function CartPage() {
     }).format(price);
   };
 
-  // Fungsi untuk menghitung total harga
+  // Fixed shipping cost per unique item
+  const shippingCostPerItem = 15000; // IDR 15,000 per unique item
+
+  // Calculate shipping cost - charged per unique item, not per quantity
+  const calculateShippingCost = () => {
+    return cartItems.length * shippingCostPerItem; // Only multiply by number of unique items
+  };
+
+  // Calculate grand total
   const calculateTotal = () => {
-    return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
+    return (
+      cartItems.reduce((total, item) => total + item.price * item.quantity, 0) +
+      calculateShippingCost()
     );
   };
 
@@ -259,11 +267,15 @@ export default function CartPage() {
                     {cartItems.reduce((acc, item) => acc + item.quantity, 0)}{" "}
                     items)
                   </span>
-                  <span>{formatPrice(calculateTotal())}</span>
+                  <span>
+                    {formatPrice(calculateTotal() - calculateShippingCost())}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>Free</span>
+                  <span>
+                    Shipping ({cartItems.length} unique items × Rp. 15,000)
+                  </span>
+                  <span>{formatPrice(calculateShippingCost())}</span>
                 </div>
               </div>
 

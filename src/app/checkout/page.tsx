@@ -117,12 +117,17 @@ export default function CheckoutPage() {
     );
   };
 
-  // Shipping cost (simulation)
-  const shippingCost = 15000; // IDR 15,000
+  // Shipping cost per unique item (fixed)
+  const shippingCostPerItem = 15000; // IDR 15,000 per unique item
+
+  // Calculate shipping cost - charged per unique item, not per quantity
+  const calculateShippingCost = () => {
+    return cartItems.length * shippingCostPerItem; // Only multiply by number of unique items
+  };
 
   // Grand total
   const calculateTotal = () => {
-    return calculateSubtotal() + shippingCost;
+    return calculateSubtotal() + calculateShippingCost();
   };
 
   // Handler for address input changes
@@ -704,7 +709,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span>Shipping Cost</span>
-                <span>{formatPrice(shippingCost)}</span>
+                <span>{formatPrice(calculateShippingCost())}</span>
               </div>
             </div>
 
