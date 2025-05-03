@@ -299,20 +299,45 @@ export default function CheckoutPage() {
         }
       }
 
-      // Place orders for each cart item
-      const orderPromises = cartItems.map((item) =>
-        placeSingleOrder(addressId, item.productId, item.quantity)
-      );
+      // Place orders sequentially for each cart item
+      let remainingBalance = profile?.balance || 0;
+      const successfulOrders = [];
 
-      // Wait for all orders to complete
-      const results = await Promise.allSettled(orderPromises);
+      for (const item of cartItems) {
+        // Calculate cost for this order including shipping
+        const orderCost = item.price * item.quantity + shippingCostPerItem;
 
-      // Check for any failed orders
-      const failedOrders = results.filter(
-        (result) => result.status === "rejected"
-      );
-      if (failedOrders.length > 0) {
-        throw new Error(`Failed to place ${failedOrders.length} orders`);
+        // Check if we have enough balance for this order
+        if (remainingBalance < orderCost) {
+          throw new Error(
+            `Insufficient balance for ${
+              item.name
+            }. Remaining balance: ${formatPrice(
+              remainingBalance
+            )}, Required: ${formatPrice(orderCost)}`
+          );
+        }
+
+        try {
+          // Place the order
+          const result = await placeSingleOrder(
+            addressId,
+            item.productId,
+            item.quantity
+          );
+          // If successful, deduct from remaining balance
+          remainingBalance -= orderCost;
+          successfulOrders.push({
+            ...item,
+            result,
+          });
+        } catch (error) {
+          // If any order fails, throw error with details about successful orders
+          console.error(`Error placing order for ${item.name}:`, error);
+          throw new Error(
+            `Failed to place order for ${item.name}. ${successfulOrders.length} orders were successful before failure.`
+          );
+        }
       }
 
       // Generate order ID for display
@@ -353,7 +378,11 @@ export default function CheckoutPage() {
       setOrderComplete(true);
     } catch (error) {
       console.error("Error placing order:", error);
-      alert("An error occurred while processing your order. Please try again.");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while processing your order. Please try again."
+      );
     } finally {
       setProcessingOrder(false);
     }
