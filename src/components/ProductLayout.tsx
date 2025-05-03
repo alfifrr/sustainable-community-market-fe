@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { calculateFinalPrice } from "@/utils/discountUtils";
 
 interface ProductLayoutProps {
   product: Product;
@@ -76,7 +77,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
       id: `cart-${product.id}`,
       productId: product.id,
       name: product.name,
-      price: product.price,
+      price: finalPrice, // Using the discounted price
       quantity: quantity,
       imageUrl: product.image_url || "",
       sellerId: String(product.user.id),
@@ -98,7 +99,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
       id: `cart-${product.id}`,
       productId: product.id,
       name: product.name,
-      price: product.price,
+      price: finalPrice, // Using the discounted price
       quantity: quantity,
       imageUrl: product.image_url || "",
       sellerId: String(product.user.id),
@@ -116,6 +117,12 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   };
 
   const daysUntilExpiration = getDaysUntilExpiration();
+  const finalPrice = calculateFinalPrice(
+    product.price,
+    quantity,
+    daysUntilExpiration
+  );
+  const hasDiscount = finalPrice < product.price;
 
   return (
     <main
@@ -169,16 +176,39 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                     }`}
                     role="alert"
                   >
-                    Expires in {daysUntilExpiration} days
+                    Expires in {daysUntilExpiration}{" "}
+                    {daysUntilExpiration === 1 ? "day" : "days"}
+                    {daysUntilExpiration <= 4 && " - Special Discount!"}
+                  </span>
+                )}
+                {quantity >= 5 && (
+                  <span className="badge badge-secondary">
+                    Bulk Discount Applied!
                   </span>
                 )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                 {product.name}
               </h1>
-              <p className="text-xl md:text-2xl text-primary font-bold">
-                {formatPrice(product.price)}
-              </p>
+              <div className="space-y-1">
+                {hasDiscount && (
+                  <p className="text-lg line-through text-base-content/70">
+                    {formatPrice(product.price)}
+                  </p>
+                )}
+                <p
+                  className={`text-xl md:text-2xl font-bold ${
+                    hasDiscount ? "text-success" : "text-primary"
+                  }`}
+                >
+                  {formatPrice(finalPrice)}
+                </p>
+                {hasDiscount && (
+                  <p className="text-sm text-success">
+                    Save {formatPrice(product.price - finalPrice)}!
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-2">
