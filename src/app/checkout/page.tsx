@@ -2,12 +2,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCartStore } from "@/store/cartStore";
+import { useCartStore, CartItem } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import axiosInstance from "@/lib/interceptor";
 import { useProfile } from "@/hooks/useProfile";
+import { calculateFinalPrice } from "@/utils/discountUtils";
 
 interface ShippingAddress {
   label: string;
@@ -109,10 +110,45 @@ export default function CheckoutPage() {
     }
   }, [cartItems]);
 
-  // Function to calculate total price
+  const getDaysUntilExpiration = (expirationDate: string) => {
+    const today = new Date();
+    const expDate = new Date(expirationDate);
+    const todayUTC = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    );
+    const expDateUTC = Date.UTC(
+      expDate.getUTCFullYear(),
+      expDate.getUTCMonth(),
+      expDate.getUTCDate()
+    );
+    const diffTime = expDateUTC - todayUTC;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  // Calculate total for a single item including discounts
+  const calculateItemTotal = (item: CartItem) => {
+    const daysRemaining = getDaysUntilExpiration(item.expirationDate);
+    const discountedPrice = calculateFinalPrice(
+      item.price,
+      item.quantity,
+      daysRemaining
+    );
+    return discountedPrice * item.quantity;
+  };
+
+  // Calculate price per unit with discounts
+  const calculatePricePerUnit = (item: CartItem) => {
+    const daysRemaining = getDaysUntilExpiration(item.expirationDate);
+    return calculateFinalPrice(item.price, item.quantity, daysRemaining);
+  };
+
+  // Function to calculate subtotal with discounts
   const calculateSubtotal = () => {
     return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + calculateItemTotal(item),
       0
     );
   };
@@ -305,7 +341,7 @@ export default function CheckoutPage() {
 
       for (const item of cartItems) {
         // Calculate cost for this order including shipping
-        const orderCost = item.price * item.quantity + shippingCostPerItem;
+        const orderCost = calculateItemTotal(item) + shippingCostPerItem;
 
         // Check if we have enough balance for this order
         if (remainingBalance < orderCost) {
@@ -719,12 +755,32 @@ export default function CheckoutPage() {
                       <div className="text-sm font-medium truncate">
                         {item.name}
                       </div>
-                      <div className="text-xs text-base-content/70">
-                        {item.quantity} x {formatPrice(item.price)}
+                      <div className="text-xs space-y-1">
+                        <div className="text-base-content/70">
+                          {item.quantity} x{" "}
+                          {formatPrice(calculatePricePerUnit(item))}
+                        </div>
+                        {calculateItemTotal(item) !==
+                          item.price * item.quantity && (
+                          <div className="text-success">
+                            Save{" "}
+                            {formatPrice(
+                              item.price * item.quantity -
+                                calculateItemTotal(item)
+                            )}
+                            !
+                          </div>
+                        )}
+                        {getDaysUntilExpiration(item.expirationDate) <= 4 && (
+                          <div className="text-error">
+                            Expires in{" "}
+                            {getDaysUntilExpiration(item.expirationDate)} days
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="text-sm font-medium">
-                      {formatPrice(item.price * item.quantity)}
+                      {formatPrice(calculateItemTotal(item))}
                     </div>
                   </div>
                 ))}

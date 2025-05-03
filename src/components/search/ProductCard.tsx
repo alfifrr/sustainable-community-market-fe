@@ -58,11 +58,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       id: `cart-${product.id}`,
       productId: product.id,
       name: product.name,
-      price: finalPrice,
+      price: product.price, // Original price
       quantity: 1,
       imageUrl: product.image_url || getCategoryImage(categoryId),
       sellerId: product.user.id.toString(),
       sellerName: product.user.name,
+      expirationDate: product.expiration_date,
     });
 
     // Show toast notification
@@ -89,11 +90,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       id: `cart-${product.id}`,
       productId: product.id,
       name: product.name,
-      price: finalPrice,
+      price: product.price, // Original price
       quantity: 1,
       imageUrl: product.image_url || getCategoryImage(categoryId),
       sellerId: product.user.id.toString(),
       sellerName: product.user.name,
+      expirationDate: product.expiration_date,
     });
 
     if (!isLoggedIn) {

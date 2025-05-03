@@ -77,11 +77,12 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
       id: `cart-${product.id}`,
       productId: product.id,
       name: product.name,
-      price: finalPrice, // Using the discounted price
+      price: product.price, // Original price
       quantity: quantity,
       imageUrl: product.image_url || "",
       sellerId: String(product.user.id),
       sellerName: product.user.name,
+      expirationDate: product.expiration_date,
     });
 
     // Show toast notification
@@ -99,11 +100,12 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
       id: `cart-${product.id}`,
       productId: product.id,
       name: product.name,
-      price: finalPrice, // Using the discounted price
+      price: product.price, // Original price
       quantity: quantity,
       imageUrl: product.image_url || "",
       sellerId: String(product.user.id),
       sellerName: product.user.name,
+      expirationDate: product.expiration_date,
     });
     if (!isLoggedIn) {
       // Store the intended destination

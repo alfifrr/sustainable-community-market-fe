@@ -6,17 +6,19 @@ import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { calculateFinalPrice } from "@/utils/discountUtils";
 
 // Tipe data untuk item keranjang
 interface CartItem {
   id: string;
   productId: string;
   name: string;
-  price: number;
+  price: number; // Original price
   quantity: number;
   imageUrl: string;
   sellerId: string;
   sellerName: string;
+  expirationDate: string; // Added expiration date
 }
 
 export default function CartPage() {
@@ -48,12 +50,52 @@ export default function CartPage() {
     return cartItems.length * shippingCostPerItem; // Only multiply by number of unique items
   };
 
+  const getDaysUntilExpiration = (expirationDate: string) => {
+    const today = new Date();
+    const expDate = new Date(expirationDate);
+    const todayUTC = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    );
+    const expDateUTC = Date.UTC(
+      expDate.getUTCFullYear(),
+      expDate.getUTCMonth(),
+      expDate.getUTCDate()
+    );
+    const diffTime = expDateUTC - todayUTC;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  // Calculate total for a single item including discounts
+  const calculateItemTotal = (item: CartItem) => {
+    const daysRemaining = getDaysUntilExpiration(item.expirationDate);
+    const discountedPrice = calculateFinalPrice(
+      item.price,
+      item.quantity,
+      daysRemaining
+    );
+    return discountedPrice * item.quantity;
+  };
+
+  // Calculate price per unit with discounts
+  const calculatePricePerUnit = (item: CartItem) => {
+    const daysRemaining = getDaysUntilExpiration(item.expirationDate);
+    return calculateFinalPrice(item.price, item.quantity, daysRemaining);
+  };
+
+  // Calculate subtotal
+  const calculateSubtotal = () => {
+    return cartItems.reduce(
+      (total, item) => total + calculateItemTotal(item),
+      0
+    );
+  };
+
   // Calculate grand total
   const calculateTotal = () => {
-    return (
-      cartItems.reduce((total, item) => total + item.price * item.quantity, 0) +
-      calculateShippingCost()
-    );
+    return calculateSubtotal() + calculateShippingCost();
   };
 
   // Handler untuk mengubah jumlah item
@@ -188,6 +230,13 @@ export default function CartPage() {
                       Seller: {item.sellerName}
                     </p>
 
+                    {getDaysUntilExpiration(item.expirationDate) <= 4 && (
+                      <p className="text-sm text-error">
+                        Expires in {getDaysUntilExpiration(item.expirationDate)}{" "}
+                        days - Special Discount Applied!
+                      </p>
+                    )}
+
                     <div className="mt-auto pt-2 flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <button
@@ -241,12 +290,29 @@ export default function CartPage() {
 
                       <div className="text-right">
                         <p className="font-medium">
-                          {formatPrice(item.price * item.quantity)}
+                          {formatPrice(calculateItemTotal(item))}
                         </p>
-                        {item.quantity > 1 && (
-                          <p className="text-xs text-base-content/70">
-                            {formatPrice(item.price)} each
-                          </p>
+                        {(item.quantity > 1 ||
+                          calculateItemTotal(item) !==
+                            item.price * item.quantity) && (
+                          <div className="text-xs space-y-1">
+                            {item.quantity > 1 && (
+                              <p className="text-base-content/70">
+                                {formatPrice(calculatePricePerUnit(item))} each
+                              </p>
+                            )}
+                            {calculateItemTotal(item) !==
+                              item.price * item.quantity && (
+                              <p className="text-success">
+                                Save{" "}
+                                {formatPrice(
+                                  item.price * item.quantity -
+                                    calculateItemTotal(item)
+                                )}
+                                !
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -267,9 +333,7 @@ export default function CartPage() {
                     {cartItems.reduce((acc, item) => acc + item.quantity, 0)}{" "}
                     items)
                   </span>
-                  <span>
-                    {formatPrice(calculateTotal() - calculateShippingCost())}
-                  </span>
+                  <span>{formatPrice(calculateSubtotal())}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>

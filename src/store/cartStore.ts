@@ -12,6 +12,7 @@ export interface CartItem {
   imageUrl: string;
   sellerId: string;
   sellerName: string;
+  expirationDate: string;
 }
 
 interface CartState {
@@ -47,7 +48,11 @@ export const useCartStore = create<CartState>()(
           if (existingItemIndex >= 0) {
             // Update quantity if item exists
             updatedCart = [...currentCart];
-            updatedCart[existingItemIndex].quantity += newItem.quantity;
+            updatedCart[existingItemIndex] = {
+              ...updatedCart[existingItemIndex],
+              quantity:
+                updatedCart[existingItemIndex].quantity + newItem.quantity,
+            };
           } else {
             // Add new item if it doesn't exist
             updatedCart = [...currentCart, newItem];
