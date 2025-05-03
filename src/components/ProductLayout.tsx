@@ -37,17 +37,33 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("id-ID", {
+    // Create a date object in UTC
+    const utcDate = new Date(date);
+
+    // Convert to user's local timezone for display
+    return new Intl.DateTimeFormat("id-ID", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
+      timeZone: "Asia/Jakarta", // Using Asia/Jakarta timezone for Indonesian time
+    }).format(utcDate);
   };
 
   const getDaysUntilExpiration = () => {
     const today = new Date();
     const expDate = new Date(product.expiration_date);
-    const diffTime = expDate.getTime() - today.getTime();
+    // Normalize both dates to UTC midnight for accurate day calculation
+    const todayUTC = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    );
+    const expDateUTC = Date.UTC(
+      expDate.getUTCFullYear(),
+      expDate.getUTCMonth(),
+      expDate.getUTCDate()
+    );
+    const diffTime = expDateUTC - todayUTC;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
