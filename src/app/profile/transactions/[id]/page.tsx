@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import { createHash } from "crypto";
+import CancelButton from "@/components/transactions/CancelButton";
 
 interface Address {
   id: number;
@@ -179,6 +180,7 @@ async function getTransactionData(id: string): Promise<Transaction | null> {
   }
 }
 
+// Server component
 export default async function TransactionDetailPage({
   params,
 }: {
@@ -186,12 +188,16 @@ export default async function TransactionDetailPage({
 }) {
   const transactionId = (await params).id;
   const transaction = await getTransactionData(transactionId);
+  const cookieStore = await cookies();
+  const userRole = cookieStore.get("userRole")?.value;
 
   if (!transaction) {
     notFound();
   }
 
   const displayTransactionNumber = generateTransactionNumber(transaction);
+  const showCancelButton =
+    userRole === "buyer" && transaction.delivery_status === "pending";
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -229,14 +235,19 @@ export default async function TransactionDetailPage({
                 {formatDate(transaction.created_at)}
               </p>
             </div>
-            <span
-              className={`badge ${getStatusBadgeColor(
-                transaction.delivery_status
-              )}`}
-            >
-              {transaction.delivery_status.charAt(0).toUpperCase() +
-                transaction.delivery_status.slice(1)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`badge ${getStatusBadgeColor(
+                  transaction.delivery_status
+                )}`}
+              >
+                {transaction.delivery_status.charAt(0).toUpperCase() +
+                  transaction.delivery_status.slice(1)}
+              </span>
+              {showCancelButton && (
+                <CancelButton transactionId={transaction.id} />
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

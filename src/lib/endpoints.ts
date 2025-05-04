@@ -12,5 +12,6 @@ export const API_ENDPOINTS = {
   DEPOSIT: "/api/deposit",
   BUY: "/api/buy",
   PRODUCT_HISTORY: "/api/product-history",
+  CANCEL: "/api/cancel",
   // Add other endpoints as needed
 };
