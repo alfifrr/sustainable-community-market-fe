@@ -11,5 +11,6 @@ export const API_ENDPOINTS = {
   REFRESH_TOKEN: "/api/refresh-token",
   DEPOSIT: "/api/deposit",
   BUY: "/api/buy",
+  PRODUCT_HISTORY: "/api/product-history",
   // Add other endpoints as needed
 };

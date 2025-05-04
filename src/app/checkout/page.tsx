@@ -380,35 +380,6 @@ export default function CheckoutPage() {
       const randomOrderId = `ORD-${Math.floor(Math.random() * 1000000)}`;
       setOrderId(randomOrderId);
 
-      // Save order to localStorage for purchase history
-      const purchaseDate = new Date().toISOString();
-      const newOrder = {
-        id: randomOrderId,
-        userId: user?.id || "guest",
-        items: cartItems.map((item) => ({
-          productId: item.productId,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          imageUrl: item.imageUrl,
-          sellerId: item.sellerId,
-          sellerName: item.sellerName,
-        })),
-        shippingAddress,
-        totalAmount: calculateTotal(),
-        purchaseDate,
-        status: "completed",
-      };
-
-      // Get existing purchases from localStorage
-      const existingPurchases = JSON.parse(
-        localStorage.getItem("purchases") || "[]"
-      );
-
-      // Add new order to purchases
-      existingPurchases.push(newOrder);
-      localStorage.setItem("purchases", JSON.stringify(existingPurchases));
-
       // Clear cart and complete order
       clearCart();
       setOrderComplete(true);
