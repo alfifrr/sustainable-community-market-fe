@@ -34,7 +34,7 @@ export default function ExpeditionDetail({
   const handleDeliveryConfirmed = () => {
     setTransaction((prev: ProcessedTransaction) => ({
       ...prev,
-      delivery_status: "completed",
+      delivery_status: "delivered",
     }));
   };
 

@@ -143,14 +143,16 @@ export default function TransactionsPage() {
   // Get the badge color based on delivery status
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "completed":
+      case "delivered":
         return "badge-success";
+      case "processed":
+        return "badge-info";
       case "pending":
         return "badge-warning";
-      case "processing":
-        return "badge-info";
       case "cancelled":
         return "badge-error";
+      case "rated":
+        return "badge-success";
       default:
         return "badge-ghost";
     }

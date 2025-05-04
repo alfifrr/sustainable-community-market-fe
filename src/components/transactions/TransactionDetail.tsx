@@ -5,6 +5,7 @@ import Link from "next/link";
 import CancelButton from "./CancelButton";
 import ProcessButton from "./ProcessButton";
 import { Transaction } from "@/lib/types";
+import axiosInstance from "@/lib/interceptor";
 
 interface TransactionDetailProps {
   transaction: Transaction;
@@ -43,14 +44,16 @@ const generateTransactionNumber = (transaction: Transaction) => {
 
 const getStatusBadgeColor = (status: string) => {
   switch (status) {
-    case "completed":
+    case "delivered":
       return "badge-success";
+    case "processed":
+      return "badge-info";
     case "pending":
       return "badge-warning";
-    case "processing":
-      return "badge-info";
     case "cancelled":
       return "badge-error";
+    case "rated":
+      return "badge-success";
     default:
       return "badge-ghost";
   }
@@ -62,10 +65,19 @@ export default function TransactionDetail({
   isSeller,
 }: TransactionDetailProps) {
   const [transaction, setTransaction] = useState(initialTransaction);
+  const [showRatingForm, setShowRatingForm] = useState(false);
+  const [rating, setRating] = useState<number>(0);
+  const [testimonial, setTestimonial] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const displayTransactionNumber = generateTransactionNumber(transaction);
   const showCancelButton = isBuyer && transaction.delivery_status === "pending";
   const showProcessButton =
     isSeller && transaction.delivery_status === "pending";
+  const showRating =
+    isBuyer &&
+    transaction.delivery_status === "delivered" &&
+    !transaction.rating;
 
   const handleCancelSuccess = () => {
     setTransaction((prev) => ({
@@ -77,8 +89,52 @@ export default function TransactionDetail({
   const handleProcessSuccess = () => {
     setTransaction((prev) => ({
       ...prev,
-      delivery_status: "processing",
+      delivery_status: "processed",
     }));
+  };
+
+  const validateRating = () => {
+    if (rating < 1 || rating > 5) {
+      setError("Please select a rating between 1 and 5 stars");
+      return false;
+    }
+    if (testimonial.length > 1000) {
+      setError("Testimonial must not exceed 1000 characters");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmitRating = async () => {
+    if (!validateRating()) return;
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      const response = await axiosInstance.post("/api/rate", {
+        transaction_id: transaction.id,
+        rating,
+        testimonial: testimonial.trim() || null,
+      });
+
+      if (response.data.status === "success") {
+        setTransaction((prev) => ({
+          ...prev,
+          rating,
+          testimonial,
+          review_date: new Date().toISOString(),
+          delivery_status: "rated",
+        }));
+        setShowRatingForm(false);
+      } else {
+        setError("Failed to submit rating. Please try again.");
+      }
+    } catch (err) {
+      setError("Failed to submit rating. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -273,7 +329,7 @@ export default function TransactionDetail({
           </div>
 
           {/* Review Section */}
-          {transaction.delivery_status === "completed" && (
+          {transaction.delivery_status === "delivered" && (
             <div className="mt-8">
               <h2 className="text-lg font-semibold mb-4">Review</h2>
               {transaction.rating ? (
@@ -285,7 +341,7 @@ export default function TransactionDetail({
                           <input
                             key={star}
                             type="radio"
-                            name="rating"
+                            name="rating-view"
                             className="mask mask-star-2 bg-warning"
                             checked={star === transaction.rating}
                             readOnly
@@ -303,16 +359,99 @@ export default function TransactionDetail({
                     )}
                   </div>
                 </div>
-              ) : (
+              ) : showRating ? (
                 <div className="card bg-base-200">
-                  <div className="card-body p-4 text-center">
-                    <p className="mb-4 text-sm sm:text-base">No review yet</p>
-                    <button className="btn btn-primary btn-sm sm:btn-md">
-                      Write a Review
-                    </button>
+                  <div className="card-body p-4">
+                    {!showRatingForm ? (
+                      <div className="text-center">
+                        <p className="mb-4 text-sm sm:text-base">
+                          Share your experience with this purchase!
+                        </p>
+                        <button
+                          className="btn btn-primary btn-sm sm:btn-md"
+                          onClick={() => setShowRatingForm(true)}
+                        >
+                          Write a Review
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {error && (
+                          <div className="alert alert-error text-sm">
+                            {error}
+                          </div>
+                        )}
+                        <div>
+                          <label className="label">
+                            <span className="label-text font-medium">
+                              Rating <span className="text-error">*</span>
+                            </span>
+                          </label>
+                          <div className="rating rating-lg">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <input
+                                key={star}
+                                type="radio"
+                                name="rating-form"
+                                className="mask mask-star-2 bg-warning"
+                                checked={star === rating}
+                                onChange={() => setRating(star)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="label">
+                            <span className="label-text font-medium">
+                              Testimonial
+                            </span>
+                            <span className="label-text-alt">
+                              Optional · {testimonial.length}/1000
+                            </span>
+                          </label>
+                          <textarea
+                            className="textarea textarea-bordered w-full h-24"
+                            placeholder="Share your thoughts about the product and seller..."
+                            value={testimonial}
+                            onChange={(e) => setTestimonial(e.target.value)}
+                            maxLength={1000}
+                          ></textarea>
+                        </div>
+
+                        <div className="flex justify-end gap-2">
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => {
+                              setShowRatingForm(false);
+                              setRating(0);
+                              setTestimonial("");
+                              setError("");
+                            }}
+                            disabled={isSubmitting}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={handleSubmitRating}
+                            disabled={isSubmitting || rating === 0}
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Submitting...
+                              </>
+                            ) : (
+                              "Submit Review"
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>

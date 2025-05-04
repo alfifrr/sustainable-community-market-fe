@@ -21,6 +21,7 @@ export default function ConfirmDeliveryButton({
       });
 
       if (response.status === 200 || response.status === 201) {
+        // Call onSuccess which should update the parent's delivery_status to "delivered"
         onSuccess();
       }
     } catch (error) {

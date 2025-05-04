@@ -27,6 +27,7 @@ export default function ProcessButton({
       });
 
       if (response.data.status === "success") {
+        // Call onSuccess which should update the parent's delivery_status to "processed"
         onSuccess?.();
       } else {
         setError("Failed to process the order. Please try again.");

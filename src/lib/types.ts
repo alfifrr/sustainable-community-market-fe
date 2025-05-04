@@ -153,7 +153,12 @@ export interface Transaction {
   };
   quantity: number;
   total_price: number;
-  delivery_status: "pending" | "processing" | "completed" | "cancelled";
+  delivery_status:
+    | "pending"
+    | "cancelled"
+    | "processed"
+    | "delivered"
+    | "rated";
   delivery_address_details: Address;
   pickup_address_details: Address;
   created_at: string;
