@@ -162,3 +162,78 @@ export interface Transaction {
   review_date: string | null;
   testimonial: string | null;
 }
+
+export interface ProcessedTransaction {
+  id: number;
+  buyer: {
+    id: number;
+    name: string;
+  };
+  seller: {
+    id: number;
+    name: string;
+  };
+  product: {
+    id: number;
+    name: string;
+  };
+  product_details: {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    expiration_date: string;
+    product_posted: string;
+    product_updated: string | null;
+    category: {
+      id: number;
+      name: string;
+    };
+    applied_discounts: Record<string, any>;
+    user: {
+      id: number;
+      name: string;
+      is_verified: boolean;
+    };
+    pickup_address: {
+      id: number;
+      label: string;
+      address: string;
+      contact_person: string;
+      details: string;
+    };
+  };
+  delivery_status: string;
+  delivery_address_details: {
+    id: number;
+    label: string;
+    address: string;
+    contact_person: string;
+    details: string;
+    date_created: string;
+    date_updated: string | null;
+    user_id: number;
+  };
+  pickup_address_details: {
+    id: number;
+    label: string;
+    address: string;
+    contact_person: string;
+    details: string;
+    date_created: string;
+    date_updated: string | null;
+    user_id: number;
+  };
+  quantity: number;
+  total_price: number;
+  created_at: string;
+  updated_at: string;
+  confirmation_details: {
+    confirmation_date: string | null;
+    confirmed_by: string | null;
+  };
+  rating: number | null;
+  review_date: string | null;
+  testimonial: string | null;
+}
