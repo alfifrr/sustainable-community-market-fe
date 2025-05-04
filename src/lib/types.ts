@@ -87,3 +87,55 @@ export interface SignupError {
   message: Record<string, string[]>;
   status: string;
 }
+
+interface Address {
+  id: number;
+  label: string;
+  address: string;
+  contact_person: string;
+  details: string;
+  date_created: string;
+  date_updated: string | null;
+  user_id: number;
+}
+
+interface ProductDetails extends Product {
+  description: string;
+  price: number;
+  stock: number;
+  expiration_date: string;
+  product_posted: string;
+  product_updated: string | null;
+  imageUrl?: string;
+  category: Category;
+  applied_discounts?: {
+    bulk?: {
+      amount: number;
+      percentage: number;
+    };
+    expiration?: {
+      amount: number;
+      percentage: number;
+    };
+  };
+  user: User & { is_verified: boolean };
+  pickup_address: Omit<Address, "user_id" | "date_created" | "date_updated">;
+}
+
+export interface Transaction {
+  id: number;
+  buyer: User;
+  seller: User;
+  product: Product;
+  product_details: ProductDetails;
+  quantity: number;
+  total_price: number;
+  delivery_status: "pending" | "processing" | "completed" | "cancelled";
+  delivery_address_details: Address;
+  pickup_address_details: Address;
+  created_at: string;
+  updated_at: string | null;
+  rating: number | null;
+  review_date: string | null;
+  testimonial: string | null;
+}

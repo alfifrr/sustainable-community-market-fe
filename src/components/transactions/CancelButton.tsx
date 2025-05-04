@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 
 interface CancelButtonProps {
   transactionId: number;
-  onSuccess?: () => void;
+  onSuccess: () => void;
 }
 
 export default function CancelButton({
@@ -14,8 +14,9 @@ export default function CancelButton({
 }: CancelButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isVisible, setIsVisible] = useState(true);
 
-  const handleCancel = async () => {
+  const handleCancel = useCallback(async () => {
     if (isLoading) return;
 
     try {
@@ -27,7 +28,12 @@ export default function CancelButton({
       });
 
       if (response.data.status === "success") {
-        onSuccess?.();
+        // First visually hide the button with animation
+        setIsVisible(false);
+        // Wait for animation to complete before updating parent state
+        setTimeout(() => {
+          onSuccess();
+        }, 300); // matches the transition duration
       } else {
         setError("Failed to cancel the order. Please try again.");
       }
@@ -36,15 +42,17 @@ export default function CancelButton({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [transactionId, isLoading, onSuccess]);
+
+  if (!isVisible) return null;
 
   return (
-    <>
+    <div className="flex flex-col items-end space-y-2">
       {error && (
-        <div className="alert alert-error mb-4">
+        <div className="alert alert-error py-2 px-4 text-sm rounded-lg max-w-xs animate-fadeIn">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current shrink-0 h-6 w-6"
+            className="stroke-current shrink-0 h-4 w-4"
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -59,12 +67,18 @@ export default function CancelButton({
         </div>
       )}
       <button
-        className={`btn btn-error btn-sm ml-2 ${isLoading ? "loading" : ""}`}
+        className={`btn btn-error btn-sm transition-all duration-300 ease-in-out transform
+          ${isLoading ? "loading opacity-70" : "hover:scale-105"} 
+          ${
+            isVisible
+              ? "opacity-100 translate-x-0"
+              : "opacity-0 translate-x-full"
+          }`}
         onClick={handleCancel}
         disabled={isLoading}
       >
         {isLoading ? "Cancelling..." : "Cancel Order"}
       </button>
-    </>
+    </div>
   );
 }
