@@ -40,6 +40,8 @@ export interface Product {
   pickup_address: PickupAddress;
   created_at: string;
   updated_at: string;
+  average_rating?: number;
+  total_items_sold?: number;
 }
 
 export interface ContactInfo {

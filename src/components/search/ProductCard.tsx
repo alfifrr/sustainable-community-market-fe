@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { calculateFinalPrice } from "@/utils/discountUtils";
+import ProductStats from "./ProductStats";
 
 interface ProductCardProps {
   product: Product;
@@ -183,16 +184,22 @@ export default function ProductCard({ product }: ProductCardProps) {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-base-content/70">
-                <span aria-label="Seller">by {product.user.name}</span>
-                {product.user.is_verified && (
-                  <span
-                    className="badge badge-success badge-sm"
-                    aria-label="Verified seller"
-                  >
-                    ✓
-                  </span>
-                )}
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2 text-base-content/70">
+                  by {product.user.name}
+                  {product.user.is_verified && (
+                    <span
+                      className="badge badge-success badge-sm"
+                      aria-label="Verified seller"
+                    >
+                      ✓
+                    </span>
+                  )}
+                </span>
+                <ProductStats
+                  averageRating={product.average_rating}
+                  totalItemsSold={product.total_items_sold}
+                />
               </div>
             </div>
           </div>
