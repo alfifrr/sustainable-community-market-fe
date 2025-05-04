@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/profile"];
+const protectedRoutes = ["/profile", "/checkout"]; // Removed /cart from protected routes
 const sellerRoutes = ["/products/create"];
+const buyerRoutes = ["/checkout"]; // Moved /cart out of buyer routes to allow guest access
 const authRoutes = ["/login", "/signup"];
 
 export function middleware(request: NextRequest) {
@@ -31,6 +32,14 @@ export function middleware(request: NextRequest) {
   if (
     sellerRoutes.some((route) => path.startsWith(route)) &&
     userRole?.value !== "seller"
+  ) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // Prevent sellers from accessing buyer-specific routes
+  if (
+    buyerRoutes.some((route) => path.startsWith(route)) &&
+    userRole?.value === "seller"
   ) {
     return NextResponse.redirect(new URL("/", request.url));
   }

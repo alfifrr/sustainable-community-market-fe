@@ -2,179 +2,324 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import axiosInstance from "@/lib/interceptor";
+import Link from "next/link";
 
-// Tipe data untuk transaksi
-interface Transaction {
-    id: string;
-    type: "purchase" | "sale" | "deposit" | "withdrawal";
-    amount: number;
-    description: string;
-    date: string;
-    status: "completed" | "pending" | "failed";
-    reference?: string;
+interface Address {
+  id: number;
+  label: string;
+  address: string;
+  contact_person: string;
+  details: string;
+  date_created: string;
+  date_updated: string | null;
+  user_id: number;
 }
 
+interface User {
+  id: number;
+  name: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+}
+
+interface ProductDetails extends Product {
+  description: string;
+  price: number;
+  stock: number;
+  expiration_date: string;
+  product_posted: string;
+  product_updated: string | null;
+  category: {
+    id: number;
+    name: string;
+  };
+  applied_discounts?: {
+    bulk?: {
+      amount: number;
+      percentage: number;
+    };
+    expiration?: {
+      amount: number;
+      percentage: number;
+    };
+  };
+  user: User & { is_verified: boolean };
+  pickup_address: Omit<Address, "user_id" | "date_created" | "date_updated">;
+}
+
+interface Transaction {
+  id: number;
+  buyer: User;
+  seller: User;
+  product: Product;
+  product_details: ProductDetails;
+  quantity: number;
+  total_price: number;
+  delivery_status: "pending" | "processing" | "completed" | "cancelled";
+  delivery_address_details: Address;
+  pickup_address_details: Address;
+  created_at: string;
+  updated_at: string | null;
+  rating: number | null;
+  review_date: string | null;
+  testimonial: string | null;
+}
+
+interface ApiResponse {
+  status: string;
+  message: string;
+  data: Transaction[];
+}
+
+// Format functions
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+  }).format(price);
+};
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const generateTransactionNumber = (transaction: Transaction) => {
+  const date = new Date(transaction.created_at);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  const idSuffix = String(transaction.id).slice(-2).padStart(2, "0");
+  return `TRX-${year}${month}${day}${hour}${minute}${idSuffix}`;
+};
+
 export default function TransactionsPage() {
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [loading, setLoading] = useState(true);
-    const { isLoggedIn } = useAuth();
-    const router = useRouter();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { isLoggedIn, user } = useAuth();
+  const router = useRouter();
+  const isSeller = user?.role === "seller";
 
-    // Fungsi untuk memformat harga
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-        }).format(price);
-    };
+  // Fetch transactions from API
+  useEffect(() => {
+    if (!isLoggedIn) {
+      router.push("/login");
+      return;
+    }
 
-    // Fungsi untuk memformat tanggal
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("id-ID", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
+    const fetchTransactions = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get("/api/product-history");
 
-    // Mengambil data transaksi dari localStorage
-    useEffect(() => {
-        // Cek apakah user sudah login
-        if (!isLoggedIn) {
-            router.push("/login");
-            return;
+        if (response.data.status === "success") {
+          setTransactions(response.data.data);
+        } else {
+          throw new Error(response.data.message);
         }
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+        setTransactions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        // Get transactions from localStorage
-        const fetchTransactions = () => {
-            setLoading(true);
-            try {
-                // Check if we're in the browser environment
-                if (typeof window !== 'undefined') {
-                    const storedPurchases = localStorage.getItem('purchases');
-                    let transactionsList: Transaction[] = [];
+    fetchTransactions();
+  }, [isLoggedIn, router]);
 
-                    // Add default transactions that are not from purchases
-                    const defaultTransactions: Transaction[] = [
-                        {
-                            id: "trx1",
-                            type: "deposit",
-                            amount: 500000,
-                            description: "Top up balance",
-                            date: "2023-06-20T08:30:00Z",
-                            status: "completed",
-                        },
-                        {
-                            id: "trx4",
-                            type: "sale",
-                            amount: 150000,
-                            description: "Sale: Homemade Cookies",
-                            date: "2023-06-08T11:20:00Z",
-                            status: "completed",
-                            reference: "sale1",
-                        },
-                        {
-                            id: "trx5",
-                            type: "withdrawal",
-                            amount: -100000,
-                            description: "Withdrawal to bank account",
-                            date: "2023-06-05T09:15:00Z",
-                            status: "completed"
-                        }
-                    ];
+  // Get the badge color based on delivery status
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case "delivered":
+        return "badge-success";
+      case "processed":
+        return "badge-info";
+      case "pending":
+        return "badge-warning";
+      case "cancelled":
+        return "badge-error";
+      case "rated":
+        return "badge-success";
+      default:
+        return "badge-ghost";
+    }
+  };
 
-                    transactionsList = [...defaultTransactions];
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Transaction History</h1>
 
-                    if (storedPurchases) {
-                        // Parse the stored purchases
-                        const parsedPurchases = JSON.parse(storedPurchases);
-
-                        // Transform purchase data to transaction format
-                        const purchaseTransactions: Transaction[] = parsedPurchases.map((order: any, index: number) => {
-                            // Calculate total amount for the order
-                            const totalAmount = order.items.reduce((sum: number, item: any) => {
-                                return sum + (item.price * item.quantity);
-                            }, 0);
-
-                            return {
-                                id: `trx-purchase-${index}-${order.id}`,
-                                type: "purchase",
-                                amount: -totalAmount, // Negative amount for purchases
-                                description: `Purchase: ${order.items.map((item: any) => item.name).join(", ")}`,
-                                date: order.purchaseDate,
-                                status: order.status,
-                                reference: order.id
-                            };
-                        });
-
-                        // Add purchase transactions to the list
-                        transactionsList = [...transactionsList, ...purchaseTransactions];
-                    }
-
-                    // Sort transactions by date (newest first)
-                    transactionsList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-                    setTransactions(transactionsList);
-                } else {
-                    setTransactions([]);
-                }
-            } catch (error) {
-                console.error('Error fetching transactions:', error);
-                setTransactions([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTransactions();
-
-        // Add event listener for storage changes
-        window.addEventListener('storage', fetchTransactions);
-
-        return () => {
-            window.removeEventListener('storage', fetchTransactions);
-        };
-    }, [isLoggedIn, router]);
-
-    return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-2xl font-bold mb-6">Transaction History</h1>
-
-            {loading ? (
-                <div className="flex justify-center items-center h-64">
-                    <span className="loading loading-spinner loading-lg"></span>
-                </div>
-            ) : (
-                <div className="overflow-x-auto">
-                    <table className="table table-zebra w-full">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {transactions.map((transaction) => (
-                                <tr key={transaction.id} className="hover">
-                                    <td>{formatDate(transaction.date)}</td>
-                                    <td>{transaction.description}</td>
-                                    <td className={`font-medium ${transaction.amount > 0 ? 'text-success' : 'text-error'}`}>
-                                        {formatPrice(transaction.amount)}
-                                    </td>
-                                    <td>
-                                        <span className={`badge ${transaction.status === 'completed' ? 'badge-success' : transaction.status === 'pending' ? 'badge-warning' : 'badge-error'}`}>
-                                            {transaction.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <span className="loading loading-spinner loading-lg"></span>
         </div>
-    );
+      ) : transactions.length === 0 ? (
+        <div className="text-center py-10">
+          <div className="mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-16 w-16 mx-auto text-base-content/50"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+          </div>
+          <p className="text-lg mb-4">No transactions found</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {transactions.map((transaction) => (
+            <Link
+              key={transaction.id}
+              href={`/profile/transactions/${transaction.id}`}
+              className="block card bg-base-100 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="card-body">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="card-title">{transaction.product.name}</h3>
+                    <p className="text-sm text-base-content/70">
+                      Order {generateTransactionNumber(transaction)}
+                    </p>
+                    <p className="text-sm text-base-content/70">
+                      {isSeller ? "Sold on" : "Purchased on"}{" "}
+                      {formatDate(transaction.created_at)}
+                    </p>
+                    <p className="text-sm mt-1">
+                      {isSeller
+                        ? `Buyer: ${transaction.buyer.name}`
+                        : `Seller: ${transaction.seller.name}`}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`badge ${getStatusBadgeColor(
+                        transaction.delivery_status
+                      )}`}
+                    >
+                      {transaction.delivery_status.charAt(0).toUpperCase() +
+                        transaction.delivery_status.slice(1)}
+                    </span>
+                    <p className="mt-2 font-medium">
+                      {formatPrice(transaction.total_price)}
+                    </p>
+                  </div>
+                </div>
+
+                {isSeller ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Pickup Details</h4>
+                      <p className="text-sm">
+                        {transaction.pickup_address_details.label}
+                      </p>
+                      <p className="text-sm">
+                        {transaction.pickup_address_details.contact_person}
+                      </p>
+                      <p className="text-sm">
+                        {transaction.pickup_address_details.address}
+                      </p>
+                      <p className="text-sm text-base-content/70">
+                        {transaction.pickup_address_details.details}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Delivery Details</h4>
+                      <p className="text-sm">
+                        {transaction.delivery_address_details.label}
+                      </p>
+                      <p className="text-sm">
+                        {transaction.delivery_address_details.contact_person}
+                      </p>
+                      <p className="text-sm">
+                        {transaction.delivery_address_details.address}
+                      </p>
+                      <p className="text-sm text-base-content/70">
+                        {transaction.delivery_address_details.details}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2">Delivery Details</h4>
+                    <p className="text-sm">
+                      {transaction.delivery_address_details.label}
+                    </p>
+                    <p className="text-sm">
+                      {transaction.delivery_address_details.contact_person}
+                    </p>
+                    <p className="text-sm">
+                      {transaction.delivery_address_details.address}
+                    </p>
+                    <p className="text-sm text-base-content/70">
+                      {transaction.delivery_address_details.details}
+                    </p>
+                  </div>
+                )}
+
+                {transaction.product_details.applied_discounts && (
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2">Applied Discounts</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {transaction.product_details.applied_discounts.bulk && (
+                        <span className="badge badge-primary">
+                          Bulk Discount:{" "}
+                          {
+                            transaction.product_details.applied_discounts.bulk
+                              .percentage
+                          }
+                          % (
+                          {formatPrice(
+                            transaction.product_details.applied_discounts.bulk
+                              .amount
+                          )}
+                          )
+                        </span>
+                      )}
+                      {transaction.product_details.applied_discounts
+                        .expiration && (
+                        <span className="badge badge-secondary">
+                          Expiration Discount:{" "}
+                          {
+                            transaction.product_details.applied_discounts
+                              .expiration.percentage
+                          }
+                          % (
+                          {formatPrice(
+                            transaction.product_details.applied_discounts
+                              .expiration.amount
+                          )}
+                          )
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

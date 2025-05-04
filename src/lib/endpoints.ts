@@ -9,5 +9,10 @@ export const API_ENDPOINTS = {
   LOGIN: "/api/login",
   PROFILE: "/api/profile",
   REFRESH_TOKEN: "/api/refresh-token",
+  DEPOSIT: "/api/deposit",
+  BUY: "/api/buy",
+  PRODUCT_HISTORY: "/api/product-history",
+  CANCEL: "/api/cancel",
+  PROCESS: "/api/process",
   // Add other endpoints as needed
 };

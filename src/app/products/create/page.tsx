@@ -22,6 +22,13 @@ interface Address {
   user_id: number;
 }
 
+interface ShippingAddress {
+  label: string;
+  address: string;
+  details: string;
+  contact_person: string;
+}
+
 export default function CreateProduct() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,6 +37,9 @@ export default function CreateProduct() {
     message: string;
     status: string;
   } | null>(null);
+  const [addressInputMode, setAddressInputMode] = useState<"saved" | "new">(
+    "saved"
+  );
   const [categories, setCategories] = useState<Category[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
@@ -44,6 +54,20 @@ export default function CreateProduct() {
     category_id: "",
     address_id: "",
     expiration_date: "",
+  });
+
+  const [newAddress, setNewAddress] = useState<ShippingAddress>({
+    label: "",
+    address: "",
+    details: "",
+    contact_person: "",
+  });
+
+  const [addressFormErrors, setAddressFormErrors] = useState({
+    label: "",
+    address: "",
+    details: "",
+    contact_person: "",
   });
 
   const fetchCategories = async () => {
@@ -101,13 +125,116 @@ export default function CreateProduct() {
     }));
   };
 
+  const handleAddressChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewAddress((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setAddressFormErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
+
+  const validateAddressForm = () => {
+    const errors = {
+      label: "",
+      address: "",
+      details: "",
+      contact_person: "",
+    };
+    let isValid = true;
+
+    if (!newAddress.label.trim()) {
+      errors.label = "Label is required";
+      isValid = false;
+    } else if (newAddress.label.trim().length < 3) {
+      errors.label = "Label must be at least 3 characters";
+      isValid = false;
+    } else if (newAddress.label.trim().length > 50) {
+      errors.label = "Label must not exceed 50 characters";
+      isValid = false;
+    }
+
+    if (!newAddress.address.trim()) {
+      errors.address = "Address is required";
+      isValid = false;
+    } else if (newAddress.address.trim().length < 5) {
+      errors.address = "Address must be at least 5 characters";
+      isValid = false;
+    } else if (newAddress.address.trim().length > 255) {
+      errors.address = "Address must not exceed 255 characters";
+      isValid = false;
+    }
+
+    if (newAddress.details.trim().length > 255) {
+      errors.details = "Details must not exceed 255 characters";
+      isValid = false;
+    }
+
+    if (!newAddress.contact_person.trim()) {
+      errors.contact_person = "Contact person is required";
+      isValid = false;
+    } else if (newAddress.contact_person.trim().length < 3) {
+      errors.contact_person = "Contact person must be at least 3 characters";
+      isValid = false;
+    } else if (newAddress.contact_person.trim().length > 255) {
+      errors.contact_person = "Contact person must not exceed 255 characters";
+      isValid = false;
+    }
+
+    setAddressFormErrors(errors);
+    return isValid;
+  };
+
+  const createNewAddress = async (): Promise<string | null> => {
+    if (!validateAddressForm()) {
+      return null;
+    }
+
+    try {
+      const { data } = await axiosInstance.post(API_ENDPOINTS.ADDRESSES, {
+        label: newAddress.label,
+        address: newAddress.address,
+        details: newAddress.details || "",
+        contact_person: newAddress.contact_person,
+      });
+
+      if (data.status === "success") {
+        setAddresses((prev) => [...prev, data.data]);
+        return data.data.id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error creating address:", error);
+      setServerError({
+        error: "Address Creation Error",
+        message: "Failed to create new address. Please try again.",
+        status: "error",
+      });
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setServerError(null);
 
     try {
-      // Convert the expiration date to end of day (23:59:59.999)
+      let finalAddressId = formData.address_id;
+      if (addressInputMode === "new") {
+        const newAddressId = await createNewAddress();
+        if (!newAddressId) {
+          setIsSubmitting(false);
+          return;
+        }
+        finalAddressId = newAddressId;
+      }
+
       const expirationDate = new Date(formData.expiration_date);
       expirationDate.setUTCHours(23, 59, 59, 999);
 
@@ -117,7 +244,7 @@ export default function CreateProduct() {
         price: parseInt(formData.price),
         stock: parseInt(formData.stock),
         category_id: parseInt(formData.category_id),
-        address_id: parseInt(formData.address_id),
+        address_id: parseInt(finalAddressId),
         expiration_date: expirationDate.toISOString(),
       };
 
@@ -171,7 +298,6 @@ export default function CreateProduct() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Product Name */}
               <div>
                 <label
                   htmlFor="name"
@@ -191,7 +317,6 @@ export default function CreateProduct() {
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label
                   htmlFor="description"
@@ -210,7 +335,6 @@ export default function CreateProduct() {
                 />
               </div>
 
-              {/* Price and Stock Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
@@ -275,7 +399,6 @@ export default function CreateProduct() {
                 </div>
               </div>
 
-              {/* Category and Address Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
@@ -313,44 +436,167 @@ export default function CreateProduct() {
                   )}
                 </div>
                 <div>
-                  <label
-                    htmlFor="address_id"
-                    className="block text-sm font-medium mb-2"
-                  >
+                  <label className="block text-sm font-medium mb-2">
                     Pickup Location <span className="text-error">*</span>
                   </label>
-                  <div className="relative">
-                    <select
-                      id="address_id"
-                      name="address_id"
-                      value={formData.address_id}
-                      onChange={handleChange}
-                      onClick={fetchAddresses}
-                      className="select select-bordered w-full"
-                      required
-                      disabled={isAddressesLoading}
+                  <div className="tabs tabs-boxed mb-4">
+                    <button
+                      type="button"
+                      className={`tab ${
+                        addressInputMode === "saved" ? "tab-active" : ""
+                      }`}
+                      onClick={() => setAddressInputMode("saved")}
                     >
-                      <option value="">Select a pickup location</option>
-                      {addresses.map((address) => (
-                        <option key={address.id} value={address.id}>
-                          {address.label} - {address.address}
-                          {address.details && ` (${address.details})`}
-                        </option>
-                      ))}
-                    </select>
-                    {isAddressesLoading && (
-                      <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                        <span className="loading loading-spinner loading-sm"></span>
-                      </div>
-                    )}
+                      Use Saved Address
+                    </button>
+                    <button
+                      type="button"
+                      className={`tab ${
+                        addressInputMode === "new" ? "tab-active" : ""
+                      }`}
+                      onClick={() => setAddressInputMode("new")}
+                    >
+                      Add New Address
+                    </button>
                   </div>
-                  {addressesError && (
-                    <p className="text-error text-sm mt-1">{addressesError}</p>
+
+                  {addressInputMode === "saved" && (
+                    <div className="form-control">
+                      <div className="relative">
+                        <select
+                          id="address_id"
+                          name="address_id"
+                          value={formData.address_id}
+                          onChange={handleChange}
+                          onClick={fetchAddresses}
+                          className="select select-bordered w-full"
+                          required
+                          disabled={isAddressesLoading}
+                        >
+                          <option value="">Select a pickup location</option>
+                          {addresses.map((address) => (
+                            <option key={address.id} value={address.id}>
+                              {address.label} - {address.address}
+                              {address.details && ` (${address.details})`}
+                            </option>
+                          ))}
+                        </select>
+                        {isAddressesLoading && (
+                          <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                            <span className="loading loading-spinner loading-sm"></span>
+                          </div>
+                        )}
+                      </div>
+                      {addressesError && (
+                        <p className="text-error text-sm mt-1">
+                          {addressesError}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {addressInputMode === "new" && (
+                    <div className="space-y-4">
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">
+                            Label <span className="text-error">*</span>
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          name="label"
+                          value={newAddress.label}
+                          onChange={handleAddressChange}
+                          className={`input input-bordered w-full ${
+                            addressFormErrors.label ? "input-error" : ""
+                          }`}
+                          placeholder="E.g., Store, Warehouse, etc."
+                        />
+                        {addressFormErrors.label && (
+                          <span className="text-error text-sm mt-1">
+                            {addressFormErrors.label}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">
+                            Contact Person <span className="text-error">*</span>
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          name="contact_person"
+                          value={newAddress.contact_person}
+                          onChange={handleAddressChange}
+                          className={`input input-bordered w-full ${
+                            addressFormErrors.contact_person
+                              ? "input-error"
+                              : ""
+                          }`}
+                          placeholder="Name of contact person at this location"
+                        />
+                        {addressFormErrors.contact_person && (
+                          <span className="text-error text-sm mt-1">
+                            {addressFormErrors.contact_person}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">
+                            Complete Address{" "}
+                            <span className="text-error">*</span>
+                          </span>
+                        </label>
+                        <textarea
+                          name="address"
+                          value={newAddress.address}
+                          onChange={handleAddressChange}
+                          className={`textarea textarea-bordered w-full ${
+                            addressFormErrors.address ? "textarea-error" : ""
+                          }`}
+                          placeholder="Street name, building number, RT/RW, district, city, region/province, postal code"
+                          rows={3}
+                        />
+                        {addressFormErrors.address && (
+                          <span className="text-error text-sm mt-1">
+                            {addressFormErrors.address}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">Additional Details</span>
+                          <span className="label-text-alt text-base-content/50">
+                            Optional
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          name="details"
+                          value={newAddress.details}
+                          onChange={handleAddressChange}
+                          className={`input input-bordered w-full ${
+                            addressFormErrors.details ? "input-error" : ""
+                          }`}
+                          placeholder="Building color, landmarks, gate number, specific instructions"
+                        />
+                        {addressFormErrors.details && (
+                          <span className="text-error text-sm mt-1">
+                            {addressFormErrors.details}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
 
-              {/* Expiration Date */}
               <div>
                 <label
                   htmlFor="expiration_date"
@@ -370,7 +616,6 @@ export default function CreateProduct() {
                 />
               </div>
 
-              {/* Submit Button */}
               <div className="flex justify-end gap-4">
                 <button
                   type="button"

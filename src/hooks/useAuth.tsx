@@ -1,5 +1,6 @@
 "use client";
 import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
 import Cookies from "js-cookie";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import axiosInstance from "@/lib/interceptor";
@@ -7,6 +8,7 @@ import type { ProfileResponse } from "@/lib/types";
 
 export const useAuth = () => {
   const { isLoggedIn, setIsLoggedIn, user, setUser, setRole } = useAuthStore();
+  const migrateGuestCart = useCartStore((state) => state.migrateGuestCart);
 
   const login = async (tokens: {
     access_token: string;
@@ -42,6 +44,9 @@ export const useAuth = () => {
           last_activity: profileData.last_activity || "",
           role: profileData.role,
         });
+
+        // Migrate guest cart to user cart after successful login
+        migrateGuestCart(profileData.id.toString());
       }
     } catch (err) {
       console.error("Error fetching profile after login:", err);

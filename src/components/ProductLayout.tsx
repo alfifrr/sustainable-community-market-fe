@@ -3,20 +3,52 @@
 import { Product } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarDays, MapPin, Package2, User2, ShoppingCart, CreditCard, X } from "lucide-react";
+import {
+  CalendarDays,
+  MapPin,
+  Package2,
+  User2,
+  ShoppingCart,
+  CreditCard,
+  X,
+  Star,
+} from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
+import { calculateFinalPrice } from "@/utils/discountUtils";
+import type {
+  ProductReviewResponse,
+  Category,
+  ProductUser,
+  PickupAddress,
+} from "@/lib/types";
 
 interface ProductLayoutProps {
-  product: Product;
+  product: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    image_url: string;
+    category: Category;
+    user: ProductUser;
+    product_posted: string;
+    expiration_date: string;
+    pickup_address: PickupAddress;
+    reviews: ProductReviewResponse["data"];
+  };
 }
 
 const ProductLayout = ({ product }: ProductLayoutProps) => {
   const [quantity, setQuantity] = useState(1);
   const router = useRouter();
   const { isLoggedIn } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  const isSeller = user?.role === "seller";
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -26,17 +58,33 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("id-ID", {
+    // Create a date object in UTC
+    const utcDate = new Date(date);
+
+    // Convert to user's local timezone for display
+    return new Intl.DateTimeFormat("id-ID", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
+      timeZone: "Asia/Jakarta", // Using Asia/Jakarta timezone for Indonesian time
+    }).format(utcDate);
   };
 
   const getDaysUntilExpiration = () => {
     const today = new Date();
     const expDate = new Date(product.expiration_date);
-    const diffTime = expDate.getTime() - today.getTime();
+    // Normalize both dates to UTC midnight for accurate day calculation
+    const todayUTC = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    );
+    const expDateUTC = Date.UTC(
+      expDate.getUTCFullYear(),
+      expDate.getUTCMonth(),
+      expDate.getUTCDate()
+    );
+    const diffTime = expDateUTC - todayUTC;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
@@ -44,55 +92,59 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   const addToCart = useCartStore((state) => state.addItem);
 
   const handleAddToCart = () => {
-    if (!isLoggedIn) {
-      router.push('/login');
-      return;
-    }
-
-    // Add to cart using cartStore
+    // Add to cart using cartStore without login check
     addToCart({
       id: `cart-${product.id}`,
       productId: product.id,
       name: product.name,
-      price: product.price,
+      price: product.price, // Original price
       quantity: quantity,
-      imageUrl: product.image_url || '',
+      imageUrl: product.image_url || "",
       sellerId: String(product.user.id),
-      sellerName: product.user.name
+      sellerName: product.user.name,
+      expirationDate: product.expiration_date,
     });
 
     // Show toast notification
-    document.getElementById('cart-toast')?.classList.remove('hidden');
+    document.getElementById("cart-toast")?.classList.remove("hidden");
 
     // Hide toast after 3 seconds
     setTimeout(() => {
-      document.getElementById('cart-toast')?.classList.add('hidden');
+      document.getElementById("cart-toast")?.classList.add("hidden");
     }, 3000);
   };
 
   const handleBuyNow = () => {
-    if (!isLoggedIn) {
-      router.push('/login');
-      return;
-    }
-
     // Add to cart using cartStore
     addToCart({
       id: `cart-${product.id}`,
       productId: product.id,
       name: product.name,
-      price: product.price,
+      price: product.price, // Original price
       quantity: quantity,
-      imageUrl: product.image_url || '',
+      imageUrl: product.image_url || "",
       sellerId: String(product.user.id),
-      sellerName: product.user.name
+      sellerName: product.user.name,
+      expirationDate: product.expiration_date,
     });
+    if (!isLoggedIn) {
+      // Store the intended destination
+      localStorage.setItem("redirectAfterLogin", "/checkout");
+      router.push("/login");
+      return;
+    }
 
     // Redirect to checkout
-    router.push('/checkout');
+    router.push("/checkout");
   };
 
   const daysUntilExpiration = getDaysUntilExpiration();
+  const finalPrice = calculateFinalPrice(
+    product.price,
+    quantity,
+    daysUntilExpiration
+  );
+  const hasDiscount = finalPrice < product.price;
 
   return (
     <main
@@ -141,20 +193,44 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 </span>
                 {daysUntilExpiration <= 7 && (
                   <span
-                    className={`badge ${daysUntilExpiration <= 3 ? "badge-error" : "badge-warning"
-                      }`}
+                    className={`badge ${
+                      daysUntilExpiration <= 3 ? "badge-error" : "badge-warning"
+                    }`}
                     role="alert"
                   >
-                    Expires in {daysUntilExpiration} days
+                    Expires in {daysUntilExpiration}{" "}
+                    {daysUntilExpiration === 1 ? "day" : "days"}
+                    {daysUntilExpiration <= 4 && " - Special Discount!"}
+                  </span>
+                )}
+                {quantity >= 5 && (
+                  <span className="badge badge-secondary">
+                    Bulk Discount Applied!
                   </span>
                 )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                 {product.name}
               </h1>
-              <p className="text-xl md:text-2xl text-primary font-bold">
-                {formatPrice(product.price)}
-              </p>
+              <div className="space-y-1">
+                {hasDiscount && (
+                  <p className="text-lg line-through text-base-content/70">
+                    {formatPrice(product.price)}
+                  </p>
+                )}
+                <p
+                  className={`text-xl md:text-2xl font-bold ${
+                    hasDiscount ? "text-success" : "text-primary"
+                  }`}
+                >
+                  {formatPrice(finalPrice)}
+                </p>
+                {hasDiscount && (
+                  <p className="text-sm text-success">
+                    Save {formatPrice(product.price - finalPrice)}!
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -169,51 +245,59 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 </span>
               </div>
 
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-sm font-medium">Quantity:</span>
-                <div className="join">
-                  <button
-                    className="join-item btn btn-sm btn-outline"
-                    onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                    disabled={quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <span className="join-item px-4 py-1 flex items-center justify-center bg-base-200">
-                    {quantity}
-                  </span>
-                  <button
-                    className="join-item btn btn-sm btn-outline"
-                    onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
-                    disabled={quantity >= product.stock}
-                  >
-                    +
-                  </button>
+              {/* Quantity Selector - Hide for sellers */}
+              {!isSeller && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm font-medium">Quantity:</span>
+                  <div className="join">
+                    <button
+                      className="join-item btn btn-sm btn-outline"
+                      onClick={() =>
+                        setQuantity((prev) => Math.max(1, prev - 1))
+                      }
+                      disabled={quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <span className="join-item px-4 py-1 flex items-center justify-center bg-base-200">
+                      {quantity}
+                    </span>
+                    <button
+                      className="join-item btn btn-sm btn-outline"
+                      onClick={() =>
+                        setQuantity((prev) => Math.min(product.stock, prev + 1))
+                      }
+                      disabled={quantity >= product.stock}
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleAddToCart}
-              className="btn btn-outline btn-primary flex-1 gap-2"
-              disabled={product.stock <= 0}
-            >
-              <ShoppingCart size={18} />
-              Add to Cart
-            </button>
-            <button
-              onClick={handleBuyNow}
-              className="btn btn-primary flex-1 gap-2"
-              disabled={product.stock <= 0}
-            >
-              <CreditCard size={18} />
-              Buy Now
-            </button>
-          </div>
+          {/* Action Buttons - Hide for sellers */}
+          {!isSeller && (
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleAddToCart}
+                className="btn btn-outline btn-primary flex-1 gap-2"
+                disabled={product.stock <= 0}
+              >
+                <ShoppingCart size={18} />
+                Add to Cart
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="btn btn-primary flex-1 gap-2"
+                disabled={product.stock <= 0}
+              >
+                <CreditCard size={18} />
+                Buy Now
+              </button>
+            </div>
+          )}
 
           {/* Product Description */}
           <div className="mt-8">
@@ -300,9 +384,10 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 <div className="flex items-center gap-2 mt-1">
                   <span
                     className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium
-                      ${product.user.is_verified
-                        ? "bg-info/10 text-info"
-                        : "bg-warning/10 text-warning"
+                      ${
+                        product.user.is_verified
+                          ? "bg-info/10 text-info"
+                          : "bg-warning/10 text-warning"
                       }`}
                   >
                     <span
@@ -316,6 +401,73 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 </div>
               </div>
             </Link>
+          </div>
+
+          {/* Reviews Section */}
+          <div className="mt-8 pt-6 border-t border-base-content/10">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Reviews</h2>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-warning" />
+                  <span className="font-medium">
+                    {(product.reviews.average_rating || 0).toFixed(1)}
+                  </span>
+                  <span className="text-base-content/70">
+                    ({product.reviews.total_reviews || 0})
+                  </span>
+                </div>
+                <div className="text-sm text-base-content/70">
+                  {product.reviews.total_items_sold} sold
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {product.reviews.reviews.length === 0 ? (
+                <div className="text-center py-8 text-base-content/70">
+                  No reviews yet
+                </div>
+              ) : (
+                product.reviews.reviews.map((review, index) => (
+                  <div key={index} className="bg-base-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="avatar placeholder">
+                          <div className="w-8 h-8 rounded-full bg-neutral-focus text-neutral-content">
+                            <span className="text-xs">
+                              {review.reviewer.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="font-medium">
+                          {review.reviewer.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-warning" />
+                        <span>{review.rating}</span>
+                      </div>
+                    </div>
+                    {review.testimonial && (
+                      <p className="text-base-content/90">
+                        {review.testimonial}
+                      </p>
+                    )}
+                    <p className="text-xs text-base-content/70 mt-2">
+                      {new Date(review.review_date).toLocaleDateString(
+                        "id-ID",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         destination:
           "https://sustainable-community-market.onrender.com/api/:path*",
+        // "http://localhost:5000/api/:path*",
       },
     ];
   },
