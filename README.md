@@ -1,8 +1,15 @@
 # Sustainable Community Market - Frontend
 
-A modern web application built with Next.js and TypeScript, featuring user authentication, product search, and community marketplace features.
+A modern web application built with Next.js and TypeScript, creating a marketplace platform that connects sustainable local producers with environmentally conscious consumers. The platform aims to build a sustainable economic ecosystem, support local small businesses, and reduce the environmental impact of everyday consumption.
 
 ## Features
+
+### Marketplace Features
+
+- **Product Browsing**: Browse sustainable products from local producers
+- **Community Connection**: Connect with local farmers and producers
+- **Sustainability Focus**: Support for eco-friendly products and practices
+- **Impact Tracking**: Measure environmental and social impact of purchases
 
 ### Authentication System
 
@@ -18,6 +25,7 @@ A modern web application built with Next.js and TypeScript, featuring user authe
 - **Loading States**: Visual feedback during form submission with disabled inputs
 - **Server Error Handling**: Clean display of backend error messages
 - **Mobile-Responsive Design**: Optimized layout for all screen sizes using Tailwind CSS and DaisyUI
+- **Responsive Pages**: All pages are fully responsive across devices
 
 ### Technical Features
 
@@ -33,35 +41,53 @@ A modern web application built with Next.js and TypeScript, featuring user authe
 ```bash
 sustainable-community-market-fe/
 ├── src/
-│   ├── app/
-│   │   ├── login/
-│   │   │   └── page.tsx            # Login page component
-│   │   ├── signup/
-│   │   │   └── page.tsx            # Signup page component
-│   │   ├── search/                 # Search functionality
-│   │   ├── users/                  # User management
-│   │   ├── favicon.ico
-│   │   ├── globals.css
-│   │   ├── layout.tsx              # Root layout
-│   │   └── page.tsx                # Home page
-│   ├── components/
-│   │   ├── HeroSection.tsx
-│   │   ├── Navbar.tsx              # Navigation bar
-│   │   ├── SearchResult.tsx
-│   │   ├── SectionContainer.tsx
-│   │   └── UserLayout.tsx
-│   ├── hooks/
-│   │   └── useDebounce.tsx         # Custom debounce hook
-│   └── lib/
-│       ├── endpoints.ts            # API endpoints
-│       ├── types.ts                # TypeScript type definitions
-│       └── utils.ts                # Utility functions
-├── tests/                          # Unit tests
-├── public/                         # Static assets
-├── next.config.ts
-├── package.json
-├── README.md
-└── tsconfig.json
+│   ├── app/                      # Next.js App Router pages
+│   │   ├── about/                # About page
+│   │   ├── careers/              # Careers page
+│   │   ├── contact/              # Contact page
+│   │   ├── cookies/              # Cookie policy page
+│   │   ├── faq/                  # FAQ page
+│   │   ├── impact/               # Impact report page
+│   │   ├── login/                # Login page
+│   │   ├── privacy/              # Privacy policy page
+│   │   ├── products/             # Products browsing
+│   │   ├── returns/              # Returns policy page
+│   │   ├── shipping/             # Shipping information page
+│   │   ├── signup/               # Signup page
+│   │   ├── team/                 # Team page
+│   │   ├── terms/                # Terms of service page
+│   │   ├── layout.tsx            # Root layout
+│   │   └── page.tsx              # Home page
+│   ├── components/               # Reusable components
+│   │   ├── CommunitySection.tsx  # Community section component
+│   │   ├── Footer.tsx            # Footer component
+│   │   ├── HeroSection.tsx       # Hero section component
+│   │   ├── ImpactStatsSection.tsx# Impact stats component
+│   │   ├── Navbar.tsx            # Navigation bar component
+│   │   ├── SectionContainer.tsx  # Section container component
+│   │   ├── SustainabilitySection.tsx # Sustainability section
+│   │   └── ... other components
+│   ├── context/                  # React Context providers
+│   │   └── ThemeContext.tsx      # Theme context provider
+│   ├── hooks/                    # Custom React hooks
+│   │   ├── useAuth.tsx           # Authentication hook
+│   │   ├── useDebounce.tsx       # Debounce hook
+│   │   └── ... other hooks
+│   ├── lib/                      # Utility libraries
+│   │   ├── endpoints.ts          # API endpoints
+│   │   ├── types.ts              # TypeScript type definitions
+│   │   └── ... other utilities
+│   └── store/                    # State management
+│       ├── authStore.ts          # Authentication state
+│       └── cartStore.ts          # Shopping cart state
+├── public/                       # Static assets
+│   ├── images/                   # Image assets
+│   └── logo/                     # Logo assets
+├── __tests__/                    # Test files
+├── next.config.ts                # Next.js configuration
+├── package.json                  # Project dependencies
+├── tailwind.config.js           # Tailwind CSS configuration
+└── tsconfig.json                # TypeScript configuration
 ```
 
 ## Getting Started
@@ -107,13 +133,19 @@ yarn test
 
 ## Future Enhancements
 
-Integration with backend authentication API
-Social login options (Google, Facebook, etc.)
-Two-factor authentication
-Password reset functionality
-User profile management
-Protected routes for authenticated users
-Session management and persistence
+- Integration with backend authentication API
+- Social login options (Google, Facebook, etc.)
+- Two-factor authentication
+- Password reset functionality
+- User profile management
+- Protected routes for authenticated users
+- Session management and persistence
+- Product search with filters
+- Shopping cart functionality
+- Checkout process
+- Order tracking
+- Seller dashboard
+- Admin panel
 
 ## Technologies Used
 
