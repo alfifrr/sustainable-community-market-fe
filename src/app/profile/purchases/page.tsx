@@ -36,11 +36,11 @@ interface Purchase {
   testimonial: string | null;
 }
 
-interface ApiResponse {
-  status: string;
-  message: string;
-  data: Purchase[];
-}
+// interface ApiResponse {
+//   status: string;
+//   message: string;
+//   data: Purchase[];
+// }
 
 export default function PurchasesPage() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -142,7 +142,9 @@ export default function PurchasesPage() {
               />
             </svg>
           </div>
-          <p className="text-lg mb-4">You haven't made any purchases yet</p>
+          <p className="text-lg mb-4">
+            You haven&apos;t made any purchases yet
+          </p>
           <Link href="/products" className="btn btn-primary">
             Browse Products
           </Link>

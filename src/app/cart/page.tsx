@@ -28,7 +28,7 @@ export default function CartPage() {
   const carts = useCartStore((state) => state.carts);
   const removeItem = useCartStore((state) => state.removeItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const { isLoggedIn } = useAuth();
 
   // Get current cart items

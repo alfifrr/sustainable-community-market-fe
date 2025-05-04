@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import { Product } from "@/lib/types";
 import ProductCard from "@/components/search/ProductCard";
-import { Filter, SlidersHorizontal } from "lucide-react";
+import { Filter } from "lucide-react";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);

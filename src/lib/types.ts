@@ -101,28 +101,28 @@ interface Address {
   user_id: number;
 }
 
-interface ProductDetails extends Product {
-  description: string;
-  price: number;
-  stock: number;
-  expiration_date: string;
-  product_posted: string;
-  product_updated: string | null;
-  imageUrl?: string;
-  category: Category;
-  applied_discounts?: {
-    bulk?: {
-      amount: number;
-      percentage: number;
-    };
-    expiration?: {
-      amount: number;
-      percentage: number;
-    };
-  };
-  user: ProductUser & { is_verified: boolean };
-  pickup_address: PickupAddress;
-}
+// interface ProductDetails extends Product {
+//   description: string;
+//   price: number;
+//   stock: number;
+//   expiration_date: string;
+//   product_posted: string;
+//   product_updated: string | null;
+//   imageUrl?: string;
+//   category: Category;
+//   applied_discounts?: {
+//     bulk?: {
+//       amount: number;
+//       percentage: number;
+//     };
+//     expiration?: {
+//       amount: number;
+//       percentage: number;
+//     };
+//   };
+//   user: ProductUser & { is_verified: boolean };
+//   pickup_address: PickupAddress;
+// }
 
 export interface Transaction {
   id: number;
@@ -197,7 +197,16 @@ export interface ProcessedTransaction {
       id: number;
       name: string;
     };
-    applied_discounts: Record<string, any>;
+    applied_discounts?: {
+      bulk?: {
+        amount: number;
+        percentage: number;
+      };
+      expiration?: {
+        amount: number;
+        percentage: number;
+      };
+    };
     user: {
       id: number;
       name: string;

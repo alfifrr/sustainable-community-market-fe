@@ -69,11 +69,11 @@ interface Transaction {
   testimonial: string | null;
 }
 
-interface ApiResponse {
-  status: string;
-  message: string;
-  data: Transaction[];
-}
+// interface ApiResponse {
+//   status: string;
+//   message: string;
+//   data: Transaction[];
+// }
 
 // Format functions
 const formatPrice = (price: number) => {

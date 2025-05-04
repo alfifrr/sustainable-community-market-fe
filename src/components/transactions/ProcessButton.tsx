@@ -32,7 +32,7 @@ export default function ProcessButton({
       } else {
         setError("Failed to process the order. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to process the order. Please try again.");
     } finally {
       setIsLoading(false);

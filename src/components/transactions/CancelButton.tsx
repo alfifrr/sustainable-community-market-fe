@@ -37,7 +37,7 @@ export default function CancelButton({
       } else {
         setError("Failed to cancel the order. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to cancel the order. Please try again.");
     } finally {
       setIsLoading(false);

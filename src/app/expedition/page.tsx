@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import { useAuth } from "@/hooks/useAuth";
-import Image from "next/image";
 import Link from "next/link";
 
 interface ConfirmationDetails {
@@ -43,7 +42,16 @@ interface ProductDetails {
   product_posted: string;
   product_updated: string | null;
   category: Category;
-  applied_discounts: Record<string, any>;
+  applied_discounts: {
+    bulk?: {
+      amount: number;
+      percentage: number;
+    };
+    expiration?: {
+      amount: number;
+      percentage: number;
+    };
+  };
   user: User & { is_verified: boolean };
   pickup_address: Omit<Address, "user_id" | "date_created" | "date_updated">;
 }
@@ -98,7 +106,7 @@ export default function ExpeditionPage() {
       setLoading(true);
       try {
         const response = await axiosInstance.get<ApiResponse>(
-          "/api/processed-products"
+          API_ENDPOINTS.PROCESSED_PRODUCT
         );
         if (response.data.status === "success") {
           setTransactions(response.data.data);

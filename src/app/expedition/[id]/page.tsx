@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import ExpeditionDetail from "@/components/transactions/ExpeditionDetail";
-import type { Metadata } from "next";
 import type { ProcessedTransaction } from "@/lib/types";
 
 interface ApiResponse {
@@ -28,7 +27,7 @@ async function getProcessedTransactionDetails(
     const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
 
     const response = await fetch(
-      `${protocol}://${host}/api/processed-products/${id}`,
+      `${protocol}://${host}${API_ENDPOINTS.PROCESSED_PRODUCT_BY_ID(id)}`,
       {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -50,30 +49,12 @@ async function getProcessedTransactionDetails(
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { id: string };
-}): Promise<Metadata> {
-  const transactionId = (await params).id;
-  const transaction = await getProcessedTransactionDetails(transactionId);
-
-  return {
-    title: transaction
-      ? `Expedition ${transaction.id} - ${transaction.product.name}`
-      : "Expedition Not Found",
-    description: transaction
-      ? `Expedition details for ${transaction.product.name}`
-      : "Expedition not found",
-  };
-}
-
 export default async function ExpeditionTransactionDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const transactionId = (await params).id;
+  const transactionId = params.id;
   const transaction = await getProcessedTransactionDetails(transactionId);
   const cookieStore = await cookies();
   const userRole = cookieStore.get("userRole")?.value;

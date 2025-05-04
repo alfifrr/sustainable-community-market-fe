@@ -1,9 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore, CartItem } from "@/store/cartStore";
-import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import axiosInstance from "@/lib/interceptor";
@@ -27,13 +26,15 @@ interface Address {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
   const currentCartId = useCartStore((state) => state.currentCartId);
   const carts = useCartStore((state) => state.carts);
   const clearCart = useCartStore((state) => state.clearCart);
-  const cartItems = carts[currentCartId] || [];
-  const { profile, isLoading: isProfileLoading } = useProfile();
-  const [loading, setLoading] = useState(false);
+  const cartItems = useMemo(
+    () => carts[currentCartId] || [],
+    [carts, currentCartId]
+  );
+  const { profile } = useProfile();
+  const [loading] = useState(false);
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
@@ -79,7 +80,7 @@ export default function CheckoutPage() {
   }, [cartItems.length, router, orderComplete]);
 
   // Add fetchAddresses function
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     if (addresses.length > 0) return;
     setIsAddressesLoading(true);
     setAddressesError(null);
@@ -101,14 +102,14 @@ export default function CheckoutPage() {
     } finally {
       setIsAddressesLoading(false);
     }
-  };
+  }, [addresses.length]);
 
   // Add effect to fetch addresses on mount
   useEffect(() => {
     if (cartItems.length > 0) {
       fetchAddresses();
     }
-  }, [cartItems]);
+  }, [cartItems, fetchAddresses]);
 
   const getDaysUntilExpiration = (expirationDate: string) => {
     const today = new Date();

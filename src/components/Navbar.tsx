@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthSync } from "@/hooks/useAuthSync";
 import { useTheme } from "@/context/ThemeContext";
 import { useCartStore } from "@/store/cartStore";
-import Image from "next/image";
 import Cookies from "js-cookie";
 import { refreshAccessToken } from "@/lib/interceptor";
 import { useAuthStore } from "@/store/authStore";

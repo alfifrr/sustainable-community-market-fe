@@ -130,7 +130,7 @@ export default function TransactionDetail({
       } else {
         setError("Failed to submit rating. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to submit rating. Please try again.");
     } finally {
       setIsSubmitting(false);
