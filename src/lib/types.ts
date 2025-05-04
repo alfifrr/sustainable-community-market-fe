@@ -242,3 +242,23 @@ export interface ProcessedTransaction {
   review_date: string | null;
   testimonial: string | null;
 }
+
+export interface ProductReviewResponse {
+  data: {
+    average_rating?: number;
+    product_id: number;
+    reviews: {
+      rating: number;
+      review_date: string;
+      reviewer: {
+        id: number;
+        name: string;
+      };
+      testimonial: string | null;
+    }[];
+    total_items_sold: number;
+    total_reviews?: number;
+  };
+  message: string;
+  status: string;
+}

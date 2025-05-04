@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   CreditCard,
   X,
+  Star,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,9 +19,28 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { calculateFinalPrice } from "@/utils/discountUtils";
+import type {
+  ProductReviewResponse,
+  Category,
+  ProductUser,
+  PickupAddress,
+} from "@/lib/types";
 
 interface ProductLayoutProps {
-  product: Product;
+  product: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    image_url: string;
+    category: Category;
+    user: ProductUser;
+    product_posted: string;
+    expiration_date: string;
+    pickup_address: PickupAddress;
+    reviews: ProductReviewResponse["data"];
+  };
 }
 
 const ProductLayout = ({ product }: ProductLayoutProps) => {
@@ -381,6 +401,73 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 </div>
               </div>
             </Link>
+          </div>
+
+          {/* Reviews Section */}
+          <div className="mt-8 pt-6 border-t border-base-content/10">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Reviews</h2>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-warning" />
+                  <span className="font-medium">
+                    {(product.reviews.average_rating || 0).toFixed(1)}
+                  </span>
+                  <span className="text-base-content/70">
+                    ({product.reviews.total_reviews || 0})
+                  </span>
+                </div>
+                <div className="text-sm text-base-content/70">
+                  {product.reviews.total_items_sold} sold
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {product.reviews.reviews.length === 0 ? (
+                <div className="text-center py-8 text-base-content/70">
+                  No reviews yet
+                </div>
+              ) : (
+                product.reviews.reviews.map((review, index) => (
+                  <div key={index} className="bg-base-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="avatar placeholder">
+                          <div className="w-8 h-8 rounded-full bg-neutral-focus text-neutral-content">
+                            <span className="text-xs">
+                              {review.reviewer.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="font-medium">
+                          {review.reviewer.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-warning" />
+                        <span>{review.rating}</span>
+                      </div>
+                    </div>
+                    {review.testimonial && (
+                      <p className="text-base-content/90">
+                        {review.testimonial}
+                      </p>
+                    )}
+                    <p className="text-xs text-base-content/70 mt-2">
+                      {new Date(review.review_date).toLocaleDateString(
+                        "id-ID",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
