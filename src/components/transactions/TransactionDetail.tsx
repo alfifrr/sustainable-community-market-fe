@@ -3,11 +3,13 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import CancelButton from "./CancelButton";
+import ProcessButton from "./ProcessButton";
 import { Transaction } from "@/lib/types";
 
 interface TransactionDetailProps {
   transaction: Transaction;
   isBuyer: boolean;
+  isSeller: boolean;
 }
 
 const formatPrice = (price: number) => {
@@ -57,15 +59,25 @@ const getStatusBadgeColor = (status: string) => {
 export default function TransactionDetail({
   transaction: initialTransaction,
   isBuyer,
+  isSeller,
 }: TransactionDetailProps) {
   const [transaction, setTransaction] = useState(initialTransaction);
   const displayTransactionNumber = generateTransactionNumber(transaction);
   const showCancelButton = isBuyer && transaction.delivery_status === "pending";
+  const showProcessButton =
+    isSeller && transaction.delivery_status === "pending";
 
   const handleCancelSuccess = () => {
     setTransaction((prev) => ({
       ...prev,
       delivery_status: "cancelled",
+    }));
+  };
+
+  const handleProcessSuccess = () => {
+    setTransaction((prev) => ({
+      ...prev,
+      delivery_status: "processing",
     }));
   };
 
@@ -114,6 +126,12 @@ export default function TransactionDetail({
                 {transaction.delivery_status.charAt(0).toUpperCase() +
                   transaction.delivery_status.slice(1)}
               </span>
+              {showProcessButton && (
+                <ProcessButton
+                  transactionId={transaction.id}
+                  onSuccess={handleProcessSuccess}
+                />
+              )}
               {showCancelButton && (
                 <CancelButton
                   transactionId={transaction.id}

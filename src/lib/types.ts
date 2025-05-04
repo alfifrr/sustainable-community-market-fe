@@ -118,8 +118,8 @@ interface ProductDetails extends Product {
       percentage: number;
     };
   };
-  user: User & { is_verified: boolean };
-  pickup_address: Omit<Address, "user_id" | "date_created" | "date_updated">;
+  user: ProductUser & { is_verified: boolean };
+  pickup_address: PickupAddress;
 }
 
 export interface Transaction {
@@ -127,7 +127,30 @@ export interface Transaction {
   buyer: User;
   seller: User;
   product: Product;
-  product_details: ProductDetails;
+  product_details: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    expiration_date: string;
+    product_posted: string;
+    product_updated: string | null;
+    imageUrl?: string;
+    category: Category;
+    applied_discounts?: {
+      bulk?: {
+        amount: number;
+        percentage: number;
+      };
+      expiration?: {
+        amount: number;
+        percentage: number;
+      };
+    };
+    user: ProductUser & { is_verified: boolean };
+    pickup_address: PickupAddress;
+  };
   quantity: number;
   total_price: number;
   delivery_status: "pending" | "processing" | "completed" | "cancelled";

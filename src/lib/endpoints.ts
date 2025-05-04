@@ -13,5 +13,6 @@ export const API_ENDPOINTS = {
   BUY: "/api/buy",
   PRODUCT_HISTORY: "/api/product-history",
   CANCEL: "/api/cancel",
+  PROCESS: "/api/process",
   // Add other endpoints as needed
 };

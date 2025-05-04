@@ -84,6 +84,7 @@ export default async function TransactionDetailPage({
     <TransactionDetail
       transaction={transaction}
       isBuyer={userRole === "buyer"}
+      isSeller={userRole === "seller"}
     />
   );
 }
