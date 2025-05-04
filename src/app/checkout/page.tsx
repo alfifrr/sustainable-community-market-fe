@@ -462,9 +462,44 @@ export default function CheckoutPage() {
       <h1 className="text-2xl font-bold mb-6">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Shipping and Payment Form */}
+        {/* Payment Section */}
         <div className="lg:col-span-2">
           <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Payment</h2>
+            <div className="space-y-4">
+              <div className="p-4 bg-base-200 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Current Balance</span>
+                  <span className="text-xl font-bold">
+                    {formatPrice(profile?.balance || 0)}
+                  </span>
+                </div>
+                <div className="text-sm text-base-content/70 mt-1">
+                  Order total: {formatPrice(calculateTotal())}
+                </div>
+                {profile?.balance && profile.balance >= calculateTotal() ? (
+                  <div className="text-sm text-success mt-1">
+                    Balance after purchase:{" "}
+                    {formatPrice(profile.balance - calculateTotal())}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="text-sm text-error">
+                      Insufficient balance
+                    </div>
+                    <Link
+                      href="/topup?returnTo=/checkout"
+                      className="btn btn-error btn-xs"
+                    >
+                      Top Up
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-base-100 rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
 
             {/* Address Input Mode Toggle */}
@@ -643,41 +678,6 @@ export default function CheckoutPage() {
                   {formErrors.balance}
                 </div>
               )}
-            </div>
-          </div>
-
-          <div className="bg-base-100 rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">Payment</h2>
-            <div className="space-y-4">
-              <div className="p-4 bg-base-200 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Current Balance</span>
-                  <span className="text-xl font-bold">
-                    {formatPrice(profile?.balance || 0)}
-                  </span>
-                </div>
-                <div className="text-sm text-base-content/70 mt-1">
-                  Order total: {formatPrice(calculateTotal())}
-                </div>
-                {profile?.balance && profile.balance >= calculateTotal() ? (
-                  <div className="text-sm text-success mt-1">
-                    Balance after purchase:{" "}
-                    {formatPrice(profile.balance - calculateTotal())}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 mt-2">
-                    <div className="text-sm text-error">
-                      Insufficient balance
-                    </div>
-                    <Link
-                      href="/topup?returnTo=/checkout"
-                      className="btn btn-error btn-xs"
-                    >
-                      Top Up
-                    </Link>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>

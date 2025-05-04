@@ -3,26 +3,37 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import axiosInstance from "@/lib/interceptor";
+import { AxiosError } from "axios";
+
+interface ErrorResponse {
+  error: string;
+  message: string;
+  status: string;
+}
 
 export default function TopUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<ErrorResponse | null>(null);
 
   const returnTo = searchParams.get("returnTo") || "/profile/transactions";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
     if (!amount || parseInt(amount) <= 0) {
-      setError("Please enter a valid amount");
+      setError({
+        error: "Validation error",
+        message: "Please enter a valid amount",
+        status: "error",
+      });
       return;
     }
 
     setIsSubmitting(true);
+    setError(null);
 
     try {
       await axiosInstance.post(API_ENDPOINTS.DEPOSIT, {
@@ -32,7 +43,15 @@ export default function TopUpPage() {
       // Return to the previous page (checkout or transactions)
       router.push(returnTo);
     } catch (err) {
-      setError("Failed to process top-up. Please try again.");
+      if (err instanceof AxiosError && err.response?.data) {
+        setError(err.response.data);
+      } else {
+        setError({
+          error: "Top-up error",
+          message: "Failed to process top-up. Please try again.",
+          status: "error",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -45,7 +64,10 @@ export default function TopUpPage() {
 
         {error && (
           <div className="alert alert-error mb-4">
-            <span>{error}</span>
+            <div>
+              <h3 className="font-bold">{error.error}</h3>
+              <p className="text-sm">{error.message}</p>
+            </div>
           </div>
         )}
 
