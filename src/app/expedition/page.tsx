@@ -174,7 +174,7 @@ export default function ExpeditionPage() {
           {transactions.map((transaction) => (
             <Link
               key={transaction.id}
-              href={`/profile/transactions/${transaction.id}`}
+              href={`/expedition/${transaction.id}`}
               className="block card bg-base-100 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="card-body">
