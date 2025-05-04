@@ -14,7 +14,7 @@ export const API_ENDPOINTS = {
   PRODUCT_HISTORY: "/api/product-history",
   CANCEL: "/api/cancel",
   PROCESS: "/api/process",
-  PROCESSED_PRODUCT: "/api/processed_products",
+  PROCESSED_PRODUCT: "/api/processed-products",
   PROCESSED_PRODUCT_BY_ID: (id: string) => `/api/processed-products/${id}`,
   // Add other endpoints as needed
 };

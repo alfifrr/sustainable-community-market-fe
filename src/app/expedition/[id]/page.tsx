@@ -4,16 +4,16 @@ import { API_ENDPOINTS } from "@/lib/endpoints";
 import ExpeditionDetail from "@/components/transactions/ExpeditionDetail";
 import type { ProcessedTransaction } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface ApiResponse {
   status: string;
   message: string;
   data: ProcessedTransaction;
 }
 
-// Server-side data fetching
-async function getProcessedTransactionDetails(
-  id: string
-): Promise<ProcessedTransaction | null> {
+async function getProcessedTransactionDetails(id: string) {
   const cookieStore = await cookies();
   const authToken = cookieStore.get("authToken")?.value;
 
@@ -22,8 +22,8 @@ async function getProcessedTransactionDetails(
   }
 
   try {
-    const headersList = await headers();
-    const host = headersList.get("host");
+    const headersList = headers();
+    const host = (await headersList).get("host");
     const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
 
     const response = await fetch(
@@ -33,7 +33,7 @@ async function getProcessedTransactionDetails(
           Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 0 }, // Disable cache for fresh data
+        next: { revalidate: 0 },
       }
     );
 
@@ -49,13 +49,29 @@ async function getProcessedTransactionDetails(
   }
 }
 
+type Params = Promise<{ id: string }>;
+
+export async function generateMetadata({ params }: { params: Params }) {
+  const { id } = await params;
+  const transaction = await getProcessedTransactionDetails(id);
+
+  return {
+    title: transaction
+      ? `Expedition #${transaction.id} - ${transaction.product.name}`
+      : "Expedition Not Found",
+    description: transaction
+      ? `Expedition details for order ${transaction.product.name}`
+      : "Expedition details not found",
+  };
+}
+
 export default async function ExpeditionTransactionDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Params;
 }) {
-  const transactionId = params.id;
-  const transaction = await getProcessedTransactionDetails(transactionId);
+  const { id } = await params;
+  const transaction = await getProcessedTransactionDetails(id);
   const cookieStore = await cookies();
   const userRole = cookieStore.get("userRole")?.value;
 
