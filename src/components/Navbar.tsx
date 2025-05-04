@@ -225,6 +225,11 @@ const Navbar: FC = () => {
                     <Link href="/products/create">List Product</Link>
                   </li>
                 )}
+                {role === "expedition" && (
+                  <li>
+                    <Link href="/expedition">Processed Orders</Link>
+                  </li>
+                )}
                 <li>
                   <a>Settings</a>
                 </li>

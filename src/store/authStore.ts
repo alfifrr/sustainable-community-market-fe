@@ -10,7 +10,7 @@ interface UserData {
   is_verified: boolean;
   date_joined: string;
   last_activity: string;
-  role: "buyer" | "seller";
+  role: "buyer" | "seller" | "expedition";
 }
 
 export interface AuthState {
@@ -18,8 +18,8 @@ export interface AuthState {
   setIsLoggedIn: (value: boolean) => void;
   user: UserData | null;
   setUser: (user: UserData | null) => void;
-  role: "seller" | "buyer" | null;
-  setRole: (role: "seller" | "buyer" | null) => void;
+  role: "seller" | "buyer" | "expedition" | null;
+  setRole: (role: "seller" | "buyer" | "expedition" | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
