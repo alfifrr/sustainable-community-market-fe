@@ -208,16 +208,13 @@ const Navbar: FC = () => {
                 className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
               >
                 <li>
-                  <Link className="justify-between" href="/profile">
-                    Profile
-                    <span className="badge">New</span>
-                  </Link>
+                  <Link href="/profile">Profile</Link>
                 </li>
                 <li>
                   <Link href="/profile/transactions">Transactions</Link>
                 </li>
                 <li>
-                  <Link href="/profile/purchases">Purchases</Link>
+                  <Link href="/profile/statements">Statements</Link>
                 </li>
                 {role === "seller" && (
                   <li>
@@ -229,9 +226,6 @@ const Navbar: FC = () => {
                     <Link href="/expedition">Processed Orders</Link>
                   </li>
                 )}
-                <li>
-                  <a>Settings</a>
-                </li>
                 <li>
                   <a onClick={handleLogout}>Logout</a>
                 </li>

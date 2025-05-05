@@ -37,7 +37,6 @@ export default function CheckoutPage() {
   const [loading] = useState(false);
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
-  const [orderId, setOrderId] = useState("");
   const [addressInputMode, setAddressInputMode] = useState<"saved" | "new">(
     "saved"
   );
@@ -377,10 +376,6 @@ export default function CheckoutPage() {
         }
       }
 
-      // Generate order ID for display
-      const randomOrderId = `ORD-${Math.floor(Math.random() * 1000000)}`;
-      setOrderId(randomOrderId);
-
       // Clear cart and complete order
       clearCart();
       setOrderComplete(true);
@@ -432,22 +427,20 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold mb-4">Order Successful!</h1>
-          <p className="mb-6">
-            Thank you for your order. Your order number is{" "}
-            <span className="font-bold">{orderId}</span>.
-          </p>
+          <h1 className="text-2xl font-bold mb-4">
+            Order Successfully Placed!
+          </h1>
 
           <div className="mb-8 p-4 bg-base-200 rounded-lg">
             <p className="text-sm">
-              Payment instructions have been sent to your email. Please complete
-              the payment within 24 hours to process your order.
+              Your order has been placed and is now being processed. You can
+              track your order status in the Transactions tab of your profile.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/profile/purchases" className="btn btn-primary">
-              View My Orders
+            <Link href="/profile/transactions" className="btn btn-primary">
+              View Transactions
             </Link>
             <Link href="/products" className="btn btn-outline">
               Continue Shopping

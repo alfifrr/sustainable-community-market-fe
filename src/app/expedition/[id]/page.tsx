@@ -3,10 +3,12 @@ import { cookies, headers } from "next/headers";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import ExpeditionDetail from "@/components/transactions/ExpeditionDetail";
 import type { ProcessedTransaction } from "@/lib/types";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+type Params = Promise<{ id: string }>;
 interface ApiResponse {
   status: string;
   message: string;
@@ -49,9 +51,11 @@ async function getProcessedTransactionDetails(id: string) {
   }
 }
 
-type Params = Promise<{ id: string }>;
-
-export async function generateMetadata({ params }: { params: Params }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Params;
+}): Promise<Metadata> {
   const { id } = await params;
   const transaction = await getProcessedTransactionDetails(id);
 

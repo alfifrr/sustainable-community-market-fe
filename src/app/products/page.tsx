@@ -156,7 +156,7 @@ export default function ProductsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Sustainable Products</h1>
+        <h1 className="text-3xl font-bold">Products</h1>
 
         <button
           className="btn btn-ghost gap-2 mt-4 md:mt-0"

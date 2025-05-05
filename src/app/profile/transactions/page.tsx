@@ -202,7 +202,7 @@ export default function TransactionsPage() {
                       Order {generateTransactionNumber(transaction)}
                     </p>
                     <p className="text-sm text-base-content/70">
-                      {isSeller ? "Sold on" : "Purchased on"}{" "}
+                      {isSeller ? "Ordered on" : "Purchased on"}{" "}
                       {formatDate(transaction.created_at)}
                     </p>
                     <p className="text-sm mt-1">

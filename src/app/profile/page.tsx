@@ -6,6 +6,7 @@ import { AlertCircle, RefreshCw, Pencil, Eye, EyeOff } from "lucide-react";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 interface FormData {
   username: string;
@@ -57,6 +58,7 @@ export default function Profile() {
     last_name: "",
     phone_number: "",
   });
+  const router = useRouter();
 
   const handleEditClick = () => {
     setFormData({
@@ -290,8 +292,18 @@ export default function Profile() {
         {/* Profile Navigation */}
         <div className="tabs tabs-boxed mb-6">
           <button className="tab tab-active">Profile</button>
-          <button className="tab" onClick={() => router.push('/profile/transactions')}>Transactions</button>
-          <button className="tab" onClick={() => router.push('/profile/purchases')}>Purchases</button>
+          <button
+            className="tab"
+            onClick={() => router.push("/profile/transactions")}
+          >
+            Transactions
+          </button>
+          <button
+            className="tab"
+            onClick={() => router.push("/profile/statements")}
+          >
+            Statements
+          </button>
         </div>
 
         <div className="card bg-base-100 shadow-xl">
@@ -374,15 +386,15 @@ export default function Profile() {
         <div className="mt-6 grid grid-cols-2 gap-4">
           <button
             className="btn btn-outline btn-primary"
-            onClick={() => router.push('/profile/transactions')}
+            onClick={() => router.push("/profile/transactions")}
           >
             View Transactions
           </button>
           <button
             className="btn btn-outline btn-primary"
-            onClick={() => router.push('/profile/purchases')}
+            onClick={() => router.push("/profile/statements")}
           >
-            View Purchases
+            View Statements
           </button>
         </div>
       </div>

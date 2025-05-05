@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import axiosInstance from "@/lib/interceptor";
@@ -11,7 +11,7 @@ interface ErrorResponse {
   status: string;
 }
 
-export default function TopUpPage() {
+function TopUpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [amount, setAmount] = useState("");
@@ -122,5 +122,13 @@ export default function TopUpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TopUpPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TopUpContent />
+    </Suspense>
   );
 }
