@@ -11,7 +11,7 @@ export default function JoinSection() {
           Get Involved
         </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* For Shoppers */}
           <div className="card bg-primary text-primary-content">
             <div className="card-body items-center text-center">
@@ -25,11 +25,11 @@ export default function JoinSection() {
                   <li>Access to fresh, local produce</li>
                   <li>Support local farmers directly</li>
                   <li>Reduce food waste through smart buying</li>
-                  <li>Join community events and workshops</li>
+                  <li>Track your sustainable impact</li>
                 </ul>
               </div>
               <button
-                onClick={() => router.push("/signup")}
+                onClick={() => router.push("/signup/buyer")}
                 className="btn btn-secondary btn-lg"
               >
                 Start Shopping
@@ -50,14 +50,40 @@ export default function JoinSection() {
                   <li>Connect with conscious consumers</li>
                   <li>Reduce waste and increase profits</li>
                   <li>Access marketing and logistics support</li>
-                  <li>Be part of a supportive community</li>
+                  <li>Manage your business online</li>
                 </ul>
               </div>
               <button
-                onClick={() => router.push("/signup?type=seller")}
+                onClick={() => router.push("/signup/seller")}
                 className="btn btn-primary btn-lg"
               >
                 Become a Seller
+              </button>
+            </div>
+          </div>
+
+          {/* For Expeditions */}
+          <div className="card bg-accent text-accent-content">
+            <div className="card-body items-center text-center">
+              <h3 className="card-title text-2xl mb-4">For Expeditions</h3>
+              <div className="space-y-4 mb-8">
+                <p>
+                  Join our delivery network and help connect sustainable
+                  products with customers while promoting eco-friendly delivery
+                  practices.
+                </p>
+                <ul className="list-disc text-left pl-6 space-y-2">
+                  <li>Flexible delivery schedules</li>
+                  <li>Competitive compensation</li>
+                  <li>Support eco-friendly delivery</li>
+                  <li>Be part of sustainable change</li>
+                </ul>
+              </div>
+              <button
+                onClick={() => router.push("/signup/expedition")}
+                className="btn btn-primary btn-lg"
+              >
+                Join as Expedition
               </button>
             </div>
           </div>
