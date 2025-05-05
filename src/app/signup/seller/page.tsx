@@ -15,11 +15,8 @@ const SellerSignup = () => {
     businessAddress: "",
     businessType: "",
     businessDescription: "",
-    businessLicense: "",
-    taxId: "",
     bankAccount: {
       accountNumber: "",
-      routingNumber: "",
       accountHolderName: "",
     },
     products: {
@@ -76,24 +73,12 @@ const SellerSignup = () => {
       newErrors.businessType = "Business type is required";
     }
 
-    if (!formData.businessLicense) {
-      newErrors.businessLicense = "Business license is required";
-    }
-
-    if (!formData.taxId) {
-      newErrors.taxId = "Tax ID is required";
-    }
-
     if (!formData.bankAccount.accountHolderName) {
       newErrors.accountHolderName = "Account holder name is required";
     }
 
     if (!formData.bankAccount.accountNumber) {
       newErrors.accountNumber = "Account number is required";
-    }
-
-    if (!formData.bankAccount.routingNumber) {
-      newErrors.routingNumber = "Routing number is required";
     }
 
     setErrors(newErrors);
@@ -284,38 +269,6 @@ const SellerSignup = () => {
               )}
             </div>
 
-            <div className="form-control">
-              <label className="label">Business License Number</label>
-              <input
-                type="text"
-                className="input input-bordered"
-                required
-                value={formData.businessLicense}
-                onChange={(e) => setFormData({...formData, businessLicense: e.target.value})}
-              />
-              {errors.businessLicense && (
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.businessLicense}</span>
-                </label>
-              )}
-            </div>
-
-            <div className="form-control">
-              <label className="label">Tax ID</label>
-              <input
-                type="text"
-                className="input input-bordered"
-                required
-                value={formData.taxId}
-                onChange={(e) => setFormData({...formData, taxId: e.target.value})}
-              />
-              {errors.taxId && (
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.taxId}</span>
-                </label>
-              )}
-            </div>
-
             <div className="divider">Banking Information</div>
 
             <div className="form-control">
@@ -352,25 +305,6 @@ const SellerSignup = () => {
               {errors.accountNumber && (
                 <label className="label">
                   <span className="label-text-alt text-error">{errors.accountNumber}</span>
-                </label>
-              )}
-            </div>
-
-            <div className="form-control">
-              <label className="label">Routing Number</label>
-              <input
-                type="text"
-                className="input input-bordered"
-                required
-                value={formData.bankAccount.routingNumber}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  bankAccount: {...formData.bankAccount, routingNumber: e.target.value}
-                })}
-              />
-              {errors.routingNumber && (
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.routingNumber}</span>
                 </label>
               )}
             </div>
