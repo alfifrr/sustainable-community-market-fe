@@ -82,6 +82,7 @@ export interface SignupRequest {
   last_name: string;
   email: string;
   phone_number: string;
+  role_id: number;
 }
 
 export interface SignupError {
