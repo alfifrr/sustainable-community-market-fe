@@ -68,8 +68,8 @@ const HeroSection = () => {
           {/* Image/Illustration */}
           <div className="relative h-[400px] md:h-[500px] rounded-lg overflow-hidden shadow-2xl">
             <Image
-              src="/hero-image.jpg"
-              alt="Sustainable farming"
+              src="/images/indonesian people workshop using recycle product.jpg"
+              alt="Indonesian people workshop using recycled products"
               fill
               className="object-cover"
               priority

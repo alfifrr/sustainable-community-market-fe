@@ -6,13 +6,19 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthSync } from "@/hooks/useAuthSync";
 import { useTheme } from "@/context/ThemeContext";
+import { useCartStore } from "@/store/cartStore";
+import Cookies from "js-cookie";
+import { refreshAccessToken } from "@/lib/interceptor";
+import { useAuthStore } from "@/store/authStore";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { isLoggedIn, logout } = useAuth();
+  const { user, role } = useAuthStore((state) => state);
   const { theme, toggleTheme } = useTheme();
+  const cartItemsCount = useCartStore((state) => state.getTotalItems());
   useAuthSync();
 
   useEffect(() => {
@@ -25,6 +31,24 @@ const Navbar: FC = () => {
     logout();
     router.push("/login");
   };
+
+  const handleLoginClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const authToken = Cookies.get("authToken");
+    const refreshToken = Cookies.get("refreshToken");
+
+    if (!authToken && refreshToken) {
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        // Token refresh successful, user is now logged in
+        return;
+      }
+    }
+    // Either no tokens exist or refresh failed
+    router.push("/login");
+  };
+
+  const isSeller = user?.role === "seller";
 
   return (
     <>
@@ -61,6 +85,9 @@ const Navbar: FC = () => {
               <li>
                 <Link href="/about">About Us</Link>
               </li>
+              <li>
+                <Link href="/products">Products</Link>
+              </li>
             </ul>
           </div>
           <div className="flex items-center gap-4">
@@ -78,6 +105,9 @@ const Navbar: FC = () => {
               <Link href="/about" className="btn btn-ghost">
                 About Us
               </Link>
+              <Link href="/products" className="btn btn-ghost">
+                Products
+              </Link>
             </div>
           </div>
         </div>
@@ -91,6 +121,18 @@ const Navbar: FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+
+          {/* Cart Icon - Hide for sellers */}
+          {!isSeller && (
+            <Link href="/cart" className="btn btn-ghost btn-circle">
+              <div className="indicator">
+                <img src="/logo/cart.svg" alt="Cart" className="w-6 h-6" />
+                <span className="badge badge-sm indicator-item">
+                  {cartItemsCount}
+                </span>
+              </div>
+            </Link>
+          )}
 
           {/* Theme Switcher */}
           <label className="toggle text-base-content cursor-pointer">
@@ -155,7 +197,9 @@ const Navbar: FC = () => {
                 <div className="w-10 rounded-full">
                   <img
                     alt="Tailwind CSS Navbar component"
-                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user?.username || ""
+                    )}`}
                   />
                 </div>
               </div>
@@ -164,14 +208,24 @@ const Navbar: FC = () => {
                 className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
               >
                 <li>
-                  <Link className="justify-between" href="/profile">
-                    Profile
-                    <span className="badge">New</span>
-                  </Link>
+                  <Link href="/profile">Profile</Link>
                 </li>
                 <li>
-                  <a>Settings</a>
+                  <Link href="/profile/transactions">Transactions</Link>
                 </li>
+                <li>
+                  <Link href="/profile/statements">Statements</Link>
+                </li>
+                {role === "seller" && (
+                  <li>
+                    <Link href="/products/create">List Product</Link>
+                  </li>
+                )}
+                {role === "expedition" && (
+                  <li>
+                    <Link href="/expedition">Processed Orders</Link>
+                  </li>
+                )}
                 <li>
                   <a onClick={handleLogout}>Logout</a>
                 </li>
@@ -179,7 +233,11 @@ const Navbar: FC = () => {
             </div>
           ) : (
             <div>
-              <Link href="/login" className="btn btn-primary btn-sm">
+              <Link
+                href="#"
+                onClick={handleLoginClick}
+                className="btn btn-primary btn-sm"
+              >
                 Login / Sign Up
               </Link>
             </div>

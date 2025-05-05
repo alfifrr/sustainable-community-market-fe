@@ -1,16 +1,19 @@
 "use client";
 import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
 import Cookies from "js-cookie";
+import { API_ENDPOINTS } from "@/lib/endpoints";
+import axiosInstance from "@/lib/interceptor";
+import type { ProfileResponse } from "@/lib/types";
 
 export const useAuth = () => {
-  const { isLoggedIn, setIsLoggedIn, user, setUser } = useAuthStore();
+  const { isLoggedIn, setIsLoggedIn, user, setUser, setRole } = useAuthStore();
+  const migrateGuestCart = useCartStore((state) => state.migrateGuestCart);
 
-  const login = (tokens: { access_token: string; refresh_token: string }) => {
-    // localStorage.removeItem("authToken");
-    // localStorage.removeItem("refreshToken");
-
-    // localStorage.setItem("authToken", tokens.access_token);
-    // localStorage.setItem("refreshToken", tokens.refresh_token);
+  const login = async (tokens: {
+    access_token: string;
+    refresh_token: string;
+  }) => {
     Cookies.set("authToken", tokens.access_token, {
       expires: 1 / 96, // 15 minutes
       path: "/",
@@ -20,15 +23,42 @@ export const useAuth = () => {
       path: "/",
     });
     setIsLoggedIn(true);
+
+    // Fetch profile immediately after login to sync role and user data
+    try {
+      const response = await axiosInstance.get<ProfileResponse>(
+        API_ENDPOINTS.PROFILE
+      );
+      if (response.data.status === "success") {
+        const profileData = response.data.data;
+        // Set both role and user data
+        setRole(profileData.role);
+        setUser({
+          id: profileData.id.toString(),
+          username: profileData.username,
+          email: profileData.contact_info.email,
+          first_name: profileData.contact_info.first_name,
+          last_name: profileData.contact_info.last_name,
+          is_verified: profileData.is_verified,
+          date_joined: profileData.date_joined,
+          last_activity: profileData.last_activity || "",
+          role: profileData.role,
+        });
+
+        // Migrate guest cart to user cart after successful login
+        migrateGuestCart(profileData.id.toString());
+      }
+    } catch (err) {
+      console.error("Error fetching profile after login:", err);
+    }
   };
 
   const logout = () => {
-    // localStorage.removeItem("authToken");
-    // localStorage.removeItem("refreshToken");
     Cookies.remove("authToken");
     Cookies.remove("refreshToken");
     setIsLoggedIn(false);
     setUser(null);
+    setRole(null);
   };
 
   return { isLoggedIn, login, user, logout };

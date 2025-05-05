@@ -1,5 +1,3 @@
-"use client";
-
 export default function HowItWorksSection() {
   return (
     <section className="py-16 md:py-24 bg-base-100">

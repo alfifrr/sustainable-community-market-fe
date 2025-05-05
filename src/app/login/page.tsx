@@ -58,6 +58,7 @@ export default function Login() {
     setErrors((prev) => ({ ...prev, username: "" }));
     return true;
   };
+
   const validatePassword = (password: string) => {
     if (!password) {
       setErrors((prev) => ({ ...prev, password: "Password is required" }));
@@ -73,6 +74,7 @@ export default function Login() {
     setErrors((prev) => ({ ...prev, password: "" }));
     return true;
   };
+
   const validateForm = () => {
     const isUsernameValid = validateUsername(username);
     const isPasswordValid = validatePassword(password);
@@ -98,10 +100,11 @@ export default function Login() {
             password,
           }),
         });
+
         const data = await response.json();
         if (response.ok && data.status === "success") {
           // use auth hook to handle login
-          login({
+          await login({
             access_token: data.data.access_token,
             refresh_token: data.data.refresh_token,
           });
@@ -112,7 +115,14 @@ export default function Login() {
             localStorage.removeItem("rememberedUsername");
           }
 
-          router.push("/");
+          // Check for redirect after login
+          const redirectTo = localStorage.getItem("redirectAfterLogin");
+          if (redirectTo) {
+            localStorage.removeItem("redirectAfterLogin");
+            router.push(redirectTo);
+          } else {
+            router.push("/");
+          }
         } else {
           setServerError(data.message || "Invalid username or password");
         }
