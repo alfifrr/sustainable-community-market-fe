@@ -182,17 +182,23 @@ export default function ExpeditionDetail({
                       {formatDate(transaction.updated_at)}
                     </p>
                   </div>
-                  {transaction.confirmation_details.confirmation_date && (
+                  {transaction.assignment_details.confirmation_date && (
                     <div>
                       <p className="text-sm font-medium">Confirmed</p>
                       <p className="text-sm">
                         {formatDate(
-                          transaction.confirmation_details.confirmation_date
+                          transaction.assignment_details.confirmation_date
                         )}
                       </p>
-                      <p className="text-sm text-base-content/70">
-                        by {transaction.confirmation_details.confirmed_by}
-                      </p>
+                      {transaction.assignment_details.assigned_expedition && (
+                        <p className="text-sm text-base-content/70">
+                          by{" "}
+                          {
+                            transaction.assignment_details.assigned_expedition
+                              .name
+                          }
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>

@@ -197,6 +197,133 @@ export default function TransactionDetail({
             </div>
           </div>
 
+          {/* Review Section - Moved to top */}
+          {transaction.delivery_status === "delivered" && (
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-4">Review</h2>
+              {transaction.rating ? (
+                <div className="card bg-base-200">
+                  <div className="card-body p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="rating rating-sm sm:rating-md">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <input
+                            key={star}
+                            type="radio"
+                            name="rating-view"
+                            className="mask mask-star-2 bg-warning"
+                            checked={star === transaction.rating}
+                            readOnly
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs sm:text-sm text-base-content/70">
+                        {formatDate(transaction.review_date!)}
+                      </span>
+                    </div>
+                    {transaction.testimonial && (
+                      <p className="text-sm sm:text-base text-base-content/80">
+                        {transaction.testimonial}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : showRating ? (
+                <div className="card bg-base-200">
+                  <div className="card-body p-4">
+                    {!showRatingForm ? (
+                      <div className="text-center">
+                        <p className="mb-4 text-sm sm:text-base">
+                          Share your experience with this purchase!
+                        </p>
+                        <button
+                          className="btn btn-primary btn-sm sm:btn-md"
+                          onClick={() => setShowRatingForm(true)}
+                        >
+                          Write a Review
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {error && (
+                          <div className="alert alert-error text-sm">
+                            {error}
+                          </div>
+                        )}
+                        <div>
+                          <label className="label">
+                            <span className="label-text font-medium">
+                              Rating <span className="text-error">*</span>
+                            </span>
+                          </label>
+                          <div className="rating rating-lg">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <input
+                                key={star}
+                                type="radio"
+                                name="rating-form"
+                                className="mask mask-star-2 bg-warning"
+                                checked={star === rating}
+                                onChange={() => setRating(star)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="label">
+                            <span className="label-text font-medium">
+                              Testimonial
+                            </span>
+                            <span className="label-text-alt">
+                              Optional · {testimonial.length}/1000
+                            </span>
+                          </label>
+                          <textarea
+                            className="textarea textarea-bordered w-full h-24"
+                            placeholder="Share your thoughts about the product and seller..."
+                            value={testimonial}
+                            onChange={(e) => setTestimonial(e.target.value)}
+                            maxLength={1000}
+                          ></textarea>
+                        </div>
+
+                        <div className="flex justify-end gap-2">
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => {
+                              setShowRatingForm(false);
+                              setRating(0);
+                              setTestimonial("");
+                              setError("");
+                            }}
+                            disabled={isSubmitting}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={handleSubmitRating}
+                            disabled={isSubmitting || rating === 0}
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Submitting...
+                              </>
+                            ) : (
+                              "Submit Review"
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
             {/* Product Details */}
             <div>
@@ -327,133 +454,6 @@ export default function TransactionDetail({
               </div>
             </div>
           </div>
-
-          {/* Review Section */}
-          {transaction.delivery_status === "delivered" && (
-            <div className="mt-8">
-              <h2 className="text-lg font-semibold mb-4">Review</h2>
-              {transaction.rating ? (
-                <div className="card bg-base-200">
-                  <div className="card-body p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="rating rating-sm sm:rating-md">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <input
-                            key={star}
-                            type="radio"
-                            name="rating-view"
-                            className="mask mask-star-2 bg-warning"
-                            checked={star === transaction.rating}
-                            readOnly
-                          />
-                        ))}
-                      </div>
-                      <span className="text-xs sm:text-sm text-base-content/70">
-                        {formatDate(transaction.review_date!)}
-                      </span>
-                    </div>
-                    {transaction.testimonial && (
-                      <p className="text-sm sm:text-base text-base-content/80">
-                        {transaction.testimonial}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ) : showRating ? (
-                <div className="card bg-base-200">
-                  <div className="card-body p-4">
-                    {!showRatingForm ? (
-                      <div className="text-center">
-                        <p className="mb-4 text-sm sm:text-base">
-                          Share your experience with this purchase!
-                        </p>
-                        <button
-                          className="btn btn-primary btn-sm sm:btn-md"
-                          onClick={() => setShowRatingForm(true)}
-                        >
-                          Write a Review
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {error && (
-                          <div className="alert alert-error text-sm">
-                            {error}
-                          </div>
-                        )}
-                        <div>
-                          <label className="label">
-                            <span className="label-text font-medium">
-                              Rating <span className="text-error">*</span>
-                            </span>
-                          </label>
-                          <div className="rating rating-lg">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <input
-                                key={star}
-                                type="radio"
-                                name="rating-form"
-                                className="mask mask-star-2 bg-warning"
-                                checked={star === rating}
-                                onChange={() => setRating(star)}
-                              />
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="label">
-                            <span className="label-text font-medium">
-                              Testimonial
-                            </span>
-                            <span className="label-text-alt">
-                              Optional · {testimonial.length}/1000
-                            </span>
-                          </label>
-                          <textarea
-                            className="textarea textarea-bordered w-full h-24"
-                            placeholder="Share your thoughts about the product and seller..."
-                            value={testimonial}
-                            onChange={(e) => setTestimonial(e.target.value)}
-                            maxLength={1000}
-                          ></textarea>
-                        </div>
-
-                        <div className="flex justify-end gap-2">
-                          <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={() => {
-                              setShowRatingForm(false);
-                              setRating(0);
-                              setTestimonial("");
-                              setError("");
-                            }}
-                            disabled={isSubmitting}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={handleSubmitRating}
-                            disabled={isSubmitting || rating === 0}
-                          >
-                            {isSubmitting ? (
-                              <>
-                                <span className="loading loading-spinner loading-xs"></span>
-                                Submitting...
-                              </>
-                            ) : (
-                              "Submit Review"
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          )}
         </div>
       </div>
     </div>
