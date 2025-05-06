@@ -250,6 +250,13 @@ export interface ProcessedTransaction {
     confirmation_date: string | null;
     confirmed_by: string | null;
   };
+  assignment_details: {
+    assigned_expedition: {
+      id: number;
+      name: string;
+    } | null;
+    confirmation_date: string | null;
+  };
   rating: number | null;
   review_date: string | null;
   testimonial: string | null;

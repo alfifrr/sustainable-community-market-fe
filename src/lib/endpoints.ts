@@ -17,5 +17,7 @@ export const API_ENDPOINTS = {
   PROCESSED_PRODUCT: "/api/processed-products",
   PROCESSED_PRODUCT_BY_ID: (id: string) => `/api/processed-products/${id}`,
   TRANSACTIONS: "/api/transactions",
+  EXPEDITIONS: "/api/expeditions",
+  SEND_ACTIVATION: "/api/send-activation",
   // Add other endpoints as needed
 };
