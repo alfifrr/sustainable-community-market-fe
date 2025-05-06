@@ -46,7 +46,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
   const user = useAuthStore((state) => state.user);
-  const isSeller = user?.role === "seller";
+  const isBuyer = user?.role === "buyer";
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -64,7 +64,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
       year: "numeric",
       month: "long",
       day: "numeric",
-      timeZone: "Asia/Jakarta", // Using Asia/Jakarta timezone for Indonesian time
+      timeZone: "UTC", // Using Asia/Jakarta timezone for Indonesian time
     }).format(utcDate);
   };
 
@@ -244,7 +244,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
               </div>
 
               {/* Quantity Selector - Hide for sellers */}
-              {!isSeller && (
+              {isBuyer && (
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-sm font-medium">Quantity:</span>
                   <div className="join">
@@ -276,7 +276,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
           </div>
 
           {/* Action Buttons - Hide for sellers */}
-          {!isSeller && (
+          {isBuyer && (
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleAddToCart}

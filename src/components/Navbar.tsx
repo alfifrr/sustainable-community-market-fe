@@ -48,7 +48,7 @@ const Navbar: FC = () => {
     router.push("/login");
   };
 
-  const isSeller = user?.role === "seller";
+  const isBuyer = user?.role === "buyer";
 
   return (
     <>
@@ -122,8 +122,8 @@ const Navbar: FC = () => {
             />
           </div>
 
-          {/* Cart Icon - Hide for sellers */}
-          {!isSeller && (
+          {/* Cart Icon - Hide for sellers and expedition */}
+          {isBuyer && (
             <Link href="/cart" className="btn btn-ghost btn-circle">
               <div className="indicator">
                 <img src="/logo/cart.svg" alt="Cart" className="w-6 h-6" />

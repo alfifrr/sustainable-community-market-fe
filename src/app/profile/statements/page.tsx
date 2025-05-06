@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/interceptor";
@@ -134,9 +133,9 @@ export default function StatementsPage() {
             </svg>
           </div>
           <p className="text-lg mb-4">No transactions found</p>
-          <Link href="/topup" className="btn btn-primary">
+          {/* <Link href="/topup" className="btn btn-primary">
             Top Up Balance
-          </Link>
+          </Link> */}
         </div>
       ) : (
         <div className="bg-base-100 rounded-lg shadow-sm divide-y">
