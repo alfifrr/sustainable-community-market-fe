@@ -58,6 +58,15 @@ export default function Profile() {
     last_name: "",
     phone_number: "",
   });
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationPassword, setVerificationPassword] = useState("");
+  const [showVerificationPassword, setShowVerificationPassword] =
+    useState(false);
   const router = useRouter();
 
   const handleEditClick = () => {
@@ -221,6 +230,41 @@ export default function Profile() {
     }
   };
 
+  const handleVerification = () => {
+    setShowVerificationModal(true);
+    setVerificationPassword("");
+    setVerificationMessage(null);
+  };
+
+  const handleVerificationSubmit = async () => {
+    if (!profile || !verificationPassword) return;
+
+    setIsVerifying(true);
+    setVerificationMessage(null);
+
+    try {
+      const response = await axiosInstance.post(API_ENDPOINTS.SEND_ACTIVATION, {
+        username: profile.username,
+        password: verificationPassword,
+      });
+
+      if (response.data.status === "success") {
+        setVerificationMessage({
+          type: "success",
+          text: response.data.message,
+        });
+        setShowVerificationModal(false);
+      }
+    } catch (error) {
+      setVerificationMessage({
+        type: "error",
+        text: "Failed to send verification email. Please check your password and try again.",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const formatDateTime = (dateString: string | null) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleString("en-US", {
@@ -357,14 +401,57 @@ export default function Profile() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Verified:</span>
-                  <span
-                    className={
-                      profile.is_verified ? "text-success" : "text-error"
-                    }
-                  >
-                    {profile.is_verified ? "Yes" : "No"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={
+                        profile.is_verified ? "text-success" : "text-error"
+                      }
+                    >
+                      {profile.is_verified ? "Yes" : "No"}
+                    </span>
+                    {!profile.is_verified && (
+                      <button
+                        onClick={handleVerification}
+                        className="btn btn-xs btn-primary"
+                        disabled={isVerifying}
+                      >
+                        {isVerifying ? (
+                          <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                          "Verify Now"
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
+                {verificationMessage && (
+                  <div
+                    className={`alert ${
+                      verificationMessage.type === "success"
+                        ? "alert-success"
+                        : "alert-error"
+                    } py-2`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="stroke-current shrink-0 h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d={
+                          verificationMessage.type === "success"
+                            ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            : "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        }
+                      />
+                    </svg>
+                    <span className="text-sm">{verificationMessage.text}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Joined:</span>
                   <span title={profile.date_joined}>
@@ -634,6 +721,92 @@ export default function Profile() {
           className="modal-backdrop bg-base-200 bg-opacity-50"
           onClick={() => !isSubmitting && setIsEditing(false)}
         ></div>
+      </dialog>
+
+      {/* Verification Password Modal */}
+      <dialog className={`modal ${showVerificationModal ? "modal-open" : ""}`}>
+        <div className="modal-box max-w-sm">
+          <h3 className="font-bold text-lg mb-4">Verify Account</h3>
+          {verificationMessage?.type === "error" && (
+            <div className="alert alert-error mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>{verificationMessage.text}</span>
+            </div>
+          )}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">
+                Enter your password to continue
+              </span>
+            </label>
+            <div className="relative">
+              <input
+                type={showVerificationPassword ? "text" : "password"}
+                value={verificationPassword}
+                onChange={(e) => setVerificationPassword(e.target.value)}
+                className="input input-bordered w-full pr-10"
+                placeholder="Password"
+                disabled={isVerifying}
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setShowVerificationPassword(!showVerificationPassword)
+                }
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                {showVerificationPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-500" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="modal-action">
+            <button
+              className="btn btn-ghost"
+              onClick={() => {
+                setShowVerificationModal(false);
+                setVerificationMessage(null);
+              }}
+              disabled={isVerifying}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleVerificationSubmit}
+              disabled={isVerifying || !verificationPassword}
+            >
+              {isVerifying ? (
+                <>
+                  <span className="loading loading-spinner loading-xs"></span>
+                  Verifying...
+                </>
+              ) : (
+                "Continue"
+              )}
+            </button>
+          </div>
+        </div>
+        <div
+          className="modal-backdrop"
+          onClick={() => !isVerifying && setShowVerificationModal(false)}
+        />
       </dialog>
     </div>
   );
