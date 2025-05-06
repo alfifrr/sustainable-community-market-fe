@@ -107,11 +107,11 @@ export const useCartStore = create<CartState>()(
 
       migrateGuestCart: (userId) =>
         set((state) => {
-          // Check if user is a seller using js-cookie
+          // Check if user is a seller or expedition using js-cookie
           const userRole = Cookies.get("userRole");
 
-          // If user is a seller, don't migrate cart
-          if (userRole === "seller") {
+          // If user is a seller or expedition, don't migrate cart
+          if (userRole === "seller" || userRole === "expedition") {
             return {
               ...state,
               currentCartId: userId,
