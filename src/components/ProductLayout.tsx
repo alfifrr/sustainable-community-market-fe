@@ -10,6 +10,19 @@ import {
   CreditCard,
   X,
   Star,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Sprout,
+  Recycle,
+  Globe,
+  Leaf,
+  Droplets,
+  Sun,
+  Bug,
+  TreePine,
+  Battery,
+  Award,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -17,7 +30,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { calculateFinalPrice } from "@/utils/discountUtils";
-import { getCertificationImage } from "@/lib/formats";
+import { getCertificationIcon } from "@/lib/formats";
 import type {
   ProductReviewResponse,
   Category,
@@ -192,6 +205,22 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
     router.push("/checkout");
   };
 
+  const getCertificationIconComponent = (iconName: string) => {
+    const icons: Record<string, typeof Sprout> = {
+      Sprout,
+      Recycle,
+      Globe,
+      Leaf,
+      Droplets,
+      Sun,
+      Bug,
+      TreePine,
+      Battery,
+      Award,
+    };
+    return icons[iconName] || Award;
+  };
+
   const daysUntilExpiration = getDaysUntilExpiration();
   const finalPrice = calculateFinalPrice(
     product.price,
@@ -278,30 +307,36 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                           key={pc.id}
                           className="tooltip"
                           data-tip={`${pc.certification.description} (${
-                            pc.status === "verified" ? "Verified" : "Pending"
+                            pc.status === "verified"
+                              ? "Verified"
+                              : pc.status === "rejected"
+                              ? "Rejected"
+                              : "Pending"
                           })`}
                         >
                           <div
                             className={`badge gap-2 ${
                               pc.status === "verified"
                                 ? "badge-success"
+                                : pc.status === "rejected"
+                                ? "badge-error"
                                 : "badge-warning"
                             }`}
                           >
-                            <div className="relative w-4 h-4 rounded overflow-hidden">
-                              <Image
-                                src={getCertificationImage(
-                                  pc.certification.icon
-                                )}
-                                alt={pc.certification.name}
-                                fill
-                                className="object-cover"
-                                sizes="16px"
-                              />
-                            </div>
+                            {(() => {
+                              const IconComponent =
+                                getCertificationIconComponent(
+                                  getCertificationIcon(pc.certification.icon)
+                                );
+                              return <IconComponent className="w-4 h-4" />;
+                            })()}
                             {pc.certification.name}
-                            {pc.status === "pending" && (
-                              <span className="ml-1">(Pending)</span>
+                            {pc.status === "verified" ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : pc.status === "rejected" ? (
+                              <XCircle className="w-3 h-3" />
+                            ) : (
+                              <Clock className="w-3 h-3" />
                             )}
                           </div>
                         </div>

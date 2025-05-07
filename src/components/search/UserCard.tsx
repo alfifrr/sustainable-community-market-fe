@@ -1,7 +1,7 @@
 "use client";
 import { User } from "@/lib/types";
 import Link from "next/link";
-import Image from "next/image";
+import { User2 } from "lucide-react";
 
 interface UserCardProps {
   user: User;
@@ -16,16 +16,8 @@ export default function UserCard({ user }: UserCardProps) {
       <article className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
         <div className="card-body p-4">
           <div className="flex items-center gap-4">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden">
-              <Image
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  user.name
-                )}&background=random`}
-                alt=""
-                fill
-                className="object-cover"
-                aria-hidden="true"
-              />
+            <div className="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center">
+              <User2 className="w-8 h-8 text-base-content/50" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
