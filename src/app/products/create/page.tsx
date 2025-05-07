@@ -227,6 +227,12 @@ export default function CreateProduct() {
       const expirationDate = new Date(formData.expiration_date);
       expirationDate.setUTCHours(23, 59, 59, 999);
 
+      // Convert certification IDs to numbers and check if any are selected
+      const sustainabilityCertifications = formData.certifications.map((id) =>
+        parseInt(id)
+      );
+      const is_sustainable = sustainabilityCertifications.length > 0;
+
       const productData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -235,7 +241,8 @@ export default function CreateProduct() {
         category_id: parseInt(formData.category_id),
         address_id: parseInt(finalAddressId),
         expiration_date: expirationDate.toISOString(),
-        certifications: formData.certifications,
+        sustainability_certifications: sustainabilityCertifications,
+        is_sustainable,
       };
 
       const { data } = await axiosInstance.post(
