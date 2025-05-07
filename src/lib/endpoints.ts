@@ -20,5 +20,8 @@ export const API_ENDPOINTS = {
   EXPEDITIONS: "/api/expeditions",
   SEND_ACTIVATION: "/api/send-activation",
   AVAILABLE_CERTIFICATIONS: "/api/sustainability/certifications",
+  PRODUCT_CERTIFICATIONS: "/api/sustainability/product-certifications",
+  VERIFY_CERTIFICATION: (id: number) =>
+    `/api/sustainability/product-certifications/${id}/verify`,
   // Add other endpoints as needed
 };

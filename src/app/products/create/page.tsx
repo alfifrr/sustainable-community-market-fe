@@ -230,8 +230,88 @@ export default function CreateProduct() {
     });
   };
 
+  const validateForm = () => {
+    let isValid = true;
+    const errors: Record<string, string> = {};
+
+    // Product Name validation (3-255 characters)
+    if (!formData.name.trim()) {
+      errors.name = "Product name is required";
+      isValid = false;
+    } else if (formData.name.trim().length < 3) {
+      errors.name = "Product name must be at least 3 characters";
+      isValid = false;
+    } else if (formData.name.trim().length > 255) {
+      errors.name = "Product name must not exceed 255 characters";
+      isValid = false;
+    }
+
+    // Description validation (10-255 characters)
+    if (!formData.description.trim()) {
+      errors.description = "Description is required";
+      isValid = false;
+    } else if (formData.description.trim().length < 10) {
+      errors.description = "Description must be at least 10 characters";
+      isValid = false;
+    } else if (formData.description.trim().length > 255) {
+      errors.description = "Description must not exceed 255 characters";
+      isValid = false;
+    }
+
+    // Price validation (minimum 1)
+    if (!formData.price) {
+      errors.price = "Price is required";
+      isValid = false;
+    } else if (parseInt(formData.price) < 1) {
+      errors.price = "Price must be at least 1";
+      isValid = false;
+    }
+
+    // Stock validation (minimum 1)
+    if (!formData.stock) {
+      errors.stock = "Stock is required";
+      isValid = false;
+    } else if (parseInt(formData.stock) < 1) {
+      errors.stock = "Stock must be at least 1";
+      isValid = false;
+    }
+
+    // Category validation
+    if (!formData.category_id) {
+      errors.category = "Category is required";
+      isValid = false;
+    }
+
+    // Address validation
+    if (addressInputMode === "saved" && !formData.address_id) {
+      errors.address = "Please select a pickup address";
+      isValid = false;
+    }
+
+    // Expiration date validation
+    if (!formData.expiration_date) {
+      errors.expiration_date = "Expiration date is required";
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setServerError({
+        error: "Validation Error",
+        message: "Please check the form for errors",
+        status: "error",
+      });
+    }
+
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
     setServerError(null);
 

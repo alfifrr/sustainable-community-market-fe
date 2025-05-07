@@ -50,6 +50,7 @@ const Navbar: FC = () => {
   };
 
   const isSeller = user?.role === "seller";
+  const isAdmin = user?.role === "admin";
 
   return (
     <>
@@ -190,6 +191,13 @@ const Navbar: FC = () => {
                 {role === "expedition" && (
                   <li>
                     <Link href="/expedition">Processed Orders</Link>
+                  </li>
+                )}
+                {role === "admin" && (
+                  <li>
+                    <Link href="/admin/certifications">
+                      Product Certifications
+                    </Link>
                   </li>
                 )}
                 <li>
