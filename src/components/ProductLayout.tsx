@@ -4,25 +4,46 @@ import Image from "next/image";
 import {
   CalendarDays,
   MapPin,
+  Package,
   Package2,
   User2,
   ShoppingCart,
   CreditCard,
   X,
   Star,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Recycle,
+  Leaf,
+  Award,
+  Scale,
+  Warehouse,
+  Wind,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { calculateFinalPrice } from "@/utils/discountUtils";
+import { getCertificationIcon } from "@/lib/formats";
 import type {
   ProductReviewResponse,
   Category,
   ProductUser,
   PickupAddress,
 } from "@/lib/types";
+
+const iconMap = {
+  Leaf,
+  Scale,
+  Recycle,
+  Warehouse,
+  Package,
+  Wind,
+  Award,
+} as const;
 
 interface ProductLayoutProps {
   product: {
@@ -38,7 +59,27 @@ interface ProductLayoutProps {
     expiration_date: string;
     pickup_address: PickupAddress;
     reviews: ProductReviewResponse["data"];
+    certifications?: string[];
   };
+}
+
+interface ProductCertification {
+  id: number;
+  product_id: number;
+  certification_id: number;
+  status: string;
+  verification_date: string | null;
+  verified_by: number | null;
+  certification?: Certification;
+}
+
+interface Certification {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const ProductLayout = ({ product }: ProductLayoutProps) => {
@@ -47,6 +88,41 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   const { isLoggedIn } = useAuth();
   const user = useAuthStore((state) => state.user);
   const isBuyer = user?.role === "buyer";
+
+  const [productCertifications, setProductCertifications] = useState<
+    ProductCertification[]
+  >([]);
+  const [isCertificationsLoading, setIsCertificationsLoading] = useState(false);
+  const [certificationsError, setCertificationsError] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fetchProductCertifications = async () => {
+      setIsCertificationsLoading(true);
+      setCertificationsError(null);
+      try {
+        const res = await fetch(
+          `/api/sustainability/product-certifications/${product.id}`
+        );
+        const data = await res.json();
+        if (data.status === "success") {
+          setProductCertifications(data.data);
+        } else {
+          setCertificationsError(
+            "Failed to load certifications. Please try again."
+          );
+        }
+      } catch {
+        setCertificationsError(
+          "Failed to load certifications. Please try again."
+        );
+      } finally {
+        setIsCertificationsLoading(false);
+      }
+    };
+    fetchProductCertifications();
+  }, [product.id]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -136,6 +212,10 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
     router.push("/checkout");
   };
 
+  const getCertificationIconComponent = (iconName: string) => {
+    return iconMap[iconName as keyof typeof iconMap] || Award;
+  };
+
   const daysUntilExpiration = getDaysUntilExpiration();
   const finalPrice = calculateFinalPrice(
     product.price,
@@ -205,6 +285,58 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                   <span className="badge badge-secondary">
                     Bulk Discount Applied!
                   </span>
+                )}
+                {/* Display Certifications */}
+                {isCertificationsLoading ? (
+                  <span className="loading loading-spinner loading-xs"></span>
+                ) : certificationsError ? (
+                  <span className="text-error text-xs">
+                    {certificationsError}
+                  </span>
+                ) : (
+                  productCertifications.length > 0 &&
+                  productCertifications.map(
+                    (pc) =>
+                      pc.certification && (
+                        <div
+                          key={pc.id}
+                          className="tooltip"
+                          data-tip={`${
+                            pc.status === "approved"
+                              ? "Verified"
+                              : pc.status === "rejected"
+                              ? "Rejected"
+                              : "Pending"
+                          }`}
+                        >
+                          <div
+                            className={`badge gap-2 ${
+                              pc.status === "approved"
+                                ? "badge-success"
+                                : pc.status === "rejected"
+                                ? "badge-error"
+                                : "badge-warning"
+                            }`}
+                          >
+                            {/* {(() => {
+                              const IconComponent =
+                                getCertificationIconComponent(
+                                  getCertificationIcon(pc.certification.icon)
+                                );
+                              return <IconComponent className="w-4 h-4" />;
+                            })()} */}
+                            {pc.certification.name}
+                            {pc.status === "approved" ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : pc.status === "rejected" ? (
+                              <XCircle className="w-3 h-3" />
+                            ) : (
+                              <Clock className="w-3 h-3" />
+                            )}
+                          </div>
+                        </div>
+                      )
+                  )
                 )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">

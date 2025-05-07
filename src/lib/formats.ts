@@ -21,3 +21,17 @@ export const getCategoryImage = (categoryId: number): string => {
 
   return categoryImages[categoryId] || "/images/categories/default.jpg";
 };
+
+// Map certification icons to Lucide icon names
+export const getCertificationIcon = (icon: string): string => {
+  const certificationIcons: Record<string, string> = {
+    eco_leaf: "Leaf",
+    fair_trade: "Scale",
+    recycling: "Recycle",
+    local_farm: "Warehouse",
+    eco_package: "Package",
+    co2_neutral: "Wind",
+  };
+
+  return certificationIcons[icon] || "Award";
+};

@@ -10,6 +10,7 @@ import { useCartStore } from "@/store/cartStore";
 import Cookies from "js-cookie";
 import { refreshAccessToken } from "@/lib/interceptor";
 import { useAuthStore } from "@/store/authStore";
+import { ShoppingCart, Sun, Moon } from "lucide-react";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -126,7 +127,7 @@ const Navbar: FC = () => {
           {isBuyer && (
             <Link href="/cart" className="btn btn-ghost btn-circle">
               <div className="indicator">
-                <img src="/logo/cart.svg" alt="Cart" className="w-6 h-6" />
+                <ShoppingCart className="w-6 h-6" />
                 <span className="badge badge-sm indicator-item">
                   {cartItemsCount}
                 </span>
@@ -143,47 +144,9 @@ const Navbar: FC = () => {
               className="theme-controller sr-only"
             />
             {theme === "light" ? (
-              <svg
-                aria-label="sun"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                className="w-5 h-5"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <circle cx="12" cy="12" r="4"></circle>
-                  <path d="M12 2v2"></path>
-                  <path d="M12 20v2"></path>
-                  <path d="m4.93 4.93 1.41 1.41"></path>
-                  <path d="m17.66 17.66 1.41 1.41"></path>
-                  <path d="M2 12h2"></path>
-                  <path d="M20 12h2"></path>
-                  <path d="m6.34 17.66-1.41 1.41"></path>
-                  <path d="m19.07 4.93-1.41 1.41"></path>
-                </g>
-              </svg>
+              <Sun className="w-5 h-5" />
             ) : (
-              <svg
-                aria-label="moon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                className="w-5 h-5"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                </g>
-              </svg>
+              <Moon className="w-5 h-5" />
             )}
           </label>
 
@@ -211,6 +174,9 @@ const Navbar: FC = () => {
                   <Link href="/profile">Profile</Link>
                 </li>
                 <li>
+                  <Link href="/profile/addresses">List Address</Link>
+                </li>
+                <li>
                   <Link href="/profile/transactions">Transactions</Link>
                 </li>
                 <li>
@@ -224,6 +190,13 @@ const Navbar: FC = () => {
                 {role === "expedition" && (
                   <li>
                     <Link href="/expedition">Processed Orders</Link>
+                  </li>
+                )}
+                {role === "admin" && (
+                  <li>
+                    <Link href="/admin/certifications">
+                      Product Certifications
+                    </Link>
                   </li>
                 )}
                 <li>
