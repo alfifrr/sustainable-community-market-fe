@@ -306,13 +306,13 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                         <div
                           key={pc.id}
                           className="tooltip"
-                          data-tip={`${pc.certification.description} (${
+                          data-tip={`${
                             pc.status === "verified"
                               ? "Verified"
                               : pc.status === "rejected"
                               ? "Rejected"
                               : "Pending"
-                          })`}
+                          }`}
                         >
                           <div
                             className={`badge gap-2 ${
