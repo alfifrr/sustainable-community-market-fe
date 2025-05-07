@@ -1,14 +1,47 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
+import { getCertificationIcon } from "@/lib/formats";
 import { AxiosError } from "axios";
+import {
+  ShoppingBag,
+  BadgeCheck,
+  ChevronLeft,
+  Loader2,
+  Leaf,
+  Scale,
+  Recycle,
+  Warehouse,
+  Package,
+  Wind,
+  Award,
+} from "lucide-react";
+
+const iconMap = {
+  Leaf,
+  Scale,
+  Recycle,
+  Warehouse,
+  Package,
+  Wind,
+  Award,
+} as const;
 
 interface Category {
   id: number;
   name: string;
   description: string;
+}
+
+interface Certification {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Address {
@@ -54,6 +87,7 @@ export default function CreateProduct() {
     category_id: "",
     address_id: "",
     expiration_date: "",
+    certifications: [] as string[],
   });
 
   const [newAddress, setNewAddress] = useState<ShippingAddress>({
@@ -70,48 +104,11 @@ export default function CreateProduct() {
     contact_person: "",
   });
 
-  const fetchCategories = async () => {
-    if (categories.length > 0) return;
-    setIsCategoriesLoading(true);
-    setCategoriesError(null);
-
-    try {
-      const { data } = await axiosInstance.get(API_ENDPOINTS.CATEGORY);
-      if (data.status === "success") {
-        setCategories(data.data);
-      } else {
-        setCategoriesError("Failed to load categories. Please try again.");
-      }
-    } catch {
-      setCategoriesError("Failed to load categories. Please try again.");
-    } finally {
-      setIsCategoriesLoading(false);
-    }
-  };
-
-  const fetchAddresses = async () => {
-    if (addresses.length > 0) return;
-    setIsAddressesLoading(true);
-    setAddressesError(null);
-
-    try {
-      const { data } = await axiosInstance.get(API_ENDPOINTS.ADDRESSES);
-      if (data.status === "success") {
-        setAddresses(data.data);
-        if (data.data.length === 0) {
-          setAddressesError(
-            "No pickup addresses found. Please add an address in your profile first."
-          );
-        }
-      } else {
-        setAddressesError("Failed to load addresses. Please try again.");
-      }
-    } catch {
-      setAddressesError("Failed to load addresses. Please try again.");
-    } finally {
-      setIsAddressesLoading(false);
-    }
-  };
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [isCertificationsLoading, setIsCertificationsLoading] = useState(false);
+  const [certificationsError, setCertificationsError] = useState<string | null>(
+    null
+  );
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -219,8 +216,102 @@ export default function CreateProduct() {
     }
   };
 
+  const handleCertificationChange = (certificationId: string) => {
+    setFormData((prev) => {
+      const currentCertifications = prev.certifications;
+      const newCertifications = currentCertifications.includes(certificationId)
+        ? currentCertifications.filter((id) => id !== certificationId)
+        : [...currentCertifications, certificationId];
+
+      return {
+        ...prev,
+        certifications: newCertifications,
+      };
+    });
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const errors: Record<string, string> = {};
+
+    // Product Name validation (3-255 characters)
+    if (!formData.name.trim()) {
+      errors.name = "Product name is required";
+      isValid = false;
+    } else if (formData.name.trim().length < 3) {
+      errors.name = "Product name must be at least 3 characters";
+      isValid = false;
+    } else if (formData.name.trim().length > 255) {
+      errors.name = "Product name must not exceed 255 characters";
+      isValid = false;
+    }
+
+    // Description validation (10-255 characters)
+    if (!formData.description.trim()) {
+      errors.description = "Description is required";
+      isValid = false;
+    } else if (formData.description.trim().length < 10) {
+      errors.description = "Description must be at least 10 characters";
+      isValid = false;
+    } else if (formData.description.trim().length > 255) {
+      errors.description = "Description must not exceed 255 characters";
+      isValid = false;
+    }
+
+    // Price validation (minimum 1)
+    if (!formData.price) {
+      errors.price = "Price is required";
+      isValid = false;
+    } else if (parseInt(formData.price) < 1) {
+      errors.price = "Price must be at least 1";
+      isValid = false;
+    }
+
+    // Stock validation (minimum 1)
+    if (!formData.stock) {
+      errors.stock = "Stock is required";
+      isValid = false;
+    } else if (parseInt(formData.stock) < 1) {
+      errors.stock = "Stock must be at least 1";
+      isValid = false;
+    }
+
+    // Category validation
+    if (!formData.category_id) {
+      errors.category = "Category is required";
+      isValid = false;
+    }
+
+    // Address validation
+    if (addressInputMode === "saved" && !formData.address_id) {
+      errors.address = "Please select a pickup address";
+      isValid = false;
+    }
+
+    // Expiration date validation
+    if (!formData.expiration_date) {
+      errors.expiration_date = "Expiration date is required";
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setServerError({
+        error: "Validation Error",
+        message: "Please check the form for errors",
+        status: "error",
+      });
+    }
+
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
     setServerError(null);
 
@@ -238,6 +329,11 @@ export default function CreateProduct() {
       const expirationDate = new Date(formData.expiration_date);
       expirationDate.setUTCHours(23, 59, 59, 999);
 
+      // Convert certification IDs to numbers
+      const sustainabilityCertifications = formData.certifications.map((id) =>
+        parseInt(id)
+      );
+
       const productData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -246,6 +342,7 @@ export default function CreateProduct() {
         category_id: parseInt(formData.category_id),
         address_id: parseInt(finalAddressId),
         expiration_date: expirationDate.toISOString(),
+        sustainability_certifications: sustainabilityCertifications,
       };
 
       const { data } = await axiosInstance.post(
@@ -281,12 +378,92 @@ export default function CreateProduct() {
     }
   };
 
+  const fetchCategories = useCallback(async () => {
+    if (categories.length > 0) return;
+    setIsCategoriesLoading(true);
+    setCategoriesError(null);
+
+    try {
+      const { data } = await axiosInstance.get(API_ENDPOINTS.CATEGORY);
+      if (data.status === "success") {
+        setCategories(data.data);
+      } else {
+        setCategoriesError("Failed to load categories. Please try again.");
+      }
+    } catch {
+      setCategoriesError("Failed to load categories. Please try again.");
+    } finally {
+      setIsCategoriesLoading(false);
+    }
+  }, [categories.length]);
+
+  const fetchAddresses = useCallback(async () => {
+    if (addresses.length > 0) return;
+    setIsAddressesLoading(true);
+    setAddressesError(null);
+
+    try {
+      const { data } = await axiosInstance.get(API_ENDPOINTS.ADDRESSES);
+      if (data.status === "success") {
+        setAddresses(data.data);
+        if (data.data.length === 0) {
+          setAddressesError(
+            "No pickup addresses found. Please add an address in your profile first."
+          );
+        }
+      } else {
+        setAddressesError("Failed to load addresses. Please try again.");
+      }
+    } catch {
+      setAddressesError("Failed to load addresses. Please try again.");
+    } finally {
+      setIsAddressesLoading(false);
+    }
+  }, [addresses.length]);
+
+  useEffect(() => {
+    const fetchCertifications = async () => {
+      setIsCertificationsLoading(true);
+      setCertificationsError(null);
+      try {
+        const { data } = await axiosInstance.get(
+          API_ENDPOINTS.AVAILABLE_CERTIFICATIONS
+        );
+        if (data.status === "success") {
+          setCertifications(data.data);
+        } else {
+          setCertificationsError(
+            "Failed to load certifications. Please try again."
+          );
+        }
+      } catch {
+        setCertificationsError(
+          "Failed to load certifications. Please try again."
+        );
+      } finally {
+        setIsCertificationsLoading(false);
+      }
+    };
+    fetchCertifications();
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    fetchAddresses();
+  }, [fetchAddresses]);
+
   return (
     <div className="min-h-screen py-12 bg-base-200">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
           <div className="bg-base-100 rounded-xl shadow-lg p-6 md:p-8">
-            <h1 className="text-2xl font-bold mb-6">List a New Product</h1>
+            <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <ShoppingBag className="w-6 h-6" />
+              List a New Product
+            </h1>
 
             {serverError && (
               <div className="alert alert-error mb-6">
@@ -616,26 +793,84 @@ export default function CreateProduct() {
                 />
               </div>
 
+              {/* Certifications Section */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Sustainable Certifications</span>
+                  <span className="label-text-alt">Select all that apply</span>
+                </label>
+                {isCertificationsLoading ? (
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="loading loading-spinner loading-sm"></span>
+                    <span>Loading certifications...</span>
+                  </div>
+                ) : certificationsError ? (
+                  <div className="text-error mt-2">{certificationsError}</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                    {certifications.map((cert) => {
+                      const IconComponent =
+                        iconMap[
+                          getCertificationIcon(
+                            cert.icon
+                          ) as keyof typeof iconMap
+                        ];
+                      return (
+                        <div
+                          key={cert.id}
+                          className={`card bg-base-100 cursor-pointer transition-all hover:shadow-lg ${
+                            formData.certifications.includes(cert.id.toString())
+                              ? "ring-2 ring-primary"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            handleCertificationChange(cert.id.toString())
+                          }
+                        >
+                          <div className="card-body p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-lg bg-base-200 flex items-center justify-center flex-shrink-0">
+                                <IconComponent className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold">{cert.name}</h3>
+                                <p className="text-sm text-base-content/70">
+                                  {cert.description}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end gap-4">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="btn btn-ghost"
+                  className="btn btn-ghost gap-2"
                 >
+                  <ChevronLeft className="w-4 h-4" />
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary"
+                  className="btn btn-primary gap-2"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <>
-                      <span className="loading loading-spinner loading-sm"></span>
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       Creating...
                     </>
                   ) : (
-                    "Create Product"
+                    <>
+                      <BadgeCheck className="w-4 h-4" />
+                      Create Product
+                    </>
                   )}
                 </button>
               </div>
