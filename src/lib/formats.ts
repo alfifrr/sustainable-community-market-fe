@@ -21,3 +21,21 @@ export const getCategoryImage = (categoryId: number): string => {
 
   return categoryImages[categoryId] || "/images/categories/default.jpg";
 };
+
+// Map certification icons to local images
+export const getCertificationImage = (icon: string): string => {
+  const certificationImages: Record<string, string> = {
+    "🌱": "/images/certifications/organic.jpg",
+    "♻️": "/images/certifications/recycled.jpg",
+    "🌍": "/images/certifications/eco-friendly.jpg",
+    "🌿": "/images/certifications/natural.jpg",
+    "💧": "/images/certifications/water-efficient.jpg",
+    "☀️": "/images/certifications/solar-powered.jpg",
+    "🌾": "/images/certifications/sustainable-farming.jpg",
+    "🐝": "/images/certifications/bee-friendly.jpg",
+    "🌳": "/images/certifications/forest-friendly.jpg",
+    "🔋": "/images/certifications/energy-efficient.jpg",
+  };
+
+  return certificationImages[icon] || "/images/certifications/default.jpg";
+};

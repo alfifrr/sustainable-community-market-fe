@@ -211,6 +211,9 @@ const Navbar: FC = () => {
                   <Link href="/profile">Profile</Link>
                 </li>
                 <li>
+                  <Link href="/profile/addresses">List Address</Link>
+                </li>
+                <li>
                   <Link href="/profile/transactions">Transactions</Link>
                 </li>
                 <li>

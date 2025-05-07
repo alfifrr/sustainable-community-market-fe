@@ -1,9 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import { AxiosError } from "axios";
+import { getCertificationImage } from "@/lib/formats";
 
 interface Category {
   id: number;
@@ -82,7 +84,9 @@ export default function CreateProduct() {
 
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [isCertificationsLoading, setIsCertificationsLoading] = useState(false);
-  const [certificationsError, setCertificationsError] = useState<string | null>(null);
+  const [certificationsError, setCertificationsError] = useState<string | null>(
+    null
+  );
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -196,7 +200,7 @@ export default function CreateProduct() {
       const newCertifications = currentCertifications.includes(certificationId)
         ? currentCertifications.filter((id) => id !== certificationId)
         : [...currentCertifications, certificationId];
-      
+
       return {
         ...prev,
         certifications: newCertifications,
@@ -267,7 +271,7 @@ export default function CreateProduct() {
     }
   };
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     if (categories.length > 0) return;
     setIsCategoriesLoading(true);
     setCategoriesError(null);
@@ -284,9 +288,9 @@ export default function CreateProduct() {
     } finally {
       setIsCategoriesLoading(false);
     }
-  };
+  }, [categories.length]);
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     if (addresses.length > 0) return;
     setIsAddressesLoading(true);
     setAddressesError(null);
@@ -308,27 +312,41 @@ export default function CreateProduct() {
     } finally {
       setIsAddressesLoading(false);
     }
-  };
+  }, [addresses.length]);
 
   useEffect(() => {
     const fetchCertifications = async () => {
       setIsCertificationsLoading(true);
       setCertificationsError(null);
       try {
-        const { data } = await axiosInstance.get("/api/sustainability/certifications");
+        const { data } = await axiosInstance.get(
+          API_ENDPOINTS.AVAILABLE_CERTIFICATIONS
+        );
         if (data.status === "success") {
           setCertifications(data.data);
         } else {
-          setCertificationsError("Failed to load certifications. Please try again.");
+          setCertificationsError(
+            "Failed to load certifications. Please try again."
+          );
         }
       } catch {
-        setCertificationsError("Failed to load certifications. Please try again.");
+        setCertificationsError(
+          "Failed to load certifications. Please try again."
+        );
       } finally {
         setIsCertificationsLoading(false);
       }
     };
     fetchCertifications();
   }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    fetchAddresses();
+  }, [fetchAddresses]);
 
   return (
     <div className="min-h-screen py-12 bg-base-200">
@@ -462,6 +480,7 @@ export default function CreateProduct() {
                       name="category_id"
                       value={formData.category_id}
                       onChange={handleChange}
+                      onClick={fetchCategories}
                       className="select select-bordered w-full"
                       required
                       disabled={isCategoriesLoading}
@@ -682,21 +701,33 @@ export default function CreateProduct() {
                     {certifications.map((cert) => (
                       <div
                         key={cert.id}
-                        className={`card bg-base-200 cursor-pointer transition-all ${
+                        className={`card bg-base-100 cursor-pointer transition-all hover:shadow-lg ${
                           formData.certifications.includes(cert.id.toString())
                             ? "ring-2 ring-primary"
                             : ""
                         }`}
-                        onClick={() => handleCertificationChange(cert.id.toString())}
+                        onClick={() =>
+                          handleCertificationChange(cert.id.toString())
+                        }
                       >
                         <div className="card-body p-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">{cert.icon}</span>
-                            <h3 className="card-title text-base">{cert.name}</h3>
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                              <Image
+                                src={getCertificationImage(cert.icon)}
+                                alt={cert.name}
+                                fill
+                                className="object-cover"
+                                sizes="48px"
+                              />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">{cert.name}</h3>
+                              <p className="text-sm text-base-content/70">
+                                {cert.description}
+                              </p>
+                            </div>
                           </div>
-                          <p className="text-sm text-base-content/70">
-                            {cert.description}
-                          </p>
                         </div>
                       </div>
                     ))}

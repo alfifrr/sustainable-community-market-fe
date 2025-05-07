@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { calculateFinalPrice } from "@/utils/discountUtils";
+import { getCertificationImage } from "@/lib/formats";
 import type {
   ProductReviewResponse,
   Category,
@@ -68,24 +69,34 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   const user = useAuthStore((state) => state.user);
   const isSeller = user?.role === "seller";
 
-  const [productCertifications, setProductCertifications] = useState<ProductCertification[]>([]);
+  const [productCertifications, setProductCertifications] = useState<
+    ProductCertification[]
+  >([]);
   const [isCertificationsLoading, setIsCertificationsLoading] = useState(false);
-  const [certificationsError, setCertificationsError] = useState<string | null>(null);
+  const [certificationsError, setCertificationsError] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchProductCertifications = async () => {
       setIsCertificationsLoading(true);
       setCertificationsError(null);
       try {
-        const res = await fetch(`/api/sustainability/product-certifications/${product.id}`);
+        const res = await fetch(
+          `/api/sustainability/product-certifications/${product.id}`
+        );
         const data = await res.json();
         if (data.status === "success") {
           setProductCertifications(data.data);
         } else {
-          setCertificationsError("Failed to load certifications. Please try again.");
+          setCertificationsError(
+            "Failed to load certifications. Please try again."
+          );
         }
       } catch {
-        setCertificationsError("Failed to load certifications. Please try again.");
+        setCertificationsError(
+          "Failed to load certifications. Please try again."
+        );
       } finally {
         setIsCertificationsLoading(false);
       }
@@ -255,22 +266,47 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                 {isCertificationsLoading ? (
                   <span className="loading loading-spinner loading-xs"></span>
                 ) : certificationsError ? (
-                  <span className="text-error text-xs">{certificationsError}</span>
-                ) : productCertifications.length > 0 && (
-                  productCertifications.map((pc) => (
-                    pc.certification && (
-                      <div
-                        key={pc.id}
-                        className="tooltip"
-                        data-tip={`${pc.certification.description} (${pc.status === 'verified' ? 'Verified' : 'Pending'})`}
-                      >
-                        <span className={`badge gap-1 ${pc.status === 'verified' ? 'badge-success' : 'badge-warning'}`}>
-                          {pc.certification.icon} {pc.certification.name}
-                          {pc.status === 'pending' && <span className="ml-1">(Pending)</span>}
-                        </span>
-                      </div>
-                    )
-                  ))
+                  <span className="text-error text-xs">
+                    {certificationsError}
+                  </span>
+                ) : (
+                  productCertifications.length > 0 &&
+                  productCertifications.map(
+                    (pc) =>
+                      pc.certification && (
+                        <div
+                          key={pc.id}
+                          className="tooltip"
+                          data-tip={`${pc.certification.description} (${
+                            pc.status === "verified" ? "Verified" : "Pending"
+                          })`}
+                        >
+                          <div
+                            className={`badge gap-2 ${
+                              pc.status === "verified"
+                                ? "badge-success"
+                                : "badge-warning"
+                            }`}
+                          >
+                            <div className="relative w-4 h-4 rounded overflow-hidden">
+                              <Image
+                                src={getCertificationImage(
+                                  pc.certification.icon
+                                )}
+                                alt={pc.certification.name}
+                                fill
+                                className="object-cover"
+                                sizes="16px"
+                              />
+                            </div>
+                            {pc.certification.name}
+                            {pc.status === "pending" && (
+                              <span className="ml-1">(Pending)</span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                  )
                 )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
