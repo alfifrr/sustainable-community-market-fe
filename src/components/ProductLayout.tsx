@@ -4,6 +4,7 @@ import Image from "next/image";
 import {
   CalendarDays,
   MapPin,
+  Package,
   Package2,
   User2,
   ShoppingCart,
@@ -13,16 +14,12 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  Sprout,
   Recycle,
-  Globe,
   Leaf,
-  Droplets,
-  Sun,
-  Bug,
-  TreePine,
-  Battery,
   Award,
+  Scale,
+  Warehouse,
+  Wind,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -37,6 +34,16 @@ import type {
   ProductUser,
   PickupAddress,
 } from "@/lib/types";
+
+const iconMap = {
+  Leaf,
+  Scale,
+  Recycle,
+  Warehouse,
+  Package,
+  Wind,
+  Award,
+} as const;
 
 interface ProductLayoutProps {
   product: {
@@ -206,19 +213,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   };
 
   const getCertificationIconComponent = (iconName: string) => {
-    const icons: Record<string, typeof Sprout> = {
-      Sprout,
-      Recycle,
-      Globe,
-      Leaf,
-      Droplets,
-      Sun,
-      Bug,
-      TreePine,
-      Battery,
-      Award,
-    };
-    return icons[iconName] || Award;
+    return iconMap[iconName as keyof typeof iconMap] || Award;
   };
 
   const daysUntilExpiration = getDaysUntilExpiration();
@@ -307,7 +302,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                           key={pc.id}
                           className="tooltip"
                           data-tip={`${
-                            pc.status === "verified"
+                            pc.status === "approved"
                               ? "Verified"
                               : pc.status === "rejected"
                               ? "Rejected"
@@ -316,22 +311,22 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                         >
                           <div
                             className={`badge gap-2 ${
-                              pc.status === "verified"
+                              pc.status === "approved"
                                 ? "badge-success"
                                 : pc.status === "rejected"
                                 ? "badge-error"
                                 : "badge-warning"
                             }`}
                           >
-                            {(() => {
+                            {/* {(() => {
                               const IconComponent =
                                 getCertificationIconComponent(
                                   getCertificationIcon(pc.certification.icon)
                                 );
                               return <IconComponent className="w-4 h-4" />;
-                            })()}
+                            })()} */}
                             {pc.certification.name}
-                            {pc.status === "verified" ? (
+                            {pc.status === "approved" ? (
                               <CheckCircle2 className="w-3 h-3" />
                             ) : pc.status === "rejected" ? (
                               <XCircle className="w-3 h-3" />
