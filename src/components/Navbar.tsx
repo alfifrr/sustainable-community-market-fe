@@ -108,6 +108,9 @@ const Navbar: FC = () => {
               <Link href="/products" className="btn btn-ghost">
                 Products
               </Link>
+              <Link href="/sellers" className="btn btn-ghost">
+                Local Sellers
+              </Link>
             </div>
           </div>
         </div>
