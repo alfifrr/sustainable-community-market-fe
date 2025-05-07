@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
@@ -9,6 +9,15 @@ interface Category {
   id: number;
   name: string;
   description: string;
+}
+
+interface Certification {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Address {
@@ -54,6 +63,7 @@ export default function CreateProduct() {
     category_id: "",
     address_id: "",
     expiration_date: "",
+    certifications: [] as string[],
   });
 
   const [newAddress, setNewAddress] = useState<ShippingAddress>({
@@ -70,48 +80,9 @@ export default function CreateProduct() {
     contact_person: "",
   });
 
-  const fetchCategories = async () => {
-    if (categories.length > 0) return;
-    setIsCategoriesLoading(true);
-    setCategoriesError(null);
-
-    try {
-      const { data } = await axiosInstance.get(API_ENDPOINTS.CATEGORY);
-      if (data.status === "success") {
-        setCategories(data.data);
-      } else {
-        setCategoriesError("Failed to load categories. Please try again.");
-      }
-    } catch {
-      setCategoriesError("Failed to load categories. Please try again.");
-    } finally {
-      setIsCategoriesLoading(false);
-    }
-  };
-
-  const fetchAddresses = async () => {
-    if (addresses.length > 0) return;
-    setIsAddressesLoading(true);
-    setAddressesError(null);
-
-    try {
-      const { data } = await axiosInstance.get(API_ENDPOINTS.ADDRESSES);
-      if (data.status === "success") {
-        setAddresses(data.data);
-        if (data.data.length === 0) {
-          setAddressesError(
-            "No pickup addresses found. Please add an address in your profile first."
-          );
-        }
-      } else {
-        setAddressesError("Failed to load addresses. Please try again.");
-      }
-    } catch {
-      setAddressesError("Failed to load addresses. Please try again.");
-    } finally {
-      setIsAddressesLoading(false);
-    }
-  };
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [isCertificationsLoading, setIsCertificationsLoading] = useState(false);
+  const [certificationsError, setCertificationsError] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -219,6 +190,20 @@ export default function CreateProduct() {
     }
   };
 
+  const handleCertificationChange = (certificationId: string) => {
+    setFormData((prev) => {
+      const currentCertifications = prev.certifications;
+      const newCertifications = currentCertifications.includes(certificationId)
+        ? currentCertifications.filter((id) => id !== certificationId)
+        : [...currentCertifications, certificationId];
+      
+      return {
+        ...prev,
+        certifications: newCertifications,
+      };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -246,6 +231,7 @@ export default function CreateProduct() {
         category_id: parseInt(formData.category_id),
         address_id: parseInt(finalAddressId),
         expiration_date: expirationDate.toISOString(),
+        certifications: formData.certifications,
       };
 
       const { data } = await axiosInstance.post(
@@ -280,6 +266,69 @@ export default function CreateProduct() {
       setIsSubmitting(false);
     }
   };
+
+  const fetchCategories = async () => {
+    if (categories.length > 0) return;
+    setIsCategoriesLoading(true);
+    setCategoriesError(null);
+
+    try {
+      const { data } = await axiosInstance.get(API_ENDPOINTS.CATEGORY);
+      if (data.status === "success") {
+        setCategories(data.data);
+      } else {
+        setCategoriesError("Failed to load categories. Please try again.");
+      }
+    } catch {
+      setCategoriesError("Failed to load categories. Please try again.");
+    } finally {
+      setIsCategoriesLoading(false);
+    }
+  };
+
+  const fetchAddresses = async () => {
+    if (addresses.length > 0) return;
+    setIsAddressesLoading(true);
+    setAddressesError(null);
+
+    try {
+      const { data } = await axiosInstance.get(API_ENDPOINTS.ADDRESSES);
+      if (data.status === "success") {
+        setAddresses(data.data);
+        if (data.data.length === 0) {
+          setAddressesError(
+            "No pickup addresses found. Please add an address in your profile first."
+          );
+        }
+      } else {
+        setAddressesError("Failed to load addresses. Please try again.");
+      }
+    } catch {
+      setAddressesError("Failed to load addresses. Please try again.");
+    } finally {
+      setIsAddressesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchCertifications = async () => {
+      setIsCertificationsLoading(true);
+      setCertificationsError(null);
+      try {
+        const { data } = await axiosInstance.get("/api/sustainability/certifications");
+        if (data.status === "success") {
+          setCertifications(data.data);
+        } else {
+          setCertificationsError("Failed to load certifications. Please try again.");
+        }
+      } catch {
+        setCertificationsError("Failed to load certifications. Please try again.");
+      } finally {
+        setIsCertificationsLoading(false);
+      }
+    };
+    fetchCertifications();
+  }, []);
 
   return (
     <div className="min-h-screen py-12 bg-base-200">
@@ -413,7 +462,6 @@ export default function CreateProduct() {
                       name="category_id"
                       value={formData.category_id}
                       onChange={handleChange}
-                      onClick={fetchCategories}
                       className="select select-bordered w-full"
                       required
                       disabled={isCategoriesLoading}
@@ -614,6 +662,46 @@ export default function CreateProduct() {
                   required
                   min={new Date().toISOString().split("T")[0]}
                 />
+              </div>
+
+              {/* Certifications Section */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Sustainable Certifications</span>
+                  <span className="label-text-alt">Select all that apply</span>
+                </label>
+                {isCertificationsLoading ? (
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="loading loading-spinner loading-sm"></span>
+                    <span>Loading certifications...</span>
+                  </div>
+                ) : certificationsError ? (
+                  <div className="text-error mt-2">{certificationsError}</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                    {certifications.map((cert) => (
+                      <div
+                        key={cert.id}
+                        className={`card bg-base-200 cursor-pointer transition-all ${
+                          formData.certifications.includes(cert.id.toString())
+                            ? "ring-2 ring-primary"
+                            : ""
+                        }`}
+                        onClick={() => handleCertificationChange(cert.id.toString())}
+                      >
+                        <div className="card-body p-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{cert.icon}</span>
+                            <h3 className="card-title text-base">{cert.name}</h3>
+                          </div>
+                          <p className="text-sm text-base-content/70">
+                            {cert.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-4">

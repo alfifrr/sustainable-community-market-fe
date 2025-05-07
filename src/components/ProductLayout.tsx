@@ -11,7 +11,7 @@ import {
   X,
   Star,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCartStore } from "@/store/cartStore";
@@ -38,7 +38,27 @@ interface ProductLayoutProps {
     expiration_date: string;
     pickup_address: PickupAddress;
     reviews: ProductReviewResponse["data"];
+    certifications?: string[];
   };
+}
+
+interface ProductCertification {
+  id: number;
+  product_id: number;
+  certification_id: number;
+  status: string;
+  verification_date: string | null;
+  verified_by: number | null;
+  certification?: Certification;
+}
+
+interface Certification {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const ProductLayout = ({ product }: ProductLayoutProps) => {
@@ -47,6 +67,31 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   const { isLoggedIn } = useAuth();
   const user = useAuthStore((state) => state.user);
   const isSeller = user?.role === "seller";
+
+  const [productCertifications, setProductCertifications] = useState<ProductCertification[]>([]);
+  const [isCertificationsLoading, setIsCertificationsLoading] = useState(false);
+  const [certificationsError, setCertificationsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProductCertifications = async () => {
+      setIsCertificationsLoading(true);
+      setCertificationsError(null);
+      try {
+        const res = await fetch(`/api/sustainability/product-certifications/${product.id}`);
+        const data = await res.json();
+        if (data.status === "success") {
+          setProductCertifications(data.data);
+        } else {
+          setCertificationsError("Failed to load certifications. Please try again.");
+        }
+      } catch {
+        setCertificationsError("Failed to load certifications. Please try again.");
+      } finally {
+        setIsCertificationsLoading(false);
+      }
+    };
+    fetchProductCertifications();
+  }, [product.id]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -205,6 +250,27 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                   <span className="badge badge-secondary">
                     Bulk Discount Applied!
                   </span>
+                )}
+                {/* Display Certifications */}
+                {isCertificationsLoading ? (
+                  <span className="loading loading-spinner loading-xs"></span>
+                ) : certificationsError ? (
+                  <span className="text-error text-xs">{certificationsError}</span>
+                ) : productCertifications.length > 0 && (
+                  productCertifications.map((pc) => (
+                    pc.certification && (
+                      <div
+                        key={pc.id}
+                        className="tooltip"
+                        data-tip={`${pc.certification.description} (${pc.status === 'verified' ? 'Verified' : 'Pending'})`}
+                      >
+                        <span className={`badge gap-1 ${pc.status === 'verified' ? 'badge-success' : 'badge-warning'}`}>
+                          {pc.certification.icon} {pc.certification.name}
+                          {pc.status === 'pending' && <span className="ml-1">(Pending)</span>}
+                        </span>
+                      </div>
+                    )
+                  ))
                 )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
