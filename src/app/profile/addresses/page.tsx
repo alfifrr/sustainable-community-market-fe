@@ -25,6 +25,12 @@ export default function AddressesPage() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<{
+    label?: string;
+    address?: string;
+    contact_person?: string;
+    location?: string;
+  }>({});
   const [formData, setFormData] = useState({
     label: "",
     address: "",
@@ -60,6 +66,10 @@ export default function AddressesPage() {
       ...prev,
       [name]: value,
     }));
+    setValidationErrors((prev) => ({
+      ...prev,
+      [name]: undefined,
+    }));
   };
 
   const handleMapClick = (lat: number, lng: number) => {
@@ -68,10 +78,49 @@ export default function AddressesPage() {
       latitude: lat,
       longitude: lng,
     }));
+    setValidationErrors((prev) => ({
+      ...prev,
+      location: undefined,
+    }));
+  };
+
+  const validateForm = () => {
+    const errors: { [key: string]: string } = {};
+
+    if (!formData.label.trim()) {
+      errors.label = "Label is required";
+    } else if (formData.label.length < 3) {
+      errors.label = "Label must be at least 3 characters long";
+    }
+
+    if (!formData.contact_person.trim()) {
+      errors.contact_person = "Contact person is required";
+    } else if (formData.contact_person.length < 3) {
+      errors.contact_person =
+        "Contact person must be at least 3 characters long";
+    }
+
+    if (!formData.address.trim()) {
+      errors.address = "Address is required";
+    } else if (formData.address.length < 5) {
+      errors.address = "Address must be at least 5 characters long";
+    }
+
+    if (!formData.latitude || !formData.longitude) {
+      errors.location = "Please select a location on the map";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -91,6 +140,7 @@ export default function AddressesPage() {
           latitude: null,
           longitude: null,
         });
+        setValidationErrors({});
       }
     } catch (error) {
       setError("Failed to create address");
@@ -126,10 +176,18 @@ export default function AddressesPage() {
                         name="label"
                         value={formData.label}
                         onChange={handleChange}
-                        className="input input-bordered w-full focus:input-primary transition-colors"
+                        className={`input input-bordered w-full focus:input-primary transition-colors ${
+                          validationErrors.label ? "input-error" : ""
+                        }`}
                         placeholder="E.g., Home, Office, Store"
-                        required
                       />
+                      {validationErrors.label && (
+                        <label className="label">
+                          <span className="label-text-alt text-error">
+                            {validationErrors.label}
+                          </span>
+                        </label>
+                      )}
                     </div>
 
                     <div className="form-control">
@@ -145,10 +203,18 @@ export default function AddressesPage() {
                         name="contact_person"
                         value={formData.contact_person}
                         onChange={handleChange}
-                        className="input input-bordered w-full focus:input-primary transition-colors"
+                        className={`input input-bordered w-full focus:input-primary transition-colors ${
+                          validationErrors.contact_person ? "input-error" : ""
+                        }`}
                         placeholder="Name of contact person"
-                        required
                       />
+                      {validationErrors.contact_person && (
+                        <label className="label">
+                          <span className="label-text-alt text-error">
+                            {validationErrors.contact_person}
+                          </span>
+                        </label>
+                      )}
                     </div>
 
                     <div className="form-control">
@@ -163,10 +229,18 @@ export default function AddressesPage() {
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
-                        className="textarea textarea-bordered min-h-[120px] focus:textarea-primary transition-colors"
+                        className={`textarea textarea-bordered min-h-[120px] focus:textarea-primary transition-colors ${
+                          validationErrors.address ? "textarea-error" : ""
+                        }`}
                         placeholder="Street name, building number, district, city, province"
-                        required
                       />
+                      {validationErrors.address && (
+                        <label className="label">
+                          <span className="label-text-alt text-error">
+                            {validationErrors.address}
+                          </span>
+                        </label>
+                      )}
                     </div>
 
                     <div className="form-control">
@@ -189,15 +263,21 @@ export default function AddressesPage() {
                       />
                     </div>
 
-                    {/* Map Section - Moved here */}
                     <div className="form-control">
                       <label className="label">
                         <span className="label-text font-medium flex items-center gap-2">
                           <MapPin size={16} className="text-primary" />
                           Location on Map
+                          <span className="text-error">*</span>
                         </span>
                       </label>
-                      <div className="h-[300px] w-full rounded-lg overflow-hidden border border-base-300">
+                      <div
+                        className={`h-[300px] w-full rounded-lg overflow-hidden border ${
+                          validationErrors.location
+                            ? "border-error"
+                            : "border-base-300"
+                        }`}
+                      >
                         {!locationLoading && userLocation && (
                           <SellersMap
                             sellers={[]}
@@ -215,6 +295,13 @@ export default function AddressesPage() {
                           Selected coordinates: {formData.latitude.toFixed(6)},{" "}
                           {formData.longitude.toFixed(6)}
                         </div>
+                      )}
+                      {validationErrors.location && (
+                        <label className="label">
+                          <span className="label-text-alt text-error">
+                            {validationErrors.location}
+                          </span>
+                        </label>
                       )}
                     </div>
 

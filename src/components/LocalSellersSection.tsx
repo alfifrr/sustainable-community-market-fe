@@ -86,7 +86,7 @@ export default function LocalSellersSection() {
                     </button>
                   </>
                 ) : (
-                  `Found ${nearbySellers.length} sellers and ${nearbyProducts.length} products within 1km of your location`
+                  `Found ${nearbyProducts.length} products within 1km of your location`
                 )}
               </span>
             </div>
