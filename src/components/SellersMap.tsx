@@ -125,8 +125,16 @@ export default function SellersMap({
   onMapClick,
 }: SellersMapProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [selectedPosition, setSelectedPosition] =
+    useState<LatLngExpression | null>(null);
 
   const centerLatLng: LatLngExpression = [center.lat, center.lng];
+
+  const handleMapClick = (lat: number, lng: number) => {
+    const newPosition: LatLngExpression = [lat, lng];
+    setSelectedPosition(newPosition);
+    onMapClick?.(lat, lng);
+  };
 
   // Handle client-side mounting
   useEffect(() => {
@@ -155,7 +163,7 @@ export default function SellersMap({
         />
 
         {/* Map Click Handler */}
-        <MapClickHandler onClick={onMapClick} />
+        <MapClickHandler onClick={handleMapClick} />
 
         {/* User Location Marker */}
         <Marker position={centerLatLng} icon={userIcon}>
@@ -165,6 +173,17 @@ export default function SellersMap({
             </div>
           </Popup>
         </Marker>
+
+        {/* Selected Location Marker */}
+        {selectedPosition && (
+          <Marker position={selectedPosition} icon={userIcon}>
+            <Popup>
+              <div className="p-2">
+                <p className="font-medium">Selected Location</p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
 
         {/* 1km Radius Circle */}
         <Circle
