@@ -17,6 +17,8 @@ export default function ProductsPage() {
   const [maxPrice, setMaxPrice] = useState<number>(1000000);
   const [ratingFilter, setRatingFilter] = useState<number>(0);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [productsPerPage] = useState<number>(5);
 
   // Define handler functions inside the component
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -202,6 +204,24 @@ export default function ProductsPage() {
 
     setFilteredProducts(result);
   }, [products, selectedCategory, sortBy, priceRange, ratingFilter]);
+
+  // Calculate pagination values
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  // Handle page change
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top when changing page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, priceRange, ratingFilter, sortBy]);
 
   if (error) {
     return (
@@ -407,6 +427,9 @@ export default function ProductsPage() {
         <div className="flex justify-between items-center mb-4">
           <p className="text-base-content/70">
             Showing {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+            {filteredProducts.length > 0 && (
+              <span> (Page {currentPage} of {totalPages})</span>
+            )}
           </p>
         </div>
       )}
@@ -431,16 +454,80 @@ export default function ProductsPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="card bg-base-100 shadow-md hover:shadow-xl transition-shadow"
-            >
-              <ProductCard product={product} />
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentProducts.map((product) => (
+              <div
+                key={product.id}
+                className="card bg-base-100 shadow-md hover:shadow-xl transition-shadow"
+              >
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {filteredProducts.length > 0 && (
+            <div className="flex justify-center mt-8">
+              <div className="join">
+                <button
+                  className="join-item btn"
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1}
+                >
+                  «
+                </button>
+                <button
+                  className="join-item btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  ‹
+                </button>
+
+                {/* Page numbers */}
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNumber = index + 1;
+                  // Show current page, first, last, and pages around current
+                  const showPageNumber =
+                    pageNumber === 1 ||
+                    pageNumber === totalPages ||
+                    (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1);
+
+                  if (showPageNumber) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        className={`join-item btn ${currentPage === pageNumber ? 'btn-active' : ''}`}
+                        onClick={() => handlePageChange(pageNumber)}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  } else if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+                    return <button key={pageNumber} className="join-item btn btn-disabled">...</button>;
+                  }
+                  return null;
+                })}
+
+                <button
+                  className="join-item btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  ›
+                </button>
+                <button
+                  className="join-item btn"
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage === totalPages}
+                >
+                  »
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );
