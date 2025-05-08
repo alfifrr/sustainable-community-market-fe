@@ -30,6 +30,8 @@ export default function AddressesPage() {
     address: "",
     details: "",
     contact_person: "",
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   useEffect(() => {
@@ -60,6 +62,14 @@ export default function AddressesPage() {
     }));
   };
 
+  const handleMapClick = (lat: number, lng: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -78,6 +88,8 @@ export default function AddressesPage() {
           address: "",
           details: "",
           contact_person: "",
+          latitude: null,
+          longitude: null,
         });
       }
     } catch (error) {
@@ -194,9 +206,16 @@ export default function AddressesPage() {
                               lng: userLocation.longitude,
                             }}
                             zoom={14}
+                            onMapClick={handleMapClick}
                           />
                         )}
                       </div>
+                      {formData.latitude && formData.longitude && (
+                        <div className="mt-2 text-sm text-base-content/70">
+                          Selected coordinates: {formData.latitude.toFixed(6)},{" "}
+                          {formData.longitude.toFixed(6)}
+                        </div>
+                      )}
                     </div>
 
                     {error && (

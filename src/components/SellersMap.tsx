@@ -111,7 +111,7 @@ function MapClickHandler({
   useMapEvents({
     click: (e) => {
       const { lat, lng } = e.latlng;
-      console.log("Map clicked at:", { latitude: lat, longitude: lng });
+      // console.log("Map clicked at:", { latitude: lat, longitude: lng });
       onClick?.(lat, lng);
     },
   });
