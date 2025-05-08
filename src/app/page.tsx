@@ -6,12 +6,16 @@ import ImpactStatsSection from "@/components/ImpactStatsSection";
 import WhyItMattersSection from "@/components/WhyItMattersSection";
 import CommunitySection from "@/components/CommunitySection";
 import JoinSection from "@/components/JoinSection";
+import LocalSellersSection from "@/components/LocalSellersSection";
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Local Sellers Section */}
+      <LocalSellersSection />
 
       {/* Headline Section */}
       <HeadlineSection />

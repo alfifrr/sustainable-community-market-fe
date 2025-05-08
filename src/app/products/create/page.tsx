@@ -18,6 +18,8 @@ import {
   Wind,
   Award,
 } from "lucide-react";
+import { useNearbySellers } from "@/hooks/useNearbySellers";
+import SellersMap from "@/components/SellersMap";
 
 const iconMap = {
   Leaf,
@@ -60,6 +62,8 @@ interface ShippingAddress {
   address: string;
   details: string;
   contact_person: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export default function CreateProduct() {
@@ -90,11 +94,15 @@ export default function CreateProduct() {
     certifications: [] as string[],
   });
 
+  const { userLocation, isLoading: locationLoading } = useNearbySellers(1);
+
   const [newAddress, setNewAddress] = useState<ShippingAddress>({
     label: "",
     address: "",
     details: "",
     contact_person: "",
+    latitude: null,
+    longitude: null,
   });
 
   const [addressFormErrors, setAddressFormErrors] = useState({
@@ -102,6 +110,7 @@ export default function CreateProduct() {
     address: "",
     details: "",
     contact_person: "",
+    location: "",
   });
 
   const [certifications, setCertifications] = useState<Certification[]>([]);
@@ -142,6 +151,7 @@ export default function CreateProduct() {
       address: "",
       details: "",
       contact_person: "",
+      location: "",
     };
     let isValid = true;
 
@@ -183,8 +193,25 @@ export default function CreateProduct() {
       isValid = false;
     }
 
+    if (!newAddress.latitude || !newAddress.longitude) {
+      errors.location = "Please select a location on the map";
+      isValid = false;
+    }
+
     setAddressFormErrors(errors);
     return isValid;
+  };
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setNewAddress((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
+    setAddressFormErrors((prev) => ({
+      ...prev,
+      location: "",
+    }));
   };
 
   const createNewAddress = async (): Promise<string | null> => {
@@ -198,6 +225,8 @@ export default function CreateProduct() {
         address: newAddress.address,
         details: newAddress.details || "",
         contact_person: newAddress.contact_person,
+        latitude: newAddress.latitude,
+        longitude: newAddress.longitude,
       });
 
       if (data.status === "success") {
@@ -767,6 +796,48 @@ export default function CreateProduct() {
                           <span className="text-error text-sm mt-1">
                             {addressFormErrors.details}
                           </span>
+                        )}
+                      </div>
+
+                      <div className="form-control">
+                        <label className="label">
+                          <span className="label-text">
+                            Location on Map{" "}
+                            <span className="text-error">*</span>
+                          </span>
+                        </label>
+                        <div
+                          className={`h-[300px] w-full rounded-lg overflow-hidden border ${
+                            addressFormErrors.location
+                              ? "border-error"
+                              : "border-base-300"
+                          }`}
+                        >
+                          {!locationLoading && userLocation && (
+                            <SellersMap
+                              sellers={[]}
+                              center={{
+                                lat: userLocation.latitude,
+                                lng: userLocation.longitude,
+                              }}
+                              zoom={14}
+                              onMapClick={handleMapClick}
+                            />
+                          )}
+                        </div>
+                        {newAddress.latitude && newAddress.longitude && (
+                          <div className="mt-2 text-sm text-base-content/70">
+                            Selected coordinates:{" "}
+                            {newAddress.latitude.toFixed(6)},{" "}
+                            {newAddress.longitude.toFixed(6)}
+                          </div>
+                        )}
+                        {addressFormErrors.location && (
+                          <label className="label">
+                            <span className="label-text-alt text-error">
+                              {addressFormErrors.location}
+                            </span>
+                          </label>
                         )}
                       </div>
                     </div>
