@@ -5,6 +5,7 @@ import { Icon, LatLngExpression } from "leaflet";
 import { Seller } from "@/lib/mockData";
 import { MapPin } from "lucide-react";
 import { useMapEvents } from "react-leaflet";
+import { usePathname } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 
 // Fix for default marker icons in Next.js
@@ -127,6 +128,7 @@ export default function SellersMap({
   const [isMounted, setIsMounted] = useState(false);
   const [selectedPosition, setSelectedPosition] =
     useState<LatLngExpression | null>(null);
+  const pathname = usePathname();
 
   const centerLatLng: LatLngExpression = [center.lat, center.lng];
 
@@ -149,6 +151,9 @@ export default function SellersMap({
     );
   }
 
+  // Check if the current route is /profile/addresses
+  const isProfileAddressesRoute = pathname === "/profile/addresses";
+
   return (
     <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg relative z-0">
       <MapContainer
@@ -163,7 +168,9 @@ export default function SellersMap({
         />
 
         {/* Map Click Handler */}
-        <MapClickHandler onClick={handleMapClick} />
+        {isProfileAddressesRoute && (
+          <MapClickHandler onClick={handleMapClick} />
+        )}
 
         {/* User Location Marker */}
         <Marker position={centerLatLng} icon={userIcon}>
