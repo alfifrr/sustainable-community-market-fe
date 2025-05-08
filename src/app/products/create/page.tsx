@@ -110,6 +110,7 @@ export default function CreateProduct() {
     address: "",
     details: "",
     contact_person: "",
+    location: "",
   });
 
   const [certifications, setCertifications] = useState<Certification[]>([]);
@@ -150,6 +151,7 @@ export default function CreateProduct() {
       address: "",
       details: "",
       contact_person: "",
+      location: "",
     };
     let isValid = true;
 
@@ -191,6 +193,11 @@ export default function CreateProduct() {
       isValid = false;
     }
 
+    if (!newAddress.latitude || !newAddress.longitude) {
+      errors.location = "Please select a location on the map";
+      isValid = false;
+    }
+
     setAddressFormErrors(errors);
     return isValid;
   };
@@ -200,6 +207,10 @@ export default function CreateProduct() {
       ...prev,
       latitude: lat,
       longitude: lng,
+    }));
+    setAddressFormErrors((prev) => ({
+      ...prev,
+      location: "",
     }));
   };
 
@@ -790,9 +801,18 @@ export default function CreateProduct() {
 
                       <div className="form-control">
                         <label className="label">
-                          <span className="label-text">Location on Map</span>
+                          <span className="label-text">
+                            Location on Map{" "}
+                            <span className="text-error">*</span>
+                          </span>
                         </label>
-                        <div className="h-[300px] w-full rounded-lg overflow-hidden border border-base-300">
+                        <div
+                          className={`h-[300px] w-full rounded-lg overflow-hidden border ${
+                            addressFormErrors.location
+                              ? "border-error"
+                              : "border-base-300"
+                          }`}
+                        >
                           {!locationLoading && userLocation && (
                             <SellersMap
                               sellers={[]}
@@ -811,6 +831,13 @@ export default function CreateProduct() {
                             {newAddress.latitude.toFixed(6)},{" "}
                             {newAddress.longitude.toFixed(6)}
                           </div>
+                        )}
+                        {addressFormErrors.location && (
+                          <label className="label">
+                            <span className="label-text-alt text-error">
+                              {addressFormErrors.location}
+                            </span>
+                          </label>
                         )}
                       </div>
                     </div>
