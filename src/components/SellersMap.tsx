@@ -151,8 +151,9 @@ export default function SellersMap({
     );
   }
 
-  // Check if the current route is /profile/addresses
-  const isProfileAddressesRoute = pathname === "/profile/addresses";
+  // Check if the current route allows map clicks
+  const isMapClickEnabled =
+    pathname === "/profile/addresses" || pathname === "/products/create";
 
   return (
     <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg relative z-0">
@@ -168,9 +169,7 @@ export default function SellersMap({
         />
 
         {/* Map Click Handler */}
-        {isProfileAddressesRoute && (
-          <MapClickHandler onClick={handleMapClick} />
-        )}
+        {isMapClickEnabled && <MapClickHandler onClick={handleMapClick} />}
 
         {/* User Location Marker */}
         <Marker position={centerLatLng} icon={userIcon}>
