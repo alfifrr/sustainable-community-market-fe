@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { MapPin, User, Home, Info, Plus, Calendar } from "lucide-react";
 import axiosInstance from "@/lib/interceptor";
 import { API_ENDPOINTS } from "@/lib/endpoints";
+import SellersMap from "@/components/SellersMap";
+import { useNearbySellers } from "@/hooks/useNearbySellers";
 
 interface Address {
   id: number;
@@ -18,6 +20,7 @@ interface Address {
 
 export default function AddressesPage() {
   const router = useRouter();
+  const { userLocation, isLoading: locationLoading } = useNearbySellers(1);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,6 +90,25 @@ export default function AddressesPage() {
   return (
     <div className="min-h-screen bg-base-200/50">
       <div className="container mx-auto px-4 py-8">
+        {/* Map Section */}
+        <div className="mb-8 card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title">Your Location</h2>
+            <div className="h-[400px] w-full rounded-lg overflow-hidden">
+              {!locationLoading && userLocation && (
+                <SellersMap
+                  sellers={[]}
+                  center={{
+                    lat: userLocation.latitude,
+                    lng: userLocation.longitude,
+                  }}
+                  zoom={14}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Column - Add New Address */}
           <div className="w-full md:w-2/5 lg:w-1/3">
