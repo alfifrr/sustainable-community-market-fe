@@ -90,25 +90,6 @@ export default function AddressesPage() {
   return (
     <div className="min-h-screen bg-base-200/50">
       <div className="container mx-auto px-4 py-8">
-        {/* Map Section */}
-        <div className="mb-8 card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Your Location</h2>
-            <div className="h-[400px] w-full rounded-lg overflow-hidden">
-              {!locationLoading && userLocation && (
-                <SellersMap
-                  sellers={[]}
-                  center={{
-                    lat: userLocation.latitude,
-                    lng: userLocation.longitude,
-                  }}
-                  zoom={14}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Column - Add New Address */}
           <div className="w-full md:w-2/5 lg:w-1/3">
@@ -194,6 +175,28 @@ export default function AddressesPage() {
                         className="input input-bordered w-full focus:input-primary transition-colors"
                         placeholder="Landmarks, building color, specific instructions"
                       />
+                    </div>
+
+                    {/* Map Section - Moved here */}
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text font-medium flex items-center gap-2">
+                          <MapPin size={16} className="text-primary" />
+                          Location on Map
+                        </span>
+                      </label>
+                      <div className="h-[300px] w-full rounded-lg overflow-hidden border border-base-300">
+                        {!locationLoading && userLocation && (
+                          <SellersMap
+                            sellers={[]}
+                            center={{
+                              lat: userLocation.latitude,
+                              lng: userLocation.longitude,
+                            }}
+                            zoom={14}
+                          />
+                        )}
+                      </div>
                     </div>
 
                     {error && (
