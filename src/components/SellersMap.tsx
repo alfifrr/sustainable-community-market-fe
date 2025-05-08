@@ -43,12 +43,28 @@ const Circle = dynamic(
 
 interface SellersMapProps {
   sellers: Seller[];
+  products?: {
+    id: number;
+    name: string;
+    pickup_address: {
+      coordinates: {
+        latitude: number;
+        longitude: number;
+      };
+      address: string;
+    };
+    price: number;
+    user: {
+      name: string;
+    };
+  }[];
   center: {
     lat: number;
     lng: number;
   };
   zoom?: number;
   onSellerClick?: (seller: Seller) => void;
+  onProductClick?: (product: any) => void;
   onMapClick?: (lat: number, lng: number) => void;
 }
 
@@ -67,6 +83,13 @@ const userIcon = new Icon({
 
 const sellerIcon = new Icon({
   iconUrl: "/images/seller-location.svg",
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+});
+
+const productIcon = new Icon({
+  iconUrl: "/images/categories/default.jpg",
   iconSize: [32, 32],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32],
@@ -95,6 +118,14 @@ function MapLegend() {
           <span>Seller Location</span>
         </div>
         <div className="flex items-center gap-2">
+          <img
+            src="/images/categories/default.jpg"
+            alt="Product Location"
+            className="w-6 h-6 rounded-full"
+          />
+          <span>Product Location</span>
+        </div>
+        <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-blue-500/10 border-2 border-blue-500"></div>
           <span>1km Radius</span>
         </div>
@@ -120,9 +151,11 @@ function MapClickHandler({
 
 export default function SellersMap({
   sellers,
+  products = [],
   center = defaultCenter,
   zoom = 14,
   onSellerClick,
+  onProductClick,
   onMapClick,
 }: SellersMapProps) {
   const [isMounted, setIsMounted] = useState(false);
@@ -205,7 +238,7 @@ export default function SellersMap({
         {/* Seller Markers */}
         {sellers.map((seller) => (
           <Marker
-            key={seller.id}
+            key={`seller-${seller.id}`}
             position={
               [
                 seller.location.latitude,
@@ -217,6 +250,39 @@ export default function SellersMap({
               click: () => onSellerClick?.(seller),
               mouseover: (e) => {
                 e.target.bindPopup(seller.name).openPopup();
+              },
+              mouseout: (e) => {
+                e.target.closePopup();
+              },
+            }}
+          />
+        ))}
+
+        {/* Product Markers */}
+        {products.map((product) => (
+          <Marker
+            key={`product-${product.id}`}
+            position={
+              [
+                product.pickup_address.coordinates.latitude,
+                product.pickup_address.coordinates.longitude,
+              ] as LatLngExpression
+            }
+            icon={productIcon}
+            eventHandlers={{
+              click: () => onProductClick?.(product),
+              mouseover: (e) => {
+                e.target
+                  .bindPopup(
+                    `
+                  <div class="p-2">
+                    <p class="font-medium">${product.name}</p>
+                    <p class="text-sm">Rp ${product.price.toLocaleString()}</p>
+                    <p class="text-sm text-gray-600">by ${product.user.name}</p>
+                  </div>
+                `
+                  )
+                  .openPopup();
               },
               mouseout: (e) => {
                 e.target.closePopup();
