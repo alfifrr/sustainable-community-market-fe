@@ -20,9 +20,10 @@ export interface AuthState {
   setUser: (user: UserData | null) => void;
   role: "seller" | "buyer" | "expedition" | "admin" | null;
   setRole: (role: "seller" | "buyer" | "expedition" | "admin" | null) => void;
+  isSellerOrExpedition: () => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   isLoggedIn:
     typeof window !== "undefined" ? Boolean(Cookies.get("authToken")) : false,
   setIsLoggedIn: (value) => set({ isLoggedIn: value }),
@@ -36,5 +37,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       Cookies.remove("userRole");
     }
     set({ role });
+  },
+  isSellerOrExpedition: () => {
+    const role = get().role;
+    return role === "seller" || role === "expedition";
   },
 }));
