@@ -1,33 +1,29 @@
 "use client";
 import React from "react";
 import { SectionContainer } from "@/components/SectionContainer";
+import Image from "next/image";
 
 interface TeamMember {
   id: number;
   name: string;
-  imagePlaceholder: string;
+  imagePath: string;
 }
 
 const teamMembers: TeamMember[] = [
   {
     id: 1,
-    name: "Team Member 1",
-    imagePlaceholder: "/team-member-1.jpg", // Placeholder, will be replaced later
+    name: "Alfian F",
+    imagePath: "/images/Team/Alfian F.jpeg",
   },
   {
     id: 2,
-    name: "Team Member 2",
-    imagePlaceholder: "/team-member-2.jpg", // Placeholder, will be replaced later
+    name: "M Rifqi Ramadani",
+    imagePath: "/images/Team/M Rifqi Ramadani.jpeg",
   },
   {
     id: 3,
-    name: "Team Member 3",
-    imagePlaceholder: "/team-member-3.jpg", // Placeholder, will be replaced later
-  },
-  {
-    id: 4,
-    name: "Team Member 4",
-    imagePlaceholder: "/team-member-4.jpg", // Placeholder, will be replaced later
+    name: "Novianus Efrat",
+    imagePath: "/images/Team/Novianus Efrat.jpeg",
   },
 ];
 
@@ -47,33 +43,24 @@ export default function TeamPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 max-w-4xl mx-auto">
             {teamMembers.map((member) => (
               <div
                 key={member.id}
-                className="card bg-base-100 shadow-xl overflow-hidden"
+                className="card bg-base-100 shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300"
               >
-                <figure className="relative h-80 w-full bg-base-300">
-                  {/* Placeholder untuk foto yang akan diupload nanti */}
-                  <div className="w-full h-full flex items-center justify-center text-base-content/50">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-24 w-24"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  </div>
+                <figure className="relative h-64 w-full bg-base-300">
+                  <Image
+                    src={member.imagePath}
+                    alt={member.name}
+                    fill
+                    className="object-cover object-center"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                    priority
+                  />
                 </figure>
-                <div className="card-body">
-                  <h2 className="card-title text-2xl">{member.name}</h2>
+                <div className="card-body p-4 text-center">
+                  <h2 className="card-title text-xl justify-center">{member.name}</h2>
                 </div>
               </div>
             ))}
