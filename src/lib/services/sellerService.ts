@@ -1,8 +1,12 @@
-import { Seller } from '../mockData';
-import { mockSellers } from '../mockData';
+import { Seller } from "../mockData";
+import { mockSellers } from "../mockData";
 
 export interface SellerService {
-  getNearbySellers(latitude: number, longitude: number, radiusInKm: number): Promise<Seller[]>;
+  getNearbySellers(
+    latitude: number,
+    longitude: number,
+    radiusInKm: number
+  ): Promise<Seller[]>;
   getSellerById(id: string): Promise<Seller | null>;
 }
 
@@ -33,26 +37,26 @@ export class MockSellerService implements SellerService {
     radiusInKm: number
   ): Promise<Seller[]> {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Filter sellers within the specified radius
-    return mockSellers.filter(seller => {
+    return mockSellers.filter((seller) => {
       const distance = calculateDistance(
         latitude,
         longitude,
         seller.location.latitude,
         seller.location.longitude
       );
-      console.log(`Distance to ${seller.name}: ${distance.toFixed(2)}km`); // Debug log
+      // console.log(`Distance to ${seller.name}: ${distance.toFixed(2)}km`); // Debug log
       return distance <= radiusInKm;
     });
   }
 
   async getSellerById(id: string): Promise<Seller | null> {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
-    const seller = mockSellers.find(s => s.id === id);
+    const seller = mockSellers.find((s) => s.id === id);
     return seller || null;
   }
 }
@@ -65,14 +69,14 @@ export class RealSellerService implements SellerService {
     radiusInKm: number
   ): Promise<Seller[]> {
     // TODO: Implement real API call
-    throw new Error('Not implemented');
+    throw new Error("Not implemented");
   }
 
   async getSellerById(id: string): Promise<Seller | null> {
     // TODO: Implement real API call
-    throw new Error('Not implemented');
+    throw new Error("Not implemented");
   }
 }
 
 // Export a singleton instance of the mock service
-export const sellerService = new MockSellerService(); 
+export const sellerService = new MockSellerService();

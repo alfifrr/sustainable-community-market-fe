@@ -17,7 +17,7 @@ const Navbar: FC = () => {
   const router = useRouter();
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { isLoggedIn, logout } = useAuth();
-  const { user, role } = useAuthStore((state) => state);
+  const { user, role, isSellerOrExpedition } = useAuthStore((state) => state);
   const { theme, toggleTheme } = useTheme();
   const cartItemsCount = useCartStore((state) => state.getTotalItems());
   useAuthSync();
@@ -48,8 +48,6 @@ const Navbar: FC = () => {
     // Either no tokens exist or refresh failed
     router.push("/login");
   };
-
-  const isBuyer = user?.role === "buyer";
 
   return (
     <>
@@ -127,7 +125,7 @@ const Navbar: FC = () => {
           </div>
 
           {/* Cart Icon - Hide for sellers and expedition */}
-          {isBuyer && (
+          {!isSellerOrExpedition() && (
             <Link href="/cart" className="btn btn-ghost btn-circle">
               <div className="indicator">
                 <ShoppingCart className="w-6 h-6" />

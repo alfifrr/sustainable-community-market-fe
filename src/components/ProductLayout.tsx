@@ -86,7 +86,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
   const [quantity, setQuantity] = useState(1);
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const user = useAuthStore((state) => state.user);
+  const { user, isSellerOrExpedition } = useAuthStore((state) => state);
   const isBuyer = user?.role === "buyer";
 
   const [productCertifications, setProductCertifications] = useState<
@@ -318,13 +318,6 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
                                 : "badge-warning"
                             }`}
                           >
-                            {/* {(() => {
-                              const IconComponent =
-                                getCertificationIconComponent(
-                                  getCertificationIcon(pc.certification.icon)
-                                );
-                              return <IconComponent className="w-4 h-4" />;
-                            })()} */}
                             {pc.certification.name}
                             {pc.status === "approved" ? (
                               <CheckCircle2 className="w-3 h-3" />
@@ -376,7 +369,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
               </div>
 
               {/* Quantity Selector - Hide for sellers */}
-              {isBuyer && (
+              {!isSellerOrExpedition() && (
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-sm font-medium">Quantity:</span>
                   <div className="join">
@@ -408,7 +401,7 @@ const ProductLayout = ({ product }: ProductLayoutProps) => {
           </div>
 
           {/* Action Buttons - Hide for sellers */}
-          {isBuyer && (
+          {!isSellerOrExpedition() && (
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleAddToCart}

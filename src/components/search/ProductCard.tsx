@@ -24,7 +24,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  const user = useAuthStore((state) => state.user);
+  const { user, isSellerOrExpedition } = useAuthStore((state) => state);
   const isBuyer = user?.role === "buyer";
 
   const getDaysUntilExpiration = () => {
@@ -207,7 +207,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {/* Action Buttons - Hide for sellers */}
-      {isBuyer && (
+      {!isSellerOrExpedition() && (
         <div className="card-actions justify-end p-4 pt-0 gap-2">
           <button
             onClick={handleAddToCart}
