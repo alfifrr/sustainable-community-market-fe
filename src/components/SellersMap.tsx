@@ -8,18 +8,6 @@ import { useMapEvents } from "react-leaflet";
 import { usePathname } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 
-// Fix for default marker icons in Next.js
-import L from "leaflet";
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
-
 // Dynamically import the map components
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -73,28 +61,6 @@ const defaultCenter = {
   lng: 106.8456,
 };
 
-// Custom marker icons
-const userIcon = new Icon({
-  iconUrl: "/images/user-location.svg",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
-
-const sellerIcon = new Icon({
-  iconUrl: "/images/seller-location.svg",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
-
-const productIcon = new Icon({
-  iconUrl: "/images/categories/default.jpg",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
-
 // Legend component
 function MapLegend() {
   return (
@@ -142,7 +108,6 @@ function MapClickHandler({
   useMapEvents({
     click: (e) => {
       const { lat, lng } = e.latlng;
-      // console.log("Map clicked at:", { latitude: lat, longitude: lng });
       onClick?.(lat, lng);
     },
   });
@@ -162,8 +127,51 @@ export default function SellersMap({
   const [selectedPosition, setSelectedPosition] =
     useState<LatLngExpression | null>(null);
   const pathname = usePathname();
-
   const centerLatLng: LatLngExpression = [center.lat, center.lng];
+  const [icons, setIcons] = useState<{
+    userIcon: Icon;
+    sellerIcon: Icon;
+    productIcon: Icon;
+  } | null>(null);
+
+  // Initialize Leaflet and icons on client-side only
+  useEffect(() => {
+    // Fix for default marker icons in Next.js
+    const L = require("leaflet");
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+      iconUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+    });
+
+    // Initialize custom icons
+    setIcons({
+      userIcon: new L.Icon({
+        iconUrl: "/images/user-location.svg",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+      }),
+      sellerIcon: new L.Icon({
+        iconUrl: "/images/seller-location.svg",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+      }),
+      productIcon: new L.Icon({
+        iconUrl: "/images/categories/default.jpg",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+      }),
+    });
+
+    setIsMounted(true);
+  }, []);
 
   const handleMapClick = (lat: number, lng: number) => {
     const newPosition: LatLngExpression = [lat, lng];
@@ -171,12 +179,7 @@ export default function SellersMap({
     onMapClick?.(lat, lng);
   };
 
-  // Handle client-side mounting
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
+  if (!isMounted || !icons) {
     return (
       <div className="w-full h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">
         <div className="loading loading-spinner loading-lg"></div>
@@ -201,11 +204,10 @@ export default function SellersMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Map Click Handler */}
         {isMapClickEnabled && <MapClickHandler onClick={handleMapClick} />}
 
         {/* User Location Marker */}
-        <Marker position={centerLatLng} icon={userIcon}>
+        <Marker position={centerLatLng} icon={icons.userIcon}>
           <Popup>
             <div className="p-2">
               <p className="font-medium">Your Location</p>
@@ -213,9 +215,8 @@ export default function SellersMap({
           </Popup>
         </Marker>
 
-        {/* Selected Location Marker */}
         {selectedPosition && (
-          <Marker position={selectedPosition} icon={userIcon}>
+          <Marker position={selectedPosition} icon={icons.userIcon}>
             <Popup>
               <div className="p-2">
                 <p className="font-medium">Selected Location</p>
@@ -224,10 +225,9 @@ export default function SellersMap({
           </Marker>
         )}
 
-        {/* 1km Radius Circle */}
         <Circle
           center={centerLatLng}
-          radius={1000} // 1km in meters
+          radius={1000}
           pathOptions={{
             color: "#3b82f6",
             fillColor: "#3b82f6",
@@ -235,7 +235,6 @@ export default function SellersMap({
           }}
         />
 
-        {/* Seller Markers */}
         {sellers.map((seller) => (
           <Marker
             key={`seller-${seller.id}`}
@@ -245,7 +244,7 @@ export default function SellersMap({
                 seller.location.longitude,
               ] as LatLngExpression
             }
-            icon={sellerIcon}
+            icon={icons.sellerIcon}
             eventHandlers={{
               click: () => onSellerClick?.(seller),
               mouseover: (e) => {
@@ -258,7 +257,6 @@ export default function SellersMap({
           />
         ))}
 
-        {/* Product Markers */}
         {products.map((product) => (
           <Marker
             key={`product-${product.id}`}
@@ -268,19 +266,21 @@ export default function SellersMap({
                 product.pickup_address.coordinates.longitude,
               ] as LatLngExpression
             }
-            icon={productIcon}
+            icon={icons.productIcon}
             eventHandlers={{
               click: () => onProductClick?.(product),
               mouseover: (e) => {
                 e.target
                   .bindPopup(
                     `
-                  <div class="p-2">
-                    <p class="font-medium">${product.name}</p>
-                    <p class="text-sm">Rp ${product.price.toLocaleString()}</p>
-                    <p class="text-sm text-gray-600">by ${product.user.name}</p>
-                  </div>
-                `
+                    <div class="p-2">
+                      <p class="font-medium">${product.name}</p>
+                      <p class="text-sm">Rp ${product.price.toLocaleString()}</p>
+                      <p class="text-sm text-gray-600">by ${
+                        product.user.name
+                      }</p>
+                    </div>
+                  `
                   )
                   .openPopup();
               },
@@ -292,7 +292,6 @@ export default function SellersMap({
         ))}
       </MapContainer>
 
-      {/* Map Legend */}
       <MapLegend />
     </div>
   );
