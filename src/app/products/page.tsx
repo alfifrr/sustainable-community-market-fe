@@ -18,7 +18,7 @@ export default function ProductsPage() {
   const [ratingFilter, setRatingFilter] = useState<number>(0);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [productsPerPage] = useState<number>(5);
+  const [productsPerPage] = useState<number>(6);
 
   // Define handler functions inside the component
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
