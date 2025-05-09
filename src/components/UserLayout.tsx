@@ -1,3 +1,4 @@
+import { User2 } from "lucide-react";
 import { User } from "@/lib/types";
 
 interface UserLayoutProps {
@@ -13,17 +14,10 @@ const UserLayout = ({ user }: UserLayoutProps) => {
       <div className="bg-base-300 rounded-lg shadow-lg p-4 md:p-6 transition-shadow hover:shadow-xl">
         <div className="flex flex-col sm:flex-row items-center sm:space-x-6 space-y-4 sm:space-y-0">
           <div
-            className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0"
+            className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 bg-base-200 rounded-full flex items-center justify-center"
             aria-hidden="true"
           >
-            <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                user.name
-              )}&size=128`}
-              alt=""
-              className="rounded-full w-full h-full object-cover shadow-md"
-              loading="lazy"
-            />
+            <User2 className="w-16 h-16 md:w-20 md:h-20 text-base-content/50" />
           </div>
           <div className="text-center sm:text-left">
             <h1 className="text-2xl md:text-3xl font-bold mb-2 tracking-tight">

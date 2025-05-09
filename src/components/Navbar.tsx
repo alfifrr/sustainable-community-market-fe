@@ -6,13 +6,20 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthSync } from "@/hooks/useAuthSync";
 import { useTheme } from "@/context/ThemeContext";
+import { useCartStore } from "@/store/cartStore";
+import Cookies from "js-cookie";
+import { refreshAccessToken } from "@/lib/interceptor";
+import { useAuthStore } from "@/store/authStore";
+import { ShoppingCart, Sun, Moon } from "lucide-react";
 
 const Navbar: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { isLoggedIn, logout } = useAuth();
+  const { user, role, isSellerOrExpedition } = useAuthStore((state) => state);
   const { theme, toggleTheme } = useTheme();
+  const cartItemsCount = useCartStore((state) => state.getTotalItems());
   useAuthSync();
 
   useEffect(() => {
@@ -26,9 +33,25 @@ const Navbar: FC = () => {
     router.push("/login");
   };
 
+  const handleLoginClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const authToken = Cookies.get("authToken");
+    const refreshToken = Cookies.get("refreshToken");
+
+    if (!authToken && refreshToken) {
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        // Token refresh successful, user is now logged in
+        return;
+      }
+    }
+    // Either no tokens exist or refresh failed
+    router.push("/login");
+  };
+
   return (
     <>
-      <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50">
+      <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50 px-8 md:px-16">
         <div className="flex-1">
           <div className="dropdown md:hidden">
             <div
@@ -61,6 +84,9 @@ const Navbar: FC = () => {
               <li>
                 <Link href="/about">About Us</Link>
               </li>
+              <li>
+                <Link href="/products">Products</Link>
+              </li>
             </ul>
           </div>
           <div className="flex items-center gap-4">
@@ -72,11 +98,29 @@ const Navbar: FC = () => {
               />
             </Link>
             <div className="hidden md:flex">
-              <Link href="/" className="btn btn-ghost">
+              <Link
+                href="/"
+                className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent"
+              >
                 Home
               </Link>
-              <Link href="/about" className="btn btn-ghost">
+              <Link
+                href="/about"
+                className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent"
+              >
                 About Us
+              </Link>
+              <Link
+                href="/products"
+                className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent"
+              >
+                Products
+              </Link>
+              <Link
+                href="/sellers"
+                className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent"
+              >
+                Local Sellers
               </Link>
             </div>
           </div>
@@ -86,14 +130,26 @@ const Navbar: FC = () => {
             <input
               type="text"
               placeholder="Search"
-              className="input input-bordered w-24 md:w-auto"
+              className="input input-bordered w-24 md:w-auto text-lg"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
+          {/* Cart Icon - Hide for sellers and expedition */}
+          {!isSellerOrExpedition() && (
+            <Link href="/cart" className="btn btn-ghost btn-circle">
+              <div className="indicator">
+                <ShoppingCart className="w-6 h-6" />
+                <span className="badge badge-sm indicator-item">
+                  {cartItemsCount}
+                </span>
+              </div>
+            </Link>
+          )}
+
           {/* Theme Switcher */}
-          <label className="toggle text-base-content cursor-pointer">
+          {/* <label className="toggle text-base-content cursor-pointer">
             <input
               type="checkbox"
               checked={theme === "dark"}
@@ -101,49 +157,11 @@ const Navbar: FC = () => {
               className="theme-controller sr-only"
             />
             {theme === "light" ? (
-              <svg
-                aria-label="sun"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                className="w-5 h-5"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <circle cx="12" cy="12" r="4"></circle>
-                  <path d="M12 2v2"></path>
-                  <path d="M12 20v2"></path>
-                  <path d="m4.93 4.93 1.41 1.41"></path>
-                  <path d="m17.66 17.66 1.41 1.41"></path>
-                  <path d="M2 12h2"></path>
-                  <path d="M20 12h2"></path>
-                  <path d="m6.34 17.66-1.41 1.41"></path>
-                  <path d="m19.07 4.93-1.41 1.41"></path>
-                </g>
-              </svg>
+              <Sun className="w-5 h-5" />
             ) : (
-              <svg
-                aria-label="moon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                className="w-5 h-5"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                </g>
-              </svg>
+              <Moon className="w-5 h-5" />
             )}
-          </label>
+          </label> */}
 
           {isLoggedIn ? (
             <div className="dropdown dropdown-end">
@@ -155,7 +173,9 @@ const Navbar: FC = () => {
                 <div className="w-10 rounded-full">
                   <img
                     alt="Tailwind CSS Navbar component"
-                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user?.username || ""
+                    )}`}
                   />
                 </div>
               </div>
@@ -164,14 +184,37 @@ const Navbar: FC = () => {
                 className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
               >
                 <li>
-                  <Link className="justify-between" href="/profile">
-                    Profile
-                    <span className="badge">New</span>
-                  </Link>
+                  <Link href="/profile">Profile</Link>
+                </li>
+
+                {role === "seller" && (
+                  <li>
+                    <Link href="/products/list">List Product</Link>
+                  </li>
+                )}
+                {role === "expedition" && (
+                  <li>
+                    <Link href="/expedition">Processed Orders</Link>
+                  </li>
+                )}
+                {role === "admin" && (
+                  <li>
+                    <Link href="/admin/certifications">
+                      Product Certifications
+                    </Link>
+                  </li>
+                )}
+
+                <li>
+                  <Link href="/profile/addresses">List Address</Link>
                 </li>
                 <li>
-                  <a>Settings</a>
+                  <Link href="/profile/transactions">Transactions</Link>
                 </li>
+                <li>
+                  <Link href="/profile/statements">Statements</Link>
+                </li>
+
                 <li>
                   <a onClick={handleLogout}>Logout</a>
                 </li>
@@ -179,7 +222,11 @@ const Navbar: FC = () => {
             </div>
           ) : (
             <div>
-              <Link href="/login" className="btn btn-primary btn-sm">
+              <Link
+                href="#"
+                onClick={handleLoginClick}
+                className="btn btn-primary hover:font-bold transition-all"
+              >
                 Login / Sign Up
               </Link>
             </div>

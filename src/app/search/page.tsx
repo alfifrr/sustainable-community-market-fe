@@ -67,7 +67,31 @@ function SearchResults() {
         ]);
 
         setUsers(usersData.data || []);
-        setProducts(productsData.data || []);
+
+        // Get review stats for each product
+        const productsWithReviews = await Promise.all(
+          (productsData.data || []).map(async (product: Product) => {
+            const reviewsRes = await fetch(
+              `/api/products/${product.id}/reviews`
+            );
+            const reviewsData = reviewsRes.ok
+              ? await reviewsRes.json()
+              : {
+                  data: {
+                    average_rating: 0,
+                    total_items_sold: 0,
+                  },
+                };
+
+            return {
+              ...product,
+              average_rating: reviewsData.data.average_rating || 0,
+              total_items_sold: reviewsData.data.total_items_sold || 0,
+            };
+          })
+        );
+
+        setProducts(productsWithReviews);
       } catch (error) {
         console.error("Search error:", error);
         setError("Failed to fetch results.");
@@ -166,21 +190,18 @@ function SearchResults() {
           <button
             className={`tab ${activeTab === "all" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("all")}
-            // aria-selected={activeTab === "all"}
           >
             All ({products.length + users.length})
           </button>
           <button
             className={`tab ${activeTab === "products" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("products")}
-            // aria-selected={activeTab === "products"}
           >
             Products ({products.length})
           </button>
           <button
             className={`tab ${activeTab === "users" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("users")}
-            // aria-selected={activeTab === "users"}
           >
             Users ({users.length})
           </button>
