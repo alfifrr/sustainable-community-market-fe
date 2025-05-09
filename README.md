@@ -7,7 +7,9 @@ A modern marketplace platform connecting local producers with consumers, promoti
 ## Features
 
 ### Smart Pricing System
+
 - **Dynamic Pricing**: Automatic price adjustments based on product expiration dates
+
   - 4 days until expiration: 20% discount
   - 3 days until expiration: 40% discount
   - 2 days until expiration: 60% discount
@@ -20,12 +22,14 @@ A modern marketplace platform connecting local producers with consumers, promoti
   - Example: 40% base discount + 5% bulk discount = 45% total savings
 
 ### User Roles
+
 - **Buyers**: Browse products, make purchases, track orders
 - **Sellers**: List products, manage inventory, track sales
 - **Expedition**: Handle order processing and delivery
 - **Admin**: Manage certifications and platform oversight
 
 ### Key Features
+
 - Real-time product search and filtering
 - Interactive map for locating nearby sellers
 - Shopping cart with dynamic pricing calculations
@@ -36,6 +40,7 @@ A modern marketplace platform connecting local producers with consumers, promoti
 ## Technical Stack
 
 ### Frontend
+
 - Next.js 14 (React Framework)
 - TypeScript
 - Tailwind CSS
@@ -44,6 +49,7 @@ A modern marketplace platform connecting local producers with consumers, promoti
 - Jest & React Testing Library
 
 ### Backend
+
 - Flask
 - Supabase
 - Mailtrap for Email Testing
@@ -55,23 +61,27 @@ For complete API documentation, visit [Swagger Documentation](https://sustainabl
 ## Pricing and Fees
 
 ### Product Pricing
+
 - Base price set by sellers
 - Dynamic discounts based on expiration dates
 - Bulk purchase discounts (5% for 5+ items)
 
 ### Service Fees
+
 - Fixed delivery and service fee: Rp 15,000 per order
 - Fee is fully refundable upon order cancellation
 
 ## Development
 
 ### Prerequisites
+
 - Node.js 18+
 - Python 3.8+
 - Supabase account
 - Mailtrap account
 
 ### Installation
+
 1. Clone the repository
 2. Install frontend dependencies:
    ```bash
@@ -83,15 +93,17 @@ For complete API documentation, visit [Swagger Documentation](https://sustainabl
    ```
 4. Set up environment variables
 5. Run development servers:
+
    ```bash
    # Frontend
    npm run dev
-   
+
    # Backend
    python app.py
    ```
 
 ### Testing
+
 ```bash
 # Frontend tests
 npm test
@@ -166,9 +178,18 @@ sustainable-community-market-fe/
 ├── __tests__/                    # Test files
 ├── next.config.ts                # Next.js configuration
 ├── package.json                  # Project dependencies
-├── tailwind.config.js           # Tailwind CSS configuration
-└── tsconfig.json                # TypeScript configuration
+├── tailwind.config.js            # Tailwind CSS configuration
+└── tsconfig.json                 # TypeScript configuration
 ```
+
+---
+
+## Deployed Apps
+
+- **Frontend**: [Sustainable Community Market Frontend](https://sustainable-community-market-fe.vercel.app/)
+- **Backend Swagger Docs**: [API Documentation](https://sustainable-community-market.onrender.com/api/docs)
+
+---
 
 ## Getting Started
 
@@ -179,31 +200,32 @@ sustainable-community-market-fe/
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repository:
 
-```bash
-git clone https://github.com/yourusername/nextjs-auth-system.git
-cd nextjs-auth-system
-```
+   ```bash
+   git clone https://github.com/alfifrr/sustainable-community-market-fe.git
+   cd sustainable-community-market-fe
+   ```
 
-2. Install dependencies
+2. Install dependencies:
 
-```bash
-npm install
-# or
-yarn install
-```
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-3. Run the development server
+3. Run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-4. Open http://localhost:3000 in your browser to view the application
-   Running Tests
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+
+5. Run tests:
 
 ```bash
 npm test
@@ -213,23 +235,29 @@ yarn test
 
 ## Technologies Used
 
-Next.js 14+
-React 18+
-TypeScript
-Tailwind CSS
-Jest & React Testing Library
-Flask
-Supabase
-Mailtrap
+- **Next.js 14+**
+- **React 18+**
+- **TypeScript**
+- **Tailwind CSS**
+- **Jest & React Testing Library**
+- **Flask**
+- **Supabase**
+- **Mailtrap**
+
+---
 
 ## Swagger API Documentation
 
 For complete API documentation, visit [Swagger Documentation](https://sustainable-community-market.onrender.com/api/docs).
 
-## Endpoint Note
+---
 
-- Purchasing a product (`/api/buy`) costs additional fixed delivery and service fee of `Rp. 15,000`
-- Delivery and service fee will be fully returned upon order cancellation (`/api/cancel`)
+## Endpoint Notes
+
+- Purchasing a product (`/api/buy`) costs an additional fixed delivery and service fee of `Rp. 15,000`.
+- Delivery and service fees will be fully refunded upon order cancellation (`/api/cancel`).
+
+---
 
 ## Dynamic Pricing System
 
@@ -245,16 +273,17 @@ Products are automatically discounted based on their remaining days until expira
 | 0 days (today)        | 90%      | 10% of original price  |
 | Expired               | -        | Not available for sale |
 
-Example:
+**Example:**
 
 - Original price: Rp 100,000
 - 3 days until expiration: Rp 60,000 (40% discount)
 - 1 day until expiration: Rp 20,000 (80% discount)
 
+---
+
 ## Bulk Discount System
 
 Purchasing 5 or more items will get a discount of 5%, stackable with the dynamic pricing system.
-
 
 ## Future Enhancements
 

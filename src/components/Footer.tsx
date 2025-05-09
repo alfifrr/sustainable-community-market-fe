@@ -1,14 +1,32 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import axiosInstance from "@/lib/interceptor";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscriptionError, setSubscriptionError] = useState<string | null>(
+    null
+  );
+  const [subscriptionSuccess, setSubscriptionSuccess] = useState(false);
 
-  const handleNewsletter = (e: React.FormEvent) => {
+  const handleNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement newsletter signup
-    setEmail("");
+    console.log("email test");
+    setIsSubmitting(true);
+    setSubscriptionError(null);
+    setSubscriptionSuccess(false);
+
+    try {
+      await axiosInstance.post("/api/subscribe", { email });
+      setSubscriptionSuccess(true);
+      setEmail("");
+    } catch (error) {
+      setSubscriptionError("Failed to subscribe. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -99,6 +117,16 @@ export default function Footer() {
               tips.
             </p>
             <form onSubmit={handleNewsletter} className="space-y-4">
+              {subscriptionError && (
+                <div className="alert alert-error text-sm">
+                  {subscriptionError}
+                </div>
+              )}
+              {subscriptionSuccess && (
+                <div className="alert alert-success text-sm">
+                  Successfully subscribed to newsletter!
+                </div>
+              )}
               <input
                 type="email"
                 placeholder="Your email"
@@ -106,9 +134,21 @@ export default function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="input input-bordered w-full"
                 required
+                disabled={isSubmitting}
               />
-              <button type="submit" className="btn btn-primary w-full">
-                Subscribe
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    Subscribing...
+                  </>
+                ) : (
+                  "Subscribe"
+                )}
               </button>
             </form>
           </div>
