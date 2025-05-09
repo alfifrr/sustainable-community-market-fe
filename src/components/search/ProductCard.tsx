@@ -111,10 +111,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <article className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+    <article className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
       <Link
         href={`/products/${product.id}`}
-        className="block transition-transform hover:scale-102 focus:scale-102 focus:outline-none"
+        className="block transition-transform hover:scale-102 focus:scale-102 focus:outline-none flex-1"
       >
         <div className="card-body p-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -208,7 +208,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Action Buttons - Hide for sellers */}
       {!isSellerOrExpedition() && (
-        <div className="card-actions justify-end p-4 pt-0 gap-2">
+        <div className="card-actions justify-end p-4 pt-0 gap-2 mt-auto border-t border-base-200">
           <button
             onClick={handleAddToCart}
             className="btn btn-sm btn-outline btn-primary flex-1"
