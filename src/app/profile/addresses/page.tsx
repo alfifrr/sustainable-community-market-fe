@@ -280,7 +280,6 @@ export default function AddressesPage() {
                       >
                         {!locationLoading && userLocation && (
                           <SellersMap
-                            sellers={[]}
                             center={{
                               lat: userLocation.latitude,
                               lng: userLocation.longitude,

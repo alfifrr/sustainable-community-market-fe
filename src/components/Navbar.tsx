@@ -174,15 +174,7 @@ const Navbar: FC = () => {
                 <li>
                   <Link href="/profile">Profile</Link>
                 </li>
-                <li>
-                  <Link href="/profile/addresses">List Address</Link>
-                </li>
-                <li>
-                  <Link href="/profile/transactions">Transactions</Link>
-                </li>
-                <li>
-                  <Link href="/profile/statements">Statements</Link>
-                </li>
+
                 {role === "seller" && (
                   <li>
                     <Link href="/products/create">List Product</Link>
@@ -200,6 +192,17 @@ const Navbar: FC = () => {
                     </Link>
                   </li>
                 )}
+
+                <li>
+                  <Link href="/profile/addresses">List Address</Link>
+                </li>
+                <li>
+                  <Link href="/profile/transactions">Transactions</Link>
+                </li>
+                <li>
+                  <Link href="/profile/statements">Statements</Link>
+                </li>
+
                 <li>
                   <a onClick={handleLogout}>Logout</a>
                 </li>

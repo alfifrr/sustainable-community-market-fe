@@ -79,7 +79,6 @@ export default function SellersPage() {
           <div className="mb-12">
             <div className="max-w-6xl mx-auto">
               <SellersMap
-                sellers={[]}
                 products={nearbyProducts}
                 center={{
                   lat: userLocation.latitude,
