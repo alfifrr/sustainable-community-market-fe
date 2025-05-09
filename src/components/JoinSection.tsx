@@ -32,7 +32,7 @@ export default function JoinSection() {
               </div>
               <button
                 onClick={() => router.push("/signup/buyer")}
-                className="btn bg-white text-success hover:bg-success hover:text-white border-success btn-lg"
+                className="btn btn-secondary btn-lg"
               >
                 Start Shopping
               </button>
@@ -59,7 +59,7 @@ export default function JoinSection() {
               </div>
               <button
                 onClick={() => router.push("/signup/seller")}
-                className="btn bg-success text-white hover:bg-white hover:text-success border-success btn-lg"
+                className="btn btn-primary btn-lg"
               >
                 Become a Seller
               </button>

@@ -77,7 +77,7 @@ export default function LocalSellersSection() {
               <span>
                 {isUsingDefaultLocation ? (
                   <>
-                    Showing nearby products in Jakarta (default location).
+                    Showing sellers and products in Jakarta (default location).
                     <button
                       className="btn btn-sm btn-ghost ml-2"
                       onClick={refreshLocation}
@@ -97,13 +97,13 @@ export default function LocalSellersSection() {
         {userLocation && (
           <div className="mb-8">
             <SellersMap
-              // sellers={nearbySellers}
+              sellers={nearbySellers}
               products={nearbyProducts}
               center={{
                 lat: userLocation.latitude,
                 lng: userLocation.longitude,
               }}
-              // onSellerClick={handleSellerClick}
+              onSellerClick={handleSellerClick}
               onProductClick={handleProductClick}
             />
           </div>

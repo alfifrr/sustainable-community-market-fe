@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Icon, LatLngExpression } from "leaflet";
+import { Seller } from "@/lib/mockData";
 import { MapPin } from "lucide-react";
 import { useMapEvents } from "react-leaflet";
 import { usePathname } from "next/navigation";
@@ -29,6 +30,7 @@ const Circle = dynamic(
 );
 
 interface SellersMapProps {
+  sellers: Seller[];
   products?: {
     id: number;
     name: string;
@@ -49,6 +51,7 @@ interface SellersMapProps {
     lng: number;
   };
   zoom?: number;
+  onSellerClick?: (seller: Seller) => void;
   onProductClick?: (product: any) => void;
   onMapClick?: (lat: number, lng: number) => void;
 }
@@ -75,6 +78,14 @@ function MapLegend() {
         <div className="flex items-center gap-2">
           <img
             src="/images/seller-location.svg"
+            alt="Seller Location"
+            className="w-6 h-6"
+          />
+          <span>Seller Location</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <img
+            src="/images/categories/default.jpg"
             alt="Product Location"
             className="w-6 h-6 rounded-full"
           />
@@ -104,12 +115,14 @@ function MapClickHandler({
 }
 
 export default function SellersMap({
+  sellers,
   products = [],
   center = defaultCenter,
   zoom = 14,
+  onSellerClick,
   onProductClick,
   onMapClick,
-}: Omit<SellersMapProps, "sellers" | "onSellerClick">) {
+}: SellersMapProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [selectedPosition, setSelectedPosition] =
     useState<LatLngExpression | null>(null);
@@ -117,11 +130,13 @@ export default function SellersMap({
   const centerLatLng: LatLngExpression = [center.lat, center.lng];
   const [icons, setIcons] = useState<{
     userIcon: Icon;
+    sellerIcon: Icon;
     productIcon: Icon;
   } | null>(null);
 
   // Initialize Leaflet and icons on client-side only
   useEffect(() => {
+    // Fix for default marker icons in Next.js
     const L = require("leaflet");
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -133,6 +148,7 @@ export default function SellersMap({
         "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
     });
 
+    // Initialize custom icons
     setIcons({
       userIcon: new L.Icon({
         iconUrl: "/images/user-location.svg",
@@ -140,8 +156,14 @@ export default function SellersMap({
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
       }),
-      productIcon: new L.Icon({
+      sellerIcon: new L.Icon({
         iconUrl: "/images/seller-location.svg",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+      }),
+      productIcon: new L.Icon({
+        iconUrl: "/images/categories/default.jpg",
         iconSize: [32, 32],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
@@ -165,11 +187,12 @@ export default function SellersMap({
     );
   }
 
+  // Check if the current route allows map clicks
   const isMapClickEnabled =
     pathname === "/profile/addresses" || pathname === "/products/create";
 
   return (
-    <div className="w-[65%] h-[400px] rounded-lg overflow-hidden shadow-lg relative z-0 mx-auto">
+    <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg relative z-0">
       <MapContainer
         center={centerLatLng}
         zoom={zoom}
@@ -211,6 +234,28 @@ export default function SellersMap({
             fillOpacity: 0.1,
           }}
         />
+
+        {sellers.map((seller) => (
+          <Marker
+            key={`seller-${seller.id}`}
+            position={
+              [
+                seller.location.latitude,
+                seller.location.longitude,
+              ] as LatLngExpression
+            }
+            icon={icons.sellerIcon}
+            eventHandlers={{
+              click: () => onSellerClick?.(seller),
+              mouseover: (e) => {
+                e.target.bindPopup(seller.name).openPopup();
+              },
+              mouseout: (e) => {
+                e.target.closePopup();
+              },
+            }}
+          />
+        ))}
 
         {products.map((product) => (
           <Marker

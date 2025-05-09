@@ -9,16 +9,21 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    []
+  );
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("newest");
   const [showFilters, setShowFilters] = useState(false);
-  const [priceRange, setPriceRange] = useState<{ min: number, max: number }>({ min: 0, max: 1000000 });
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 1000000,
+  });
   const [maxPrice, setMaxPrice] = useState<number>(1000000);
   const [ratingFilter, setRatingFilter] = useState<number>(0);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [productsPerPage] = useState<number>(6);
+  const [productsPerPage] = useState<number>(5);
 
   // Define handler functions inside the component
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -33,27 +38,27 @@ export default function ProductsPage() {
     const { name, value } = e.target;
 
     // Remove leading zeros and parse to integer
-    const cleanedValue = value.replace(/^0+/, '');
-    let parsedValue = parseInt(cleanedValue || '0');
+    const cleanedValue = value.replace(/^0+/, "");
+    let parsedValue = parseInt(cleanedValue || "0");
 
     // Ensure valid number and within bounds
     if (isNaN(parsedValue)) parsedValue = 0;
 
     // Apply constraints based on min/max
-    if (name === 'min') {
+    if (name === "min") {
       if (parsedValue > priceRange.max) {
         parsedValue = priceRange.max;
       }
-    } else if (name === 'max') {
+    } else if (name === "max") {
       if (parsedValue < priceRange.min) {
         parsedValue = priceRange.min;
       }
     }
 
     // Update price range
-    setPriceRange(prev => ({
+    setPriceRange((prev) => ({
       ...prev,
-      [name]: parsedValue
+      [name]: parsedValue,
     }));
   };
 
@@ -90,11 +95,11 @@ export default function ProductsPage() {
             const reviewsData = reviewsRes.ok
               ? await reviewsRes.json()
               : {
-                data: {
-                  average_rating: 0,
-                  total_items_sold: 0,
-                },
-              };
+                  data: {
+                    average_rating: 0,
+                    total_items_sold: 0,
+                  },
+                };
 
             return {
               ...product,
@@ -106,9 +111,14 @@ export default function ProductsPage() {
 
         // Find max price for range filter
         if (productsWithReviews.length > 0) {
-          const highestPrice = Math.max(...productsWithReviews.map(p => p.price));
+          const highestPrice = Math.max(
+            ...productsWithReviews.map((p) => p.price)
+          );
           setMaxPrice(Math.ceil(highestPrice / 10000) * 10000); // Round up to nearest 10,000
-          setPriceRange({ min: 0, max: Math.ceil(highestPrice / 10000) * 10000 });
+          setPriceRange({
+            min: 0,
+            max: Math.ceil(highestPrice / 10000) * 10000,
+          });
         }
 
         setProducts(productsWithReviews);
@@ -155,14 +165,14 @@ export default function ProductsPage() {
 
     // Apply category filter
     if (selectedCategory) {
-      result = result.filter(product => {
+      result = result.filter((product) => {
         // Ensure consistent comparison by converting both to string
         return product.category.id.toString() === selectedCategory.toString();
       });
     }
 
     // Apply price range filter
-    result = result.filter(product => {
+    result = result.filter((product) => {
       // Ensure price is treated as a number
       const productPrice = Number(product.price);
       return productPrice >= priceRange.min && productPrice <= priceRange.max;
@@ -170,7 +180,7 @@ export default function ProductsPage() {
 
     // Apply rating filter
     if (ratingFilter > 0) {
-      result = result.filter(product => {
+      result = result.filter((product) => {
         const rating = product.average_rating || 0;
         return rating >= ratingFilter;
       });
@@ -192,7 +202,9 @@ export default function ProductsPage() {
         );
         break;
       case "rating":
-        result.sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+        result.sort(
+          (a, b) => (b.average_rating || 0) - (a.average_rating || 0)
+        );
         break;
       case "newest":
       default:
@@ -208,14 +220,17 @@ export default function ProductsPage() {
   // Calculate pagination values
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   // Handle page change
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
     // Scroll to top when changing page
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Reset to first page when filters change
@@ -255,10 +270,7 @@ export default function ProductsPage() {
               <Filter size={18} />
               Filter & Sort
             </h2>
-            <button
-              onClick={resetFilters}
-              className="btn btn-sm btn-ghost"
-            >
+            <button onClick={resetFilters} className="btn btn-sm btn-ghost">
               Reset All
             </button>
           </div>
@@ -286,12 +298,18 @@ export default function ProductsPage() {
             {/* Price Range Filter */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-medium">Price Range (IDR)</span>
+                <span className="label-text font-medium">
+                  Price Range (IDR)
+                </span>
               </label>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs">{priceRange.min.toLocaleString()}</span>
-                  <span className="text-xs">{priceRange.max.toLocaleString()}</span>
+                  <span className="text-xs">
+                    {priceRange.min.toLocaleString()}
+                  </span>
+                  <span className="text-xs">
+                    {priceRange.max.toLocaleString()}
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -365,7 +383,9 @@ export default function ProductsPage() {
                   step="0.5"
                 />
                 <div className="text-center mt-1">
-                  <span className="badge badge-primary">{ratingFilter} {ratingFilter === 1 ? 'Star' : 'Stars'}</span>
+                  <span className="badge badge-primary">
+                    {ratingFilter} {ratingFilter === 1 ? "Star" : "Stars"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -391,19 +411,24 @@ export default function ProductsPage() {
 
           {/* Active Filters Display */}
           <div className="flex flex-wrap gap-2 mt-4">
-            {selectedCategory && categories.find(c => c.id === selectedCategory) && (
-              <div className="badge badge-primary gap-1">
-                Category: {categories.find(c => c.id === selectedCategory)?.name}
-                <button onClick={() => setSelectedCategory("")}>
-                  <X size={14} />
-                </button>
-              </div>
-            )}
+            {selectedCategory &&
+              categories.find((c) => c.id === selectedCategory) && (
+                <div className="badge badge-primary gap-1">
+                  Category:{" "}
+                  {categories.find((c) => c.id === selectedCategory)?.name}
+                  <button onClick={() => setSelectedCategory("")}>
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
 
             {(priceRange.min > 0 || priceRange.max < maxPrice) && (
               <div className="badge badge-primary gap-1">
-                Price: {priceRange.min.toLocaleString()} - {priceRange.max.toLocaleString()} IDR
-                <button onClick={() => setPriceRange({ min: 0, max: maxPrice })}>
+                Price: {priceRange.min.toLocaleString()} -{" "}
+                {priceRange.max.toLocaleString()} IDR
+                <button
+                  onClick={() => setPriceRange({ min: 0, max: maxPrice })}
+                >
                   <X size={14} />
                 </button>
               </div>
@@ -411,13 +436,12 @@ export default function ProductsPage() {
 
             {ratingFilter > 0 && (
               <div className="badge badge-primary gap-1">
-                Rating: ≥ {ratingFilter} {ratingFilter === 1 ? 'Star' : 'Stars'}
+                Rating: ≥ {ratingFilter} {ratingFilter === 1 ? "Star" : "Stars"}
                 <button onClick={() => setRatingFilter(0)}>
                   <X size={14} />
                 </button>
               </div>
             )}
-
           </div>
         </div>
       )}
@@ -426,9 +450,13 @@ export default function ProductsPage() {
       {!loading && (
         <div className="flex justify-between items-center mb-4">
           <p className="text-base-content/70">
-            Showing {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+            Showing {filteredProducts.length}{" "}
+            {filteredProducts.length === 1 ? "product" : "products"}
             {filteredProducts.length > 0 && (
-              <span> (Page {currentPage} of {totalPages})</span>
+              <span>
+                {" "}
+                (Page {currentPage} of {totalPages})
+              </span>
             )}
           </p>
         </div>
@@ -448,7 +476,9 @@ export default function ProductsPage() {
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-10 bg-base-200 rounded-lg">
           <p className="text-lg mb-2">No products found</p>
-          <p className="text-base-content/70 mb-4">Try adjusting your filters</p>
+          <p className="text-base-content/70 mb-4">
+            Try adjusting your filters
+          </p>
           <button onClick={resetFilters} className="btn btn-primary">
             Reset Filters
           </button>
@@ -492,20 +522,33 @@ export default function ProductsPage() {
                   const showPageNumber =
                     pageNumber === 1 ||
                     pageNumber === totalPages ||
-                    (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1);
+                    (pageNumber >= currentPage - 1 &&
+                      pageNumber <= currentPage + 1);
 
                   if (showPageNumber) {
                     return (
                       <button
                         key={pageNumber}
-                        className={`join-item btn ${currentPage === pageNumber ? 'btn-active' : ''}`}
+                        className={`join-item btn ${
+                          currentPage === pageNumber ? "btn-active" : ""
+                        }`}
                         onClick={() => handlePageChange(pageNumber)}
                       >
                         {pageNumber}
                       </button>
                     );
-                  } else if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
-                    return <button key={pageNumber} className="join-item btn btn-disabled">...</button>;
+                  } else if (
+                    pageNumber === currentPage - 2 ||
+                    pageNumber === currentPage + 2
+                  ) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        className="join-item btn btn-disabled"
+                      >
+                        ...
+                      </button>
+                    );
                   }
                   return null;
                 })}

@@ -815,6 +815,7 @@ export default function CreateProduct() {
                         >
                           {!locationLoading && userLocation && (
                             <SellersMap
+                              sellers={[]}
                               center={{
                                 lat: userLocation.latitude,
                                 lng: userLocation.longitude,

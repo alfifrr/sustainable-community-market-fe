@@ -110,16 +110,10 @@ const Navbar: FC = () => {
               >
                 About Us
               </Link>
-              <Link
-                href="/products"
-                className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent"
-              >
+              <Link href="/products" className="btn btn-ghost">
                 Products
               </Link>
-              <Link
-                href="/sellers"
-                className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent"
-              >
+              <Link href="/sellers" className="btn btn-ghost">
                 Local Sellers
               </Link>
             </div>
@@ -186,6 +180,9 @@ const Navbar: FC = () => {
                 <li>
                   <Link href="/profile">Profile</Link>
                 </li>
+                <li>
+                  <Link href="/profile/addresses">List Address</Link>
+                </li>
 
                 {role === "seller" && (
                   <li>
@@ -204,17 +201,6 @@ const Navbar: FC = () => {
                     </Link>
                   </li>
                 )}
-
-                <li>
-                  <Link href="/profile/addresses">List Address</Link>
-                </li>
-                <li>
-                  <Link href="/profile/transactions">Transactions</Link>
-                </li>
-                <li>
-                  <Link href="/profile/statements">Statements</Link>
-                </li>
-
                 <li>
                   <a onClick={handleLogout}>Logout</a>
                 </li>

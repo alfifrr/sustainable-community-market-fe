@@ -1,5 +1,6 @@
 # Sustainable Community Market
 
+<<<<<<< HEAD
 A modern marketplace platform connecting local producers with consumers, promoting sustainable practices and reducing food waste through dynamic pricing and bulk purchasing incentives.
 
 🌐 **Live Demo**: [Sustainable Community Market](https://sustainable-community-market-fe.vercel.app/)
@@ -7,6 +8,9 @@ A modern marketplace platform connecting local producers with consumers, promoti
 ## Features
 
 ### Smart Pricing System
+=======
+A modern web application built with Next.js and TypeScript, creating a marketplace platform that connects sustainable local producers with environmentally conscious consumers. The platform aims to build a sustainable economic ecosystem, support local small businesses, and reduce the environmental impact of everyday consumption.
+>>>>>>> refs/remotes/origin/main
 
 - **Dynamic Pricing**: Automatic price adjustments based on product expiration dates
 
@@ -21,7 +25,11 @@ A modern marketplace platform connecting local producers with consumers, promoti
   - Stackable with dynamic pricing discounts
   - Example: 40% base discount + 5% bulk discount = 45% total savings
 
+<<<<<<< HEAD
 ### User Roles
+=======
+### Authentication System
+>>>>>>> refs/remotes/origin/main
 
 - **Buyers**: Browse products, make purchases, track orders
 - **Sellers**: List products, manage inventory, track sales
@@ -30,12 +38,20 @@ A modern marketplace platform connecting local producers with consumers, promoti
 
 ### Key Features
 
+<<<<<<< HEAD
 - Real-time product search and filtering
 - Interactive map for locating nearby sellers
 - Shopping cart with dynamic pricing calculations
 - Order tracking and management
 - Product certification system
 - Impact points and rewards program
+=======
+- **Form Validation**: Real-time and submission-time validation with clear error messages
+- **Loading States**: Visual feedback during form submission with disabled inputs
+- **Server Error Handling**: Clean display of backend error messages
+- **Mobile-Responsive Design**: Optimized layout for all screen sizes using Tailwind CSS and DaisyUI
+- **Responsive Pages**: All pages are fully responsive across devices
+>>>>>>> refs/remotes/origin/main
 
 ## Technical Stack
 
@@ -178,8 +194,13 @@ sustainable-community-market-fe/
 ├── __tests__/                    # Test files
 ├── next.config.ts                # Next.js configuration
 ├── package.json                  # Project dependencies
+<<<<<<< HEAD
 ├── tailwind.config.js            # Tailwind CSS configuration
 └── tsconfig.json                 # TypeScript configuration
+=======
+├── tailwind.config.js           # Tailwind CSS configuration
+└── tsconfig.json                # TypeScript configuration
+>>>>>>> refs/remotes/origin/main
 ```
 
 ---
@@ -233,6 +254,7 @@ npm test
 yarn test
 ```
 
+<<<<<<< HEAD
 ## Technologies Used
 
 - **Next.js 14+**
@@ -245,6 +267,34 @@ yarn test
 - **Mailtrap**
 
 ---
+=======
+## Future Enhancements
+
+- Integration with backend authentication API
+- Social login options (Google, Facebook, etc.)
+- Two-factor authentication
+- Password reset functionality
+- User profile management
+- Protected routes for authenticated users
+- Session management and persistence
+- Product search with filters
+- Shopping cart functionality
+- Checkout process
+- Order tracking
+- Seller dashboard
+- Admin panel
+
+## Technologies Used
+
+Next.js 14+
+React 18+
+TypeScript
+Tailwind CSS
+Jest & React Testing Library
+Flask
+Supabase
+Mailtrap
+>>>>>>> refs/remotes/origin/main
 
 ## Swagger API Documentation
 
@@ -284,6 +334,7 @@ Products are automatically discounted based on their remaining days until expira
 ## Bulk Discount System
 
 Purchasing 5 or more items will get a discount of 5%, stackable with the dynamic pricing system.
+<<<<<<< HEAD
 
 ## Future Enhancements
 
@@ -300,3 +351,5 @@ Purchasing 5 or more items will get a discount of 5%, stackable with the dynamic
 - Order tracking
 - Seller dashboard
 - Admin panel
+=======
+>>>>>>> refs/remotes/origin/main

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import axiosInstance from "@/lib/interceptor";
-import { CheckCircle2, XCircle, Loader2, Filter } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 
 interface Certification {
@@ -32,9 +32,6 @@ export default function AdminCertificationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<number | null>(null);
-  const [filter, setFilter] = useState<
-    "all" | "pending" | "approved" | "rejected"
-  >("all");
   const { isLoggedIn, user } = useAuth();
   const router = useRouter();
 
@@ -99,28 +96,6 @@ export default function AdminCertificationsPage() {
     });
   };
 
-  const filteredCertifications = certifications.filter((cert) =>
-    filter === "all" ? true : cert.status === filter
-  );
-
-  const renderStatus = (status: string) => {
-    const statusClasses = {
-      approved: "bg-green-100 text-green-800",
-      rejected: "bg-red-100 text-red-800",
-      pending: "bg-yellow-100 text-yellow-800",
-    };
-
-    return (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          statusClasses[status as keyof typeof statusClasses]
-        }`}
-      >
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen container mx-auto px-4 py-8">
@@ -133,22 +108,7 @@ export default function AdminCertificationsPage() {
 
   return (
     <div className="min-h-screen container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Product Certifications</h1>
-        <div className="mt-4 md:mt-0 flex items-center gap-2">
-          <Filter className="w-4 h-4" />
-          <select
-            className="select select-bordered select-sm"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as typeof filter)}
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
-      </div>
+      <h1 className="text-2xl font-bold mb-6">Product Certifications</h1>
 
       {error && (
         <div className="alert alert-error mb-4">
@@ -157,99 +117,91 @@ export default function AdminCertificationsPage() {
         </div>
       )}
 
-      <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
-        <table className="table table-zebra w-full">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Certification</th>
-              <th>Status</th>
-              <th>Request Date</th>
-              <th>Verifier</th>
-              <th className="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCertifications.map((cert) => (
-              <tr key={cert.id} className="hover">
-                <td>
+      <div className="grid gap-4 md:gap-6">
+        {certifications.map((cert) => (
+          <div
+            key={cert.id}
+            className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow"
+          >
+            <div className="card-body p-4 md:p-6">
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <div>
                   <Link
                     href={`/products/${cert.product.id}`}
-                    className="hover:underline font-medium"
+                    className="hover:underline"
                   >
-                    {cert.product.name}
+                    <h3 className="font-semibold text-lg">
+                      {cert.product.name}
+                    </h3>
                   </Link>
-                </td>
-                <td>{cert.certification.name}</td>
-                <td>{renderStatus(cert.status)}</td>
-                <td>
-                  <span className="whitespace-nowrap">
-                    {formatDate(cert.created_at)}
-                  </span>
-                </td>
-                <td>
-                  {cert.verifier ? (
-                    <div className="text-sm">
-                      <p>{cert.verifier.name}</p>
-                      <p className="text-xs text-base-content/70">
-                        {cert.verification_date &&
-                          formatDate(cert.verification_date)}
-                      </p>
-                    </div>
-                  ) : (
-                    <span className="text-base-content/50">-</span>
-                  )}
-                </td>
-                <td className="text-right">
-                  {cert.status === "pending" && (
-                    <div className="flex gap-2 justify-end">
-                      <button
-                        onClick={() => handleVerify(cert.id, "approved")}
-                        className="btn btn-success btn-sm"
-                        disabled={processingId === cert.id}
-                      >
-                        {processingId === cert.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span className="hidden sm:inline ml-1">
-                              Approve
-                            </span>
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => handleVerify(cert.id, "rejected")}
-                        className="btn btn-error btn-sm"
-                        disabled={processingId === cert.id}
-                      >
-                        {processingId === cert.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <XCircle className="w-4 h-4" />
-                            <span className="hidden sm:inline ml-1">
-                              Reject
-                            </span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  <p className="text-sm text-base-content/70 mb-2">
+                    Certification: {cert.certification.name}
+                  </p>
+                  <div className="flex flex-wrap gap-2 items-center text-sm">
+                    <span
+                      className={`badge ${
+                        cert.status === "approved"
+                          ? "badge-success"
+                          : cert.status === "rejected"
+                          ? "badge-error"
+                          : "badge-warning"
+                      }`}
+                    >
+                      {cert.status}
+                    </span>
+                    <span className="text-base-content/70">
+                      Requested: {formatDate(cert.created_at)}
+                    </span>
+                  </div>
+                </div>
 
-        {filteredCertifications.length === 0 && (
+                {cert.status === "pending" && (
+                  <div className="flex gap-2 md:flex-col lg:flex-row justify-end">
+                    <button
+                      onClick={() => handleVerify(cert.id, "approved")}
+                      className="btn btn-success btn-sm flex-1"
+                      disabled={processingId === cert.id}
+                    >
+                      {processingId === cert.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          Approve
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleVerify(cert.id, "rejected")}
+                      className="btn btn-error btn-sm flex-1"
+                      disabled={processingId === cert.id}
+                    >
+                      {processingId === cert.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <XCircle className="w-4 h-4" />
+                          Reject
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                {cert.verifier && (
+                  <div className="text-sm text-base-content/70">
+                    <p>Verified by: {cert.verifier.name}</p>
+                    <p>Date: {formatDate(cert.verification_date!)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {certifications.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-base-content/70">
-              {filter === "all"
-                ? "No certifications to review"
-                : `No ${filter} certifications found`}
-            </p>
+            <p className="text-base-content/70">No certifications to review</p>
           </div>
         )}
       </div>
