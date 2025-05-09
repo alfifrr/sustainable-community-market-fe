@@ -177,7 +177,7 @@ const Navbar: FC = () => {
 
                 {role === "seller" && (
                   <li>
-                    <Link href="/products/create">List Product</Link>
+                    <Link href="/products/list">List Product</Link>
                   </li>
                 )}
                 {role === "expedition" && (
