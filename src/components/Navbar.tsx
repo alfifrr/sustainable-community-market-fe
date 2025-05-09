@@ -98,16 +98,16 @@ const Navbar: FC = () => {
               />
             </Link>
             <div className="hidden md:flex">
-              <Link href="/" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all">
+              <Link href="/" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent">
                 Home
               </Link>
-              <Link href="/about" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all">
+              <Link href="/about" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent">
                 About Us
               </Link>
-              <Link href="/products" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all">
+              <Link href="/products" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent">
                 Products
               </Link>
-              <Link href="/sellers" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all">
+              <Link href="/sellers" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all hover:bg-transparent">
                 Local Sellers
               </Link>
             </div>
