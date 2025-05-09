@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/authStore";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import ProductCard from "@/components/search/ProductCard";
 import { Product } from "@/lib/types";
+import Link from "next/link";
 
 export default function UserProductsPage() {
   const { user } = useAuthStore();
@@ -56,9 +57,9 @@ export default function UserProductsPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Your Products</h1>
-        <a href="/products/create" className="btn btn-primary">
+        <Link href="/products/create" className="btn btn-primary">
           New Product
-        </a>
+        </Link>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
