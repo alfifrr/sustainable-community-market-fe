@@ -105,7 +105,7 @@ export default function HeadlineSection() {
               Start Making a Difference
             </button>
             <button
-              onClick={() => router.push("/about/impact")}
+              onClick={() => router.push("/impact")}
               className="btn btn-outline btn-lg"
             >
               Learn About Our Impact
