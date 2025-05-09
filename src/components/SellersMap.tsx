@@ -169,7 +169,7 @@ export default function SellersMap({
     pathname === "/profile/addresses" || pathname === "/products/create";
 
   return (
-    <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg relative z-0">
+    <div className="w-[65%] h-[400px] rounded-lg overflow-hidden shadow-lg relative z-0 mx-auto">
       <MapContainer
         center={centerLatLng}
         zoom={zoom}

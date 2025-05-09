@@ -51,7 +51,7 @@ const Navbar: FC = () => {
 
   return (
     <>
-      <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50">
+      <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50 px-8 md:px-16">
         <div className="flex-1">
           <div className="dropdown md:hidden">
             <div
@@ -98,16 +98,16 @@ const Navbar: FC = () => {
               />
             </Link>
             <div className="hidden md:flex">
-              <Link href="/" className="btn btn-ghost">
+              <Link href="/" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all">
                 Home
               </Link>
-              <Link href="/about" className="btn btn-ghost">
+              <Link href="/about" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all">
                 About Us
               </Link>
-              <Link href="/products" className="btn btn-ghost">
+              <Link href="/products" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all">
                 Products
               </Link>
-              <Link href="/sellers" className="btn btn-ghost">
+              <Link href="/sellers" className="btn btn-ghost text-lg hover:text-green-800 hover:font-bold transition-all">
                 Local Sellers
               </Link>
             </div>
@@ -118,7 +118,7 @@ const Navbar: FC = () => {
             <input
               type="text"
               placeholder="Search"
-              className="input input-bordered w-24 md:w-auto"
+              className="input input-bordered w-24 md:w-auto text-lg"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -213,7 +213,7 @@ const Navbar: FC = () => {
               <Link
                 href="#"
                 onClick={handleLoginClick}
-                className="btn btn-primary btn-sm"
+                className="btn btn-primary hover:font-bold transition-all"
               >
                 Login / Sign Up
               </Link>
