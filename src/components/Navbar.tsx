@@ -137,7 +137,7 @@ const Navbar: FC = () => {
           )}
 
           {/* Theme Switcher */}
-          <label className="toggle text-base-content cursor-pointer">
+          {/* <label className="toggle text-base-content cursor-pointer">
             <input
               type="checkbox"
               checked={theme === "dark"}
@@ -149,7 +149,7 @@ const Navbar: FC = () => {
             ) : (
               <Moon className="w-5 h-5" />
             )}
-          </label>
+          </label> */}
 
           {isLoggedIn ? (
             <div className="dropdown dropdown-end">

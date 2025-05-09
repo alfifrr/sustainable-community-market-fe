@@ -5,7 +5,7 @@
   themes: customlight --default, night --prefersdark;
 } */
 @plugin "daisyui" {
-  themes: false;
+  themes: light --default;
 }
 
 ;
@@ -52,7 +52,7 @@
 
 
 
-@plugin "daisyui/theme" {
+/* @plugin "daisyui/theme" {
   name: "dark";
   default: false;
   prefersdark: true;
@@ -87,7 +87,7 @@
   --noise: 0;
 }
 
-;
+; */
 
 
 
