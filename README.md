@@ -2,39 +2,42 @@
 
 A modern web application built with Next.js and TypeScript, creating a marketplace platform that connects sustainable local producers with environmentally conscious consumers. The platform aims to build a sustainable economic ecosystem, support local small businesses, and reduce the environmental impact of everyday consumption.
 
+---
+
 ## Features
 
 ### Marketplace Features
 
-- **Product Browsing**: Browse sustainable products from local producers
-- **Community Connection**: Connect with local farmers and producers
-- **Sustainability Focus**: Support for eco-friendly products and practices
-- **Impact Tracking**: Measure environmental and social impact of purchases
+- **Product Browsing**: Browse sustainable products from local producers.
+- **Community Connection**: Connect with local farmers and producers.
+- **Sustainability Focus**: Support eco-friendly products and practices.
+- **Impact Tracking**: Measure the environmental and social impact of purchases.
 
 ### Authentication System
 
-- **Login Form**: Complete user authentication with email and password
-- **Signup Form**: User registration with comprehensive profile information
-- **Password Visibility**: Eye icon to temporarily reveal password input
-- **Password Strength Indicator**: Visual feedback on password security with criteria checklist
-- **Remember Me Functionality**: Option to save login email for returning users
+- **Login Form**: User authentication with email and password.
+- **Signup Form**: User registration with comprehensive profile information.
+- **Password Visibility**: Eye icon to temporarily reveal password input.
+- **Password Strength Indicator**: Visual feedback on password security with a criteria checklist.
+- **Remember Me Functionality**: Option to save login email for returning users.
 
 ### User Experience
 
-- **Form Validation**: Real-time and submission-time validation with clear error messages
-- **Loading States**: Visual feedback during form submission with disabled inputs
-- **Server Error Handling**: Clean display of backend error messages
-- **Mobile-Responsive Design**: Optimized layout for all screen sizes using Tailwind CSS and DaisyUI
-- **Responsive Pages**: All pages are fully responsive across devices
+- **Form Validation**: Real-time and submission-time validation with clear error messages.
+- **Loading States**: Visual feedback during form submission with disabled inputs.
+- **Server Error Handling**: Clean display of backend error messages.
+- **Mobile-Responsive Design**: Optimized layout for all screen sizes using Tailwind CSS and DaisyUI.
+- **Responsive Pages**: Fully responsive pages across devices.
 
 ### Technical Features
 
-- **TypeScript**: Full type safety throughout the application
-- **Next.js App Router**: Modern routing system with file-based routes
-- **Client Components**: Interactive UI elements with React hooks
-- **Tailwind CSS & DaisyUI**: Utility-first styling framework for consistent design
-- **Unit Tests**: Basic test coverage for components
-- **Hooks**: Custom hooks like useDebounce for improved UX
+- **TypeScript**: Full type safety throughout the application.
+- **Next.js App Router**: Modern routing system with file-based routes.
+- **Client Components**: Interactive UI elements with React hooks.
+- **Tailwind CSS & DaisyUI**: Utility-first styling framework for consistent design.
+- **Custom Hooks**: Includes hooks like `useDebounce` for improved UX.
+
+---
 
 ## Project Structure
 
@@ -86,9 +89,18 @@ sustainable-community-market-fe/
 ├── __tests__/                    # Test files
 ├── next.config.ts                # Next.js configuration
 ├── package.json                  # Project dependencies
-├── tailwind.config.js           # Tailwind CSS configuration
-└── tsconfig.json                # TypeScript configuration
+├── tailwind.config.js            # Tailwind CSS configuration
+└── tsconfig.json                 # TypeScript configuration
 ```
+
+---
+
+## Deployed Apps
+
+- **Frontend**: [Sustainable Community Market Frontend](https://sustainable-community-market-fe.vercel.app/)
+- **Backend Swagger Docs**: [API Documentation](https://sustainable-community-market.onrender.com/api/docs)
+
+---
 
 ## Getting Started
 
@@ -99,73 +111,84 @@ sustainable-community-market-fe/
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repository:
 
-```bash
-git clone https://github.com/yourusername/nextjs-auth-system.git
-cd nextjs-auth-system
-```
+   ```bash
+   git clone https://github.com/alfifrr/sustainable-community-market-fe.git
+   cd sustainable-community-market-fe
+   ```
 
-2. Install dependencies
+2. Install dependencies:
 
-```bash
-npm install
-# or
-yarn install
-```
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-3. Run the development server
+3. Run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-4. Open http://localhost:3000 in your browser to view the application
-   Running Tests
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
-```bash
-npm test
-# or
-yarn test
-```
+5. Run tests:
+
+   ```bash
+   npm test
+   # or
+   yarn test
+   ```
+
+---
 
 ## Future Enhancements
 
-- Integration with backend authentication API
-- Social login options (Google, Facebook, etc.)
-- Two-factor authentication
-- Password reset functionality
-- User profile management
-- Protected routes for authenticated users
-- Session management and persistence
-- Product search with filters
-- Shopping cart functionality
-- Checkout process
-- Order tracking
-- Seller dashboard
-- Admin panel
+- Integration with backend authentication API.
+- Social login options (Google, Facebook, etc.).
+- Two-factor authentication.
+- Password reset functionality.
+- User profile management.
+- Protected routes for authenticated users.
+- Session management and persistence.
+- Product search with filters.
+- Shopping cart functionality.
+- Checkout process.
+- Order tracking.
+- Seller dashboard.
+- Admin panel.
+
+---
 
 ## Technologies Used
 
-Next.js 14+
-React 18+
-TypeScript
-Tailwind CSS
-Jest & React Testing Library
-Flask
-Supabase
-Mailtrap
+- **Next.js 14+**
+- **React 18+**
+- **TypeScript**
+- **Tailwind CSS**
+- **Jest & React Testing Library**
+- **Flask**
+- **Supabase**
+- **Mailtrap**
+
+---
 
 ## Swagger API Documentation
 
 For complete API documentation, visit [Swagger Documentation](https://sustainable-community-market.onrender.com/api/docs).
 
-## Endpoint Note
+---
 
-- Purchasing a product (`/api/buy`) costs additional fixed delivery and service fee of `Rp. 15,000`
-- Delivery and service fee will be fully returned upon order cancellation (`/api/cancel`)
+## Endpoint Notes
+
+- Purchasing a product (`/api/buy`) costs an additional fixed delivery and service fee of `Rp. 15,000`.
+- Delivery and service fees will be fully refunded upon order cancellation (`/api/cancel`).
+
+---
 
 ## Dynamic Pricing System
 
@@ -181,12 +204,34 @@ Products are automatically discounted based on their remaining days until expira
 | 0 days (today)        | 90%      | 10% of original price  |
 | Expired               | -        | Not available for sale |
 
-Example:
+**Example:**
 
 - Original price: Rp 100,000
 - 3 days until expiration: Rp 60,000 (40% discount)
 - 1 day until expiration: Rp 20,000 (80% discount)
 
+---
+
 ## Bulk Discount System
 
 Purchasing 5 or more items will get a discount of 5%, stackable with the dynamic pricing system.
+
+---
+
+## Main Features
+
+- Discount system for nearly-expired products.
+- Bulk item discount: 5+ items apply a 5% discount, cumulative with the nearly-expired products.
+- Geolocation, pickup, and delivery address system to find local products within 1km.
+- Remember username functionality.
+- Product certification system: administrators can approve or reject products.
+- Product sold, rating, and review system.
+- Expedition system to ensure safe transaction flow.
+- Four roles: admin, seller, buyer, expedition.
+- Expedition remuneration: 14,000 IDR for every successful delivery confirmation.
+- Buyer can cancel pending transactions.
+- Five transaction statuses: Pending, Processed, Cancelled, Delivered, Rated.
+- Transaction and statement tracking.
+- Product filter and pagination for various products.
+- Market stock system.
+- Newsletter and account verification system using Mailtrap service.
