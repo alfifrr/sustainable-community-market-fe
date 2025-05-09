@@ -164,9 +164,10 @@ export default function SellersMap({
       </div>
     );
   }
-
   const isMapClickEnabled =
-    pathname === "/profile/addresses" || pathname === "/products/create";
+    pathname === "/profile/addresses" ||
+    pathname === "/products/create" ||
+    pathname === "/checkout";
 
   return (
     <div className="w-[65%] h-[400px] rounded-lg overflow-hidden shadow-lg relative z-0 mx-auto">

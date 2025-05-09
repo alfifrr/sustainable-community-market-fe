@@ -8,12 +8,17 @@ import { API_ENDPOINTS } from "@/lib/endpoints";
 import axiosInstance from "@/lib/interceptor";
 import { useProfile } from "@/hooks/useProfile";
 import { calculateFinalPrice } from "@/utils/discountUtils";
+import { useNearbySellers } from "@/hooks/useNearbySellers";
+import SellersMap from "@/components/SellersMap";
+import { MapPin } from "lucide-react";
 
 interface ShippingAddress {
   label: string;
   address: string;
   details: string;
   contact_person: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface Address {
@@ -52,15 +57,39 @@ export default function CheckoutPage() {
     address: "",
     details: "",
     contact_person: "",
+    latitude: null,
+    longitude: null,
   });
-
   const [formErrors, setFormErrors] = useState({
     label: "",
     address: "",
     details: "",
     contact_person: "",
     balance: "",
+    location: "",
   });
+
+  const [newAddress, setNewAddress] = useState<ShippingAddress>({
+    label: "",
+    address: "",
+    details: "",
+    contact_person: "",
+    latitude: null,
+    longitude: null,
+  });
+
+  const { userLocation, isLoading: locationLoading } = useNearbySellers(1);
+  const handleMapClick = (lat: number, lng: number) => {
+    setShippingAddress((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
+    setFormErrors((prev) => ({
+      ...prev,
+      location: "",
+    }));
+  };
 
   // Function to format price
   const formatPrice = (price: number) => {
@@ -187,6 +216,8 @@ export default function CheckoutPage() {
         address: "",
         details: "",
         contact_person: "",
+        latitude: null,
+        longitude: null,
       });
     }
   };
@@ -199,6 +230,7 @@ export default function CheckoutPage() {
       details: "",
       contact_person: "",
       balance: "",
+      location: "",
     };
     let isValid = true;
 
@@ -245,6 +277,12 @@ export default function CheckoutPage() {
         errors.contact_person = "Contact person must not exceed 255 characters";
         isValid = false;
       }
+
+      // Location validation
+      if (!shippingAddress.latitude || !shippingAddress.longitude) {
+        errors.location = "Please select a location on the map";
+        isValid = false;
+      }
     } else {
       // When using saved address, validate that an address is selected
       const selectElement = document.querySelector(
@@ -277,6 +315,8 @@ export default function CheckoutPage() {
         address: shippingAddress.address,
         details: shippingAddress.details || "",
         contact_person: shippingAddress.contact_person,
+        latitude: shippingAddress.latitude,
+        longitude: shippingAddress.longitude,
       });
 
       if (data.status === "success") {
@@ -536,6 +576,8 @@ export default function CheckoutPage() {
                             address: selectedAddress.address,
                             details: selectedAddress.details || "",
                             contact_person: selectedAddress.contact_person,
+                            latitude: null,
+                            longitude: null,
                           });
                         }
                       }}
@@ -660,6 +702,46 @@ export default function CheckoutPage() {
                     {formErrors.details && (
                       <span className="text-error text-sm mt-1">
                         {formErrors.details}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Map Selection */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">
+                        Select Location on Map{" "}
+                        <span className="text-error">*</span>
+                      </span>
+                    </label>
+                    <div className="h-64 w-full bg-base-200 rounded-lg overflow-hidden">
+                      <SellersMap
+                        center={
+                          shippingAddress.latitude && shippingAddress.longitude
+                            ? {
+                                lat: shippingAddress.latitude,
+                                lng: shippingAddress.longitude,
+                              }
+                            : userLocation
+                            ? {
+                                lat: userLocation.latitude,
+                                lng: userLocation.longitude,
+                              }
+                            : { lat: -6.2088, lng: 106.8456 } // Default to Jakarta
+                        }
+                        onMapClick={handleMapClick}
+                      />
+                    </div>
+                    {shippingAddress.latitude && shippingAddress.longitude && (
+                      <div className="mt-2 text-sm text-base-content/70">
+                        Selected coordinates:{" "}
+                        {shippingAddress.latitude.toFixed(6)},{" "}
+                        {shippingAddress.longitude.toFixed(6)}
+                      </div>
+                    )}
+                    {formErrors.location && (
+                      <span className="text-error text-sm mt-1">
+                        {formErrors.location}
                       </span>
                     )}
                   </div>
