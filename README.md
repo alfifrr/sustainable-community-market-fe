@@ -2,6 +2,8 @@
 
 A modern marketplace platform connecting local producers with consumers, promoting sustainable practices and reducing food waste through dynamic pricing and bulk purchasing incentives.
 
+🌐 **Live Demo**: [Sustainable Community Market](https://sustainable-community-market-fe.vercel.app/)
+
 ## Features
 
 ### Smart Pricing System
@@ -252,6 +254,7 @@ Example:
 ## Bulk Discount System
 
 Purchasing 5 or more items will get a discount of 5%, stackable with the dynamic pricing system.
+
 
 ## Future Enhancements
 
