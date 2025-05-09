@@ -136,7 +136,7 @@ export default function BenefitsSection() {
             {/* Bulk Discounts Section */}
             <div className="flex-1 w-full">
               <h3 className="text-2xl font-bold mb-6">Bulk Savings</h3>
-              <div className="bg-base-100 rounded-lg p-6 space-y-6">
+              <div className="bg-base-100 rounded-lg p-6 space-y-6 min-h-[400px]">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                     <ShoppingCart className="w-6 h-6 text-primary" />

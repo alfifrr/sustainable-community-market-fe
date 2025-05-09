@@ -1,40 +1,118 @@
-# Sustainable Community Market - Frontend
+# Sustainable Community Market
 
-A modern web application built with Next.js and TypeScript, creating a marketplace platform that connects sustainable local producers with environmentally conscious consumers. The platform aims to build a sustainable economic ecosystem, support local small businesses, and reduce the environmental impact of everyday consumption.
+A modern marketplace platform connecting local producers with consumers, promoting sustainable practices and reducing food waste through dynamic pricing and bulk purchasing incentives.
 
 ## Features
 
-### Marketplace Features
+### Smart Pricing System
+- **Dynamic Pricing**: Automatic price adjustments based on product expiration dates
+  - 4 days until expiration: 20% discount
+  - 3 days until expiration: 40% discount
+  - 2 days until expiration: 60% discount
+  - 1 day until expiration: 80% discount
+  - Expired items: Not available for sale
 
-- **Product Browsing**: Browse sustainable products from local producers
-- **Community Connection**: Connect with local farmers and producers
-- **Sustainability Focus**: Support for eco-friendly products and practices
-- **Impact Tracking**: Measure environmental and social impact of purchases
+- **Bulk Purchasing Benefits**
+  - 5% additional discount on purchases of 5 or more items
+  - Stackable with dynamic pricing discounts
+  - Example: 40% base discount + 5% bulk discount = 45% total savings
 
-### Authentication System
+### User Roles
+- **Buyers**: Browse products, make purchases, track orders
+- **Sellers**: List products, manage inventory, track sales
+- **Expedition**: Handle order processing and delivery
+- **Admin**: Manage certifications and platform oversight
 
-- **Login Form**: Complete user authentication with email and password
-- **Signup Form**: User registration with comprehensive profile information
-- **Password Visibility**: Eye icon to temporarily reveal password input
-- **Password Strength Indicator**: Visual feedback on password security with criteria checklist
-- **Remember Me Functionality**: Option to save login email for returning users
+### Key Features
+- Real-time product search and filtering
+- Interactive map for locating nearby sellers
+- Shopping cart with dynamic pricing calculations
+- Order tracking and management
+- Product certification system
+- Impact points and rewards program
 
-### User Experience
+## Technical Stack
 
-- **Form Validation**: Real-time and submission-time validation with clear error messages
-- **Loading States**: Visual feedback during form submission with disabled inputs
-- **Server Error Handling**: Clean display of backend error messages
-- **Mobile-Responsive Design**: Optimized layout for all screen sizes using Tailwind CSS and DaisyUI
-- **Responsive Pages**: All pages are fully responsive across devices
+### Frontend
+- Next.js 14 (React Framework)
+- TypeScript
+- Tailwind CSS
+- DaisyUI Components
+- Leaflet for Maps
+- Jest & React Testing Library
 
-### Technical Features
+### Backend
+- Flask
+- Supabase
+- Mailtrap for Email Testing
 
-- **TypeScript**: Full type safety throughout the application
-- **Next.js App Router**: Modern routing system with file-based routes
-- **Client Components**: Interactive UI elements with React hooks
-- **Tailwind CSS & DaisyUI**: Utility-first styling framework for consistent design
-- **Unit Tests**: Basic test coverage for components
-- **Hooks**: Custom hooks like useDebounce for improved UX
+## API Documentation
+
+For complete API documentation, visit [Swagger Documentation](https://sustainable-community-market.onrender.com/api/docs)
+
+## Pricing and Fees
+
+### Product Pricing
+- Base price set by sellers
+- Dynamic discounts based on expiration dates
+- Bulk purchase discounts (5% for 5+ items)
+
+### Service Fees
+- Fixed delivery and service fee: Rp 15,000 per order
+- Fee is fully refundable upon order cancellation
+
+## Development
+
+### Prerequisites
+- Node.js 18+
+- Python 3.8+
+- Supabase account
+- Mailtrap account
+
+### Installation
+1. Clone the repository
+2. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+3. Install backend dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Set up environment variables
+5. Run development servers:
+   ```bash
+   # Frontend
+   npm run dev
+   
+   # Backend
+   python app.py
+   ```
+
+### Testing
+```bash
+# Frontend tests
+npm test
+
+# Backend tests
+pytest
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contact
+
+For support or inquiries, please contact the development team through the platform's contact form.
 
 ## Project Structure
 
@@ -131,22 +209,6 @@ npm test
 yarn test
 ```
 
-## Future Enhancements
-
-- Integration with backend authentication API
-- Social login options (Google, Facebook, etc.)
-- Two-factor authentication
-- Password reset functionality
-- User profile management
-- Protected routes for authenticated users
-- Session management and persistence
-- Product search with filters
-- Shopping cart functionality
-- Checkout process
-- Order tracking
-- Seller dashboard
-- Admin panel
-
 ## Technologies Used
 
 Next.js 14+
@@ -190,3 +252,19 @@ Example:
 ## Bulk Discount System
 
 Purchasing 5 or more items will get a discount of 5%, stackable with the dynamic pricing system.
+
+## Future Enhancements
+
+- Integration with backend authentication API
+- Social login options (Google, Facebook, etc.)
+- Two-factor authentication
+- Password reset functionality
+- User profile management
+- Protected routes for authenticated users
+- Session management and persistence
+- Product search with filters
+- Shopping cart functionality
+- Checkout process
+- Order tracking
+- Seller dashboard
+- Admin panel
