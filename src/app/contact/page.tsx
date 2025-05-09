@@ -238,14 +238,16 @@ export default function ContactPage() {
           {/* Map Section */}
           <div className="mb-12">
             <h2 className="text-2xl font-semibold mb-4">Our Location</h2>
-            <div className="bg-base-200 h-80 rounded-xl flex items-center justify-center">
-              <p className="text-center">
-                Map will be embedded here.
-                <br />
-                <span className="text-sm">
-                  (Google Maps or other map service integration)
-                </span>
-              </p>
+            <div className="rounded-xl overflow-hidden h-80">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.4702133886!2d106.7995555!3d-6.2457777!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMTQnNDQuOCJTIDEwNsKwNDgnMDYuNCJF!5e0!3m2!1sen!2sid!4v1623456789012!5m2!1sen!2sid"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
           </div>
 

@@ -19,7 +19,7 @@ const jobOpenings: JobOpening[] = [
     location: "Jakarta",
     type: "Full-time",
     description:
-      "Memimpin inisiatif keberlanjutan kami dan memastikan semua operasi kami memenuhi standar lingkungan tertinggi. Bertanggung jawab untuk mengembangkan dan menerapkan strategi keberlanjutan di seluruh organisasi.",
+      "Lead our sustainability initiatives and ensure all our operations meet the highest environmental standards. Responsible for developing and implementing sustainability strategies across the organization.",
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ const jobOpenings: JobOpening[] = [
     location: "Bandung",
     type: "Full-time",
     description:
-      "Membangun dan memelihara hubungan dengan petani lokal, produsen, dan komunitas. Mengkoordinasikan program keterlibatan komunitas dan acara untuk mempromosikan misi keberlanjutan kami.",
+      "Build and maintain relationships with local farmers, producers, and communities. Coordinate community engagement programs and events to promote our sustainability mission.",
   },
   {
     id: 3,
@@ -37,7 +37,7 @@ const jobOpenings: JobOpening[] = [
     location: "Remote",
     type: "Full-time",
     description:
-      "Mengembangkan dan memelihara antarmuka pengguna marketplace kami menggunakan React, Next.js, dan Tailwind CSS. Berkolaborasi dengan tim desain dan backend untuk menciptakan pengalaman pengguna yang luar biasa.",
+      "Develop and maintain our marketplace user interface using React, Next.js, and Tailwind CSS. Collaborate with design and backend teams to create exceptional user experiences.",
   },
   {
     id: 4,
@@ -46,7 +46,7 @@ const jobOpenings: JobOpening[] = [
     location: "Surabaya",
     type: "Full-time",
     description:
-      "Menganalisis dan mengoptimalkan rantai pasok kami untuk memaksimalkan efisiensi dan keberlanjutan. Bekerja dengan petani dan produsen untuk memastikan praktik terbaik dalam pengiriman dan distribusi.",
+      "Analyze and optimize our supply chain to maximize efficiency and sustainability. Work with farmers and producers to ensure best practices in shipping and distribution.",
   },
   {
     id: 5,
@@ -55,7 +55,7 @@ const jobOpenings: JobOpening[] = [
     location: "Jakarta",
     type: "Part-time",
     description:
-      "Membuat konten menarik tentang keberlanjutan, pertanian lokal, dan gaya hidup ramah lingkungan untuk blog dan media sosial kami. Berkolaborasi dengan tim pemasaran untuk mengembangkan strategi konten yang efektif.",
+      "Create engaging content about sustainability, local farming, and eco-friendly lifestyles for our blog and social media. Collaborate with the marketing team to develop effective content strategies.",
   },
 ];
 
